@@ -7,9 +7,11 @@
 <div class="grid grid-4" style="margin-bottom:20px;">
   <div class="card">
     <div class="card-title">HA Calendar</div>
-    <div class="card-value" style="font-size:18px;">
-      <span class="dot {% if ha_ok %}ok{% else %}error{% endif %}"></span>
-      {% if ha_ok %}Connected{% else %}Offline{% endif %}
+    <div class="card-value" style="font-size:18px;"
+         hx-get="{{ root }}/ui/ha-status"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+      <span style="color:#94a3b8;font-size:13px;">checking…</span>
     </div>
     <div class="card-sub">calendar.coach</div>
   </div>

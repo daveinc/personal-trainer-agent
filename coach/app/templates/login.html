@@ -29,7 +29,8 @@
       <div class="form-group">
         <label for="username">Username</label>
         <input type="text" id="username" name="username"
-               placeholder="enter your name" autocomplete="off" autofocus required>
+               placeholder="enter your name" autocomplete="off" autofocus required
+               onkeydown="if(event.key==='Enter'){event.preventDefault();this.form.submit();}">
       </div>
       <button class="btn" type="submit">Continue</button>
     </form>
