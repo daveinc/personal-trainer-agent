@@ -21,15 +21,26 @@ class Base(DeclarativeBase):
     pass
 
 
+def _ext_db_url() -> str:
+    host = os.getenv("DB_HOST", "").strip()
+    if not host:
+        return ""
+    port = os.getenv("DB_PORT", "3306").strip() or "3306"
+    name = os.getenv("DB_NAME", "coach").strip() or "coach"
+    user = os.getenv("DB_USER", "").strip()
+    password = os.getenv("DB_PASSWORD", "").strip()
+    return f"mysql+aiomysql://{user}:{password}@{host}:{port}/{name}"
+
+
 def setup_ext_engine():
     global ext_engine, ExtSession
-    url = os.getenv("EXT_DB_URL", "").strip()
+    url = _ext_db_url()
     if not url:
         return
     try:
         ext_engine = create_async_engine(url, echo=False, pool_pre_ping=True)
         ExtSession = sessionmaker(ext_engine, class_=AsyncSession, expire_on_commit=False)
-        logger.info("External DB engine configured")
+        logger.info(f"External DB configured: {os.getenv('DB_HOST')}:{os.getenv('DB_PORT', '3306')}/{os.getenv('DB_NAME', 'coach')}")
     except Exception as e:
         logger.error(f"External DB setup failed: {e}")
 
