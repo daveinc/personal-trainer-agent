@@ -57,6 +57,23 @@ async def get_today_events() -> list[dict]:
     return await get_events(start, end)
 
 
+async def get_week_events() -> list[dict]:
+    from datetime import timedelta
+    now = datetime.now(timezone.utc)
+    start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    end = (start + timedelta(days=6)).replace(hour=23, minute=59, second=59, microsecond=0)
+    return await get_events(start, end)
+
+
+async def get_month_events() -> list[dict]:
+    import calendar as cal
+    now = datetime.now(timezone.utc)
+    start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_day = cal.monthrange(now.year, now.month)[1]
+    end = now.replace(day=last_day, hour=23, minute=59, second=59, microsecond=0)
+    return await get_events(start, end)
+
+
 async def create_event(
     summary: str,
     start: datetime,

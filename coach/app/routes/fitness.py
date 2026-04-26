@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_current_user, tctx
-from app.ha_calendar import create_event, get_today_events
+from app.ha_calendar import create_event, get_today_events, get_week_events, get_month_events
 from app.models import WorkoutLog
 
 router = APIRouter()
@@ -21,10 +21,31 @@ def _is_user_fitness(event: dict, username: str) -> bool:
     return f"[{CATEGORY}]" in desc and f"[{username.lower()}]" in desc
 
 
-def _fmt_local(dt: datetime) -> str:
-    """Format as local time for HA — no UTC conversion, HA treats naive as local."""
-    return dt.strftime("%Y-%m-%dT%H:%M:%S")
+def _event_date(event: dict) -> str:
+    start = event.get("start", {}).get("dateTime", "")
+    return start[:10] if start else ""
 
+
+def _group_by_date(events: list) -> dict:
+    grouped: dict = {}
+    for e in events:
+        d = _event_date(e)
+        grouped.setdefault(d, []).append(e)
+    return grouped
+
+
+async def _get_logs(db: AsyncSession, user_id: int, date_from: str, date_to: str) -> dict:
+    result = await db.execute(
+        select(WorkoutLog).where(
+            WorkoutLog.user_id == user_id,
+            WorkoutLog.event_date >= date_from,
+            WorkoutLog.event_date <= date_to,
+        )
+    )
+    return {log.calendar_uid: log for log in result.scalars().all()}
+
+
+# ── Today ──────────────────────────────────────────────────────────────────
 
 async def _today_events_response(request: Request, db: AsyncSession, target: str):
     user = await get_current_user(request, db)
@@ -33,7 +54,6 @@ async def _today_events_response(request: Request, db: AsyncSession, target: str
             request, "_fitness_today.html",
             tctx(request, events=[], logs={}, target=target)
         )
-
     try:
         raw = await get_today_events()
         events = [e for e in raw if _is_user_fitness(e, user.username)]
@@ -41,13 +61,7 @@ async def _today_events_response(request: Request, db: AsyncSession, target: str
         events = []
 
     today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    result = await db.execute(
-        select(WorkoutLog).where(
-            WorkoutLog.user_id == user.id,
-            WorkoutLog.event_date == today_str,
-        )
-    )
-    logs = {log.calendar_uid: log for log in result.scalars().all()}
+    logs = await _get_logs(db, user.id, today_str, today_str)
 
     return templates.TemplateResponse(
         request, "_fitness_today.html",
@@ -57,11 +71,68 @@ async def _today_events_response(request: Request, db: AsyncSession, target: str
 
 @router.get("/ui/fitness/today")
 async def today_events(request: Request, db: AsyncSession = Depends(get_db)):
-    # 'from' param lets the dashboard request its own target ID
     source = request.query_params.get("from", "fitness")
     target = "dash-fitness" if source == "dashboard" else "today-events"
     return await _today_events_response(request, db, target)
 
+
+# ── This Week ──────────────────────────────────────────────────────────────
+
+@router.get("/ui/fitness/week")
+async def week_events(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return templates.TemplateResponse(
+            request, "_fitness_range.html",
+            tctx(request, grouped={}, logs={}, target="fitness-content")
+        )
+    try:
+        raw = await get_week_events()
+        events = [e for e in raw if _is_user_fitness(e, user.username)]
+    except Exception:
+        events = []
+
+    now = datetime.now(timezone.utc)
+    week_start = (now - timedelta(days=now.weekday())).strftime("%Y-%m-%d")
+    week_end = (now - timedelta(days=now.weekday()) + timedelta(days=6)).strftime("%Y-%m-%d")
+    logs = await _get_logs(db, user.id, week_start, week_end)
+
+    return templates.TemplateResponse(
+        request, "_fitness_range.html",
+        tctx(request, grouped=_group_by_date(events), logs=logs, target="fitness-content")
+    )
+
+
+# ── This Month ─────────────────────────────────────────────────────────────
+
+@router.get("/ui/fitness/month")
+async def month_events(request: Request, db: AsyncSession = Depends(get_db)):
+    import calendar as cal
+    user = await get_current_user(request, db)
+    if not user:
+        return templates.TemplateResponse(
+            request, "_fitness_range.html",
+            tctx(request, grouped={}, logs={}, target="fitness-content")
+        )
+    try:
+        raw = await get_month_events()
+        events = [e for e in raw if _is_user_fitness(e, user.username)]
+    except Exception:
+        events = []
+
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1).strftime("%Y-%m-%d")
+    last_day = cal.monthrange(now.year, now.month)[1]
+    month_end = now.replace(day=last_day).strftime("%Y-%m-%d")
+    logs = await _get_logs(db, user.id, month_start, month_end)
+
+    return templates.TemplateResponse(
+        request, "_fitness_range.html",
+        tctx(request, grouped=_group_by_date(events), logs=logs, target="fitness-content")
+    )
+
+
+# ── Schedule ───────────────────────────────────────────────────────────────
 
 @router.post("/ui/fitness/schedule")
 async def schedule(
@@ -79,7 +150,6 @@ async def schedule(
             tctx(request, events=[], logs={}, target="today-events")
         )
 
-    # Parse as local time — do NOT replace with UTC, HA treats naive datetimes as local
     start_dt = datetime.fromisoformat(f"{date}T{start_time}:00")
     end_dt = start_dt + timedelta(minutes=duration)
 
@@ -97,6 +167,8 @@ async def schedule(
 
     return await _today_events_response(request, db, "today-events")
 
+
+# ── Log ────────────────────────────────────────────────────────────────────
 
 @router.post("/ui/fitness/log")
 async def log_event(
