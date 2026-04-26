@@ -10,7 +10,7 @@
       <div class="card-title" style="margin:0;">Today's Schedule</div>
     </div>
     <div id="today-events"
-         hx-get="ui/fitness/today"
+         hx-get="{{ root }}/ui/fitness/today"
          hx-trigger="load"
          hx-swap="innerHTML">
       <div class="empty">Loading…</div>
@@ -19,7 +19,7 @@
 
   <div class="card">
     <div class="card-title" style="margin-bottom:16px;">Schedule a Workout</div>
-    <form hx-post="ui/fitness/schedule"
+    <form hx-post="{{ root }}/ui/fitness/schedule"
           hx-target="#today-events"
           hx-swap="innerHTML"
           hx-on::after-request="if(event.detail.successful){this.reset();document.getElementById('sched-date').valueAsDate=new Date();}">
@@ -45,8 +45,8 @@
     </form>
   </div>
 </div>
-{% endblock %}
 
 <script>
 document.getElementById('sched-date').valueAsDate = new Date();
 </script>
+{% endblock %}

@@ -25,3 +25,12 @@ async def get_current_user(request: Request, db: AsyncSession) -> Optional[User]
 def redirect_to(request: Request, path: str) -> str:
     root = request.headers.get("X-Ingress-Path", "")
     return f"{root}/{path.lstrip('/')}"
+
+
+def root_path(request: Request) -> str:
+    return request.scope.get("root_path", "")
+
+
+def tctx(request: Request, **kwargs) -> dict:
+    """Build template context with root injected."""
+    return {"root": root_path(request), **kwargs}

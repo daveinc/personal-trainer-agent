@@ -1,6 +1,6 @@
 {
   "name": "Coach",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "slug": "coach",
   "description": "Life coach with calendar integration, check-ins, and progress tracking.",
   "url": "https://github.com/daveinc/personal-trainer-agent",

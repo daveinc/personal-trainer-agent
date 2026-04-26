@@ -4,29 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Coach{% endblock %}</title>
-  <base href="{{ request.scope.get('root_path', '') }}/">
-  <link rel="stylesheet" href="static/app.css">
+  <link rel="stylesheet" href="{{ root }}/static/app.css">
   <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 </head>
 <body>
 <div class="layout">
 
   <aside class="sidebar">
-    <a href="ui/dashboard" class="sidebar-logo">Coach<span>.</span></a>
+    <a href="{{ root }}/ui/dashboard" class="sidebar-logo">Coach<span>.</span></a>
     <nav class="sidebar-nav">
       <div class="nav-section">Overview</div>
-      <a href="ui/dashboard" class="nav-link {% if active == 'dashboard' %}active{% endif %}">
-        Dashboard
-      </a>
+      <a href="{{ root }}/ui/dashboard" class="nav-link {% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
       <div class="nav-section">Categories</div>
-      <a href="ui/fitness" class="nav-link {% if active == 'fitness' %}active{% endif %}">
-        Fitness
-      </a>
+      <a href="{{ root }}/ui/fitness" class="nav-link {% if active == 'fitness' %}active{% endif %}">Fitness</a>
     </nav>
     {% if user %}
     <div class="sidebar-footer">
       {{ user.display_name }}<br>
-      <a href="auth/logout">Log out</a>
+      <a href="{{ root }}/auth/logout">Log out</a>
     </div>
     {% endif %}
   </aside>

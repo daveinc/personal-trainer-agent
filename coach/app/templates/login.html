@@ -4,21 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coach · Login</title>
-  <base href="{{ request.scope.get('root_path', '') }}/">
-  <link rel="stylesheet" href="static/app.css">
+  <link rel="stylesheet" href="{{ root }}/static/app.css">
 </head>
 <body>
 <div class="login-wrap">
   <div class="login-card">
     <div class="login-title">Coach<span>.</span></div>
     <div class="login-sub">Your personal life coach. Who are you?</div>
-    <form method="post" action="auth/login">
+    <form method="post" action="{{ root }}/auth/login">
       <div class="form-group">
         <label class="form-label" for="username">Username</label>
         <input class="form-input" type="text" id="username" name="username"
                placeholder="enter your name" autocomplete="off" autofocus required>
       </div>
-      <button class="btn btn-primary w-full" type="submit">Continue →</button>
+      <button class="btn btn-primary w-full" type="submit">Continue</button>
     </form>
   </div>
 </div>

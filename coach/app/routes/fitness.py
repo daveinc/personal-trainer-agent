@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.deps import get_db, get_current_user
+from app.deps import get_db, get_current_user, tctx
 from app.ha_calendar import create_event, get_today_events
 from app.models import WorkoutLog
 
@@ -25,7 +25,7 @@ def _is_fitness(event: dict) -> bool:
 async def today_events(request: Request, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     if not user:
-        return templates.TemplateResponse(request, "_fitness_today.html", {"events": [], "logs": {}})
+        return templates.TemplateResponse(request, "_fitness_today.html", tctx(request, events=[], logs={}))
 
     try:
         raw = await get_today_events()
@@ -44,7 +44,7 @@ async def today_events(request: Request, db: AsyncSession = Depends(get_db)):
     logs = {log.calendar_uid: log for log in logs_today}
 
     return templates.TemplateResponse(
-        request, "_fitness_today.html", {"events": events, "logs": logs}
+        request, "_fitness_today.html", tctx(request, events=events, logs=logs)
     )
 
 
@@ -59,7 +59,7 @@ async def schedule(
 ):
     user = await get_current_user(request, db)
     if not user:
-        return templates.TemplateResponse(request, "_fitness_today.html", {"events": [], "logs": {}})
+        return templates.TemplateResponse(request, "_fitness_today.html", tctx(request, events=[], logs={}))
 
     start_dt = datetime.fromisoformat(f"{date}T{start_time}:00").replace(tzinfo=timezone.utc)
     end_dt = start_dt + timedelta(minutes=duration)
@@ -90,7 +90,7 @@ async def log_event(
 ):
     user = await get_current_user(request, db)
     if not user:
-        return templates.TemplateResponse(request, "_fitness_today.html", {"events": [], "logs": {}})
+        return templates.TemplateResponse(request, "_fitness_today.html", tctx(request, events=[], logs={}))
 
     result = await db.execute(
         select(WorkoutLog).where(
