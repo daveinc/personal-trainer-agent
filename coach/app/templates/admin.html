@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% set active = "admin" %}
+{% block title %}Coach · Database{% endblock %}
+{% block page_title %}Database{% endblock %}
+
+{% block content %}
+<div class="grid grid-4" style="margin-bottom:16px;">
+  <div class="card">
+    <div class="card-title">SQLite Size</div>
+    <div class="card-value">{{ sqlite_size_mb }} MB</div>
+    <div class="card-sub">Local · 30-day window</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Local Logs</div>
+    <div class="card-value">{{ local_log_count }}</div>
+    <div class="card-sub">Last: {{ local_last.strftime('%Y-%m-%d') if local_last else '—' }}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">External DB Logs</div>
+    {% if ext_stats %}
+    <div class="card-value">{{ ext_stats.log_count }}</div>
+    <div class="card-sub">{{ ext_stats.size_mb }} MB · Last: {{ ext_stats.last.strftime('%Y-%m-%d') if ext_stats.last else '—' }}</div>
+    {% else %}
+    <div class="card-value" style="font-size:16px;color:var(--text-muted);">Not connected</div>
+    <div class="card-sub">Configure in addon settings</div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div class="card-title">Users</div>
+    <div class="card-value">{{ users_data|length }}</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:16px;">Users</div>
+  {% if users_data %}
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Display Name</th>
+        <th>Workout Logs</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in users_data %}
+    <tr>
+      <td>{{ row.user.username }}</td>
+      <td>{{ row.user.display_name or '—' }}</td>
+      <td>{{ row.log_count }}</td>
+      <td style="display:flex;gap:6px;">
+        <form method="post" action="{{ root }}/ui/admin/delete-user-logs"
+              onsubmit="return confirm('Delete all workout logs for {{ row.user.username }}?')">
+          <input type="hidden" name="user_id" value="{{ row.user.id }}">
+          <button class="btn btn-warning btn-sm" type="submit">Clear Logs</button>
+        </form>
+        <form method="post" action="{{ root }}/ui/admin/delete-user"
+              onsubmit="return confirm('Delete {{ row.user.username }} and all their data? This cannot be undone.')">
+          <input type="hidden" name="user_id" value="{{ row.user.id }}">
+          <button class="btn btn-danger btn-sm" type="submit">Delete User</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No users yet.</div>
+  {% endif %}
+</div>
+
+<div class="card" style="border-color:#fca5a5;">
+  <div class="card-title" style="margin-bottom:16px;color:var(--error);">Danger Zone</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+    <form method="post" action="{{ root }}/ui/admin/wipe-logs"
+          onsubmit="return confirm('Wipe ALL workout logs from both databases? Users are kept. This cannot be undone.')">
+      <button class="btn btn-danger" type="submit">Wipe All Logs</button>
+    </form>
+    <a href="{{ root }}/ui/admin/backup" class="btn btn-primary">Download SQLite Backup</a>
+  </div>
+</div>
+{% endblock %}

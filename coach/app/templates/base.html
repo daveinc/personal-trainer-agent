@@ -105,6 +105,10 @@ tr:hover td { background: #f8fafc; }
 .justify-between { justify-content: space-between; }
 .htmx-indicator { opacity: 0; transition: opacity 0.2s; }
 .htmx-request .htmx-indicator { opacity: 1; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); padding: 8px 12px; border-bottom: 2px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
   </style>
   <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 </head>
@@ -117,6 +121,8 @@ tr:hover td { background: #f8fafc; }
       <a href="{{ root }}/ui/dashboard" class="nav-link {% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
       <div class="nav-section">Categories</div>
       <a href="{{ root }}/ui/fitness" class="nav-link {% if active == 'fitness' %}active{% endif %}">Fitness</a>
+      <div class="nav-section">System</div>
+      <a href="{{ root }}/ui/admin" class="nav-link {% if active == 'admin' %}active{% endif %}">Database</a>
     </nav>
     {% if user %}
     <div class="sidebar-footer">

@@ -14,6 +14,7 @@ from app.deps import redirect_to
 from app.routes.auth import router as auth_router
 from app.routes.ui import router as ui_router
 from app.routes.fitness import router as fitness_router
+from app.routes.admin import router as admin_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -53,3 +54,4 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.include_router(auth_router)
 app.include_router(ui_router)
 app.include_router(fitness_router)
+app.include_router(admin_router)
