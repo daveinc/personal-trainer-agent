@@ -1,0 +1,22 @@
+{
+  "name": "Coach",
+  "version": "0.1.0",
+  "slug": "coach",
+  "description": "Life coach with calendar integration, check-ins, and progress tracking.",
+  "url": "https://github.com/daveinc/personal-trainer-agent",
+  "arch": ["aarch64", "amd64", "armv7"],
+  "startup": "application",
+  "boot": "auto",
+  "ingress": true,
+  "ingress_port": 8765,
+  "panel_icon": "mdi:account-heart",
+  "panel_title": "Coach",
+  "options": {
+    "ha_url": "",
+    "ha_token": ""
+  },
+  "schema": {
+    "ha_url": "str?",
+    "ha_token": "str?"
+  }
+}

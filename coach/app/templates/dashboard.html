@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% set active = "dashboard" %}
+{% block title %}Coach · Dashboard{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:1.75rem;">
+  <h1 style="font-size:1.5rem;font-weight:700;color:#0f172a;">
+    Good {{ greeting }}, {{ user.display_name }}.
+  </h1>
+  <p class="text-muted" style="margin-top:0.3rem;">Here's what's on for today.</p>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Today's Fitness</span>
+    <a href="ui/fitness" class="btn btn-ghost btn-sm">View all</a>
+  </div>
+  <div id="dash-fitness"
+       hx-get="ui/fitness/today"
+       hx-trigger="load"
+       hx-swap="innerHTML">
+    <div class="empty">Loading…</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Home Assistant</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="dot {% if ha_ok %}dot-green{% else %}dot-red{% endif %}"></span>
+    <span class="text-muted">Calendar {% if ha_ok %}connected{% else %}not reachable{% endif %}</span>
+  </div>
+</div>
+{% endblock %}

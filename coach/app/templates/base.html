@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Coach{% endblock %}</title>
+  <base href="{{ request.scope.get('root_path', '') }}/">
+  <link rel="stylesheet" href="static/app.css">
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+</head>
+<body>
+
+{% block nav %}
+<nav class="nav">
+  <a href="ui/dashboard" class="nav-brand">Coach<span>.</span></a>
+  <a href="ui/dashboard" class="nav-link {% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
+  <a href="ui/fitness" class="nav-link {% if active == 'fitness' %}active{% endif %}">Fitness</a>
+  <div class="nav-spacer"></div>
+  {% if user %}
+  <span class="nav-user">{{ user.display_name }} &nbsp;·&nbsp; <a href="auth/logout">logout</a></span>
+  {% endif %}
+</nav>
+{% endblock %}
+
+<main class="page">
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% if not events %}
+<div class="empty">No fitness events scheduled for today.</div>
+{% else %}
+<div class="event-list">
+{% for event in events %}
+{% set uid = event.get("uid", "") %}
+{% set log = logs.get(uid) %}
+{% set start = event.get("start", {}).get("dateTime", "") %}
+{% set end   = event.get("end",   {}).get("dateTime", "") %}
+<div class="event-item">
+  <span class="event-time">
+    {{ start[11:16] if start else "—" }}
+    {% if end %}– {{ end[11:16] }}{% endif %}
+  </span>
+  <span class="event-title">{{ event.get("summary", "Workout") }}</span>
+  <div class="event-actions">
+    {% if log %}
+      <span class="badge badge-{{ log.status }}">{{ log.status.capitalize() }}</span>
+    {% else %}
+      <form hx-post="ui/fitness/log" hx-target="#today-events" hx-swap="innerHTML" style="display:contents">
+        <input type="hidden" name="uid" value="{{ uid }}">
+        <input type="hidden" name="title" value="{{ event.get('summary', 'Workout') }}">
+        <input type="hidden" name="event_date" value="{{ start[:10] if start else '' }}">
+        <input type="hidden" name="status" value="completed">
+        <button class="btn btn-success btn-sm" type="submit">Done</button>
+      </form>
+      <form hx-post="ui/fitness/log" hx-target="#today-events" hx-swap="innerHTML" style="display:contents">
+        <input type="hidden" name="uid" value="{{ uid }}">
+        <input type="hidden" name="title" value="{{ event.get('summary', 'Workout') }}">
+        <input type="hidden" name="event_date" value="{{ start[:10] if start else '' }}">
+        <input type="hidden" name="status" value="skipped">
+        <button class="btn btn-warning btn-sm" type="submit">Skip</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+</div>
+{% endif %}
