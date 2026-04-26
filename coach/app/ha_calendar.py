@@ -60,7 +60,7 @@ async def get_today_events() -> list[dict]:
 async def get_week_events() -> list[dict]:
     from datetime import timedelta
     now = datetime.now(timezone.utc)
-    start = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
     end = (start + timedelta(days=6)).replace(hour=23, minute=59, second=59, microsecond=0)
     return await get_events(start, end)
 

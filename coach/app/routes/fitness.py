@@ -73,7 +73,7 @@ async def _today_events_response(request: Request, db: AsyncSession, target: str
 @router.get("/ui/fitness/today")
 async def today_events(request: Request, db: AsyncSession = Depends(get_db)):
     source = request.query_params.get("from", "fitness")
-    target = "dash-fitness" if source == "dashboard" else "today-events"
+    target = "dash-fitness" if source == "dashboard" else "fitness-content"
     return await _today_events_response(request, db, target)
 
 
@@ -93,8 +93,8 @@ async def _week_events_response(request: Request, db: AsyncSession, target: str)
         events = []
 
     now = datetime.now(timezone.utc)
-    week_start = (now - timedelta(days=now.weekday())).strftime("%Y-%m-%d")
-    week_end = (now - timedelta(days=now.weekday()) + timedelta(days=6)).strftime("%Y-%m-%d")
+    week_start = now.strftime("%Y-%m-%d")
+    week_end = (now + timedelta(days=6)).strftime("%Y-%m-%d")
     logs = await _get_logs(db, user.id, week_start, week_end)
 
     return templates.TemplateResponse(
