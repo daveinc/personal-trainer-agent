@@ -1,7 +1,9 @@
+import logging
 import os
+import shutil
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import delete, func, select, text
@@ -12,6 +14,7 @@ from app.models import User, WorkoutLog
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+logger = logging.getLogger(__name__)
 
 SQLITE_PATH = "/data/coach.db"
 
@@ -136,3 +139,25 @@ async def backup(request: Request, db: AsyncSession = Depends(get_db)):
     if not os.path.exists(SQLITE_PATH):
         return RedirectResponse(url=redirect_to(request, "ui/admin"), status_code=302)
     return FileResponse(SQLITE_PATH, filename="coach_backup.db", media_type="application/octet-stream")
+
+
+@router.post("/ui/admin/restore")
+async def restore_db(
+    request: Request,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    try:
+        tmp = "/data/coach_restore_tmp.db"
+        with open(tmp, "wb") as f:
+            f.write(await file.read())
+        shutil.move(tmp, SQLITE_PATH)
+        from app.database import local_engine
+        await local_engine.dispose()
+        logger.info("SQLite database restored")
+    except Exception as e:
+        logger.error(f"DB restore failed: {e}")
+    return RedirectResponse(url=redirect_to(request, "ui/admin"), status_code=302)

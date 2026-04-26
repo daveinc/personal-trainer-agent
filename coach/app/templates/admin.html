@@ -78,6 +78,14 @@
       <button class="btn btn-danger" type="submit">Wipe All Logs</button>
     </form>
     <a href="{{ root }}/ui/admin/backup" class="btn btn-primary">Download SQLite Backup</a>
+    <form method="post" action="{{ root }}/ui/admin/restore"
+          enctype="multipart/form-data"
+          onsubmit="return confirm('This will overwrite the current database with the uploaded file. This cannot be undone. Continue?')">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="file" name="file" accept=".db" required style="font-size:13px;color:var(--text);">
+        <button class="btn btn-danger" type="submit">Restore SQLite Backup</button>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}

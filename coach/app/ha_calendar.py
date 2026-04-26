@@ -74,6 +74,39 @@ async def get_month_events() -> list[dict]:
     return await get_events(start, end)
 
 
+async def get_all_events() -> list[dict]:
+    from datetime import timedelta
+    now = datetime.now(timezone.utc)
+    start = now - timedelta(days=365)
+    end = now + timedelta(days=365)
+    return await get_events(start, end)
+
+
+async def update_event(
+    uid: str,
+    summary: str,
+    start: datetime,
+    end: datetime,
+    description: Optional[str] = None,
+) -> None:
+    payload: dict = {
+        "entity_id": CALENDAR_ENTITY,
+        "uid": uid,
+        "summary": summary,
+        "start_date_time": _fmt(start),
+        "end_date_time": _fmt(end),
+    }
+    if description is not None:
+        payload["description"] = description
+    async with httpx.AsyncClient(timeout=10) as client:
+        resp = await client.post(
+            f"{_ha_url()}/api/services/calendar/update_event",
+            headers=_headers(),
+            json=payload,
+        )
+        resp.raise_for_status()
+
+
 async def create_event(
     summary: str,
     start: datetime,
