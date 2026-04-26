@@ -1,0 +1,24 @@
+configuration:
+  db_host:
+    name: Database Host
+    description: >-
+      Hostname or IP of your MariaDB server.
+      Use 'core-mariadb' for the HA MariaDB addon on the same machine.
+      Leave blank to use local SQLite storage (no external DB needed).
+  db_port:
+    name: Database Port
+    description: MariaDB port. Default is 3306 — only change if your server uses a custom port.
+  db_user:
+    name: Database User
+    description: >-
+      Username for the database connection.
+      The default HA MariaDB user is 'homeassistant'.
+  db_password:
+    name: Database Password
+    description: Password for the database user. Leave blank if no password is set.
+  db_name:
+    name: Database Name
+    description: >-
+      Leave blank to use the default 'homeassistant' database.
+      Set a name to use a dedicated database — it will be created automatically
+      if it does not exist and the user has permission.

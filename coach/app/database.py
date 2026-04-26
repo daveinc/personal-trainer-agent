@@ -45,11 +45,34 @@ def setup_ext_engine():
         logger.error(f"External DB setup failed: {e}")
 
 
+async def _maybe_create_ext_db():
+    name = os.getenv("DB_NAME", "").strip()
+    if not name:
+        return
+    host = os.getenv("DB_HOST", "").strip()
+    port = int(os.getenv("DB_PORT", "3306") or "3306")
+    user = os.getenv("DB_USER", "").strip()
+    password = os.getenv("DB_PASSWORD", "").strip()
+    try:
+        import aiomysql
+        conn = await aiomysql.connect(host=host, port=port, user=user, password=password)
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"CREATE DATABASE IF NOT EXISTS `{name}` "
+                f"CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+            )
+        conn.close()
+        logger.info(f"External DB '{name}' ready")
+    except Exception as e:
+        logger.warning(f"Could not create '{name}', will try connecting anyway: {e}")
+
+
 async def init_db():
     async with local_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
     if ext_engine:
+        await _maybe_create_ext_db()
         try:
             async with ext_engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
