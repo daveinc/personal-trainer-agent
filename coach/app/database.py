@@ -47,7 +47,7 @@ def setup_ext_engine():
 
 async def _maybe_create_ext_db():
     name = os.getenv("DB_NAME", "").strip()
-    if not name:
+    if not name or name == "homeassistant":
         return
     host = os.getenv("DB_HOST", "").strip()
     port = int(os.getenv("DB_PORT", "3306") or "3306")
