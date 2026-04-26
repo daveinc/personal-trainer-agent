@@ -1,6 +1,6 @@
 {
   "name": "Coach",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "slug": "coach",
   "description": "Life coach with calendar integration, check-ins, and progress tracking.",
   "url": "https://github.com/daveinc/personal-trainer-agent",
@@ -13,19 +13,17 @@
   "panel_title": "Coach",
   "homeassistant_api": true,
   "ports": {
-    "8765/tcp": 8765
+    "8765/tcp": null
   },
   "ports_description": {
-    "8765/tcp": "Direct web access (enable in addon settings)"
+    "8765/tcp": "Direct web access port"
   },
   "options": {
     "ha_url": "",
-    "ha_token": "",
-    "allow_direct_access": false
+    "ha_token": ""
   },
   "schema": {
     "ha_url": "str?",
-    "ha_token": "str?",
-    "allow_direct_access": "bool?"
+    "ha_token": "str?"
   }
 }
