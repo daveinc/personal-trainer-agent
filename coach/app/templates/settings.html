@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% set active = "settings" %}
+{% block title %}Coach · Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:16px;">
+  <div class="tabs" id="settings-tabs">
+    <button class="tab" id="tab-db" onclick="switchTab('db')">Database</button>
+    <button class="tab" id="tab-calendar" onclick="switchTab('calendar')">Calendar</button>
+  </div>
+</div>
+<div id="settings-content"></div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const url = new URL(window.location);
+  url.searchParams.set('tab', tab);
+  window.history.replaceState({}, '', url);
+  htmx.ajax('GET', '{{ root }}/ui/settings/' + tab, {target: '#settings-content', swap: 'innerHTML'});
+}
+document.addEventListener('DOMContentLoaded', function() {
+  const tab = new URLSearchParams(window.location.search).get('tab') || 'db';
+  switchTab(tab);
+});
+</script>
+{% endblock %}

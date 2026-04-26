@@ -1,0 +1,64 @@
+<div class="card" style="margin-bottom:16px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div class="card-title" style="margin-bottom:0;">Events</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn btn-sm {% if not user_filter %}btn-primary{% else %}btn-secondary{% endif %}"
+        hx-get="{{ root }}/ui/settings/calendar" hx-target="#settings-content" hx-swap="innerHTML">
+        All
+      </button>
+      {% for u in all_users %}
+      <button class="btn btn-sm {% if user_filter == u %}btn-primary{% else %}btn-secondary{% endif %}"
+        hx-get="{{ root }}/ui/settings/calendar?user_filter={{ u }}" hx-target="#settings-content" hx-swap="innerHTML">
+        {{ u }}
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% if events %}
+  <div class="event-list">
+    {% for event in events %}
+    <div class="event-item">
+      <div class="event-time">{{ event.get("start", {}).get("dateTime", "")[:16].replace("T"," ") }}</div>
+      <div class="event-title">{{ event.get("summary", "—") }}</div>
+      <div style="font-size:11px;color:var(--text-muted);min-width:60px;">{{ event_user(event) }}</div>
+      <div class="event-actions">
+        <a href="{{ root }}/ui/settings/calendar/edit?uid={{ event.get('uid','') }}"
+           class="btn btn-sm btn-secondary">Edit</a>
+        <form method="post" action="{{ root }}/ui/settings/calendar/delete"
+              onsubmit="return confirm('Delete this event?')">
+          <input type="hidden" name="uid" value="{{ event.get('uid','') }}">
+          <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">No events found.</div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Backup &amp; Restore</div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;">
+    <a href="{{ root }}/ui/settings/calendar/backup" class="btn btn-primary">Download Calendar Backup</a>
+    <form method="post" action="{{ root }}/ui/settings/calendar/restore" enctype="multipart/form-data">
+      <div style="margin-bottom:10px;">
+        <input type="file" name="file" accept=".json" required style="font-size:13px;color:var(--text);">
+      </div>
+      <div style="margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;">
+        <input type="checkbox" name="replace" id="cal-replace" value="true" style="margin-top:2px;">
+        <label for="cal-replace" style="font-size:13px;">
+          Replace existing events before importing<br>
+          <span style="color:var(--text-muted);font-size:11px;">
+            ⚠ Without this, importing may create duplicates if the events already exist.
+          </span>
+        </label>
+      </div>
+      <button class="btn btn-warning" type="submit"
+              onclick="return confirm('Import calendar backup? ' + (document.getElementById('cal-replace').checked ? 'All existing events will be deleted first.' : 'Duplicates may be created if events already exist.'))">
+        Restore Calendar Backup
+      </button>
+    </form>
+  </div>
+</div>

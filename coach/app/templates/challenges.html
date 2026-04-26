@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Coach · Challenges{% endblock %}
+{% block page_title %}Challenges{% endblock %}
+
+{% block content %}
+<div class="grid grid-3" style="margin-bottom:16px;">
+  <div class="card">
+    <div class="card-title">Active Challenges</div>
+    <div class="card-value">3</div>
+    <div class="card-sub">Running now</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Completed</div>
+    <div class="card-value">8</div>
+    <div class="card-sub">All time</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Best Streak</div>
+    <div class="card-value">21 days</div>
+    <div class="card-sub">No-sugar challenge (2025)</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:16px;">Active Challenges</div>
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <strong>30-day meditation</strong>
+        <span style="font-size:12px;color:var(--text-muted);">Day 14 / 30</span>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:12px;">
+        <div style="background:var(--primary);width:47%;height:12px;border-radius:4px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">10 minutes daily · Ends May 10</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <strong>No alcohol — April</strong>
+        <span style="font-size:12px;color:var(--text-muted);">Day 26 / 30</span>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:12px;">
+        <div style="background:var(--success);width:87%;height:12px;border-radius:4px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Almost there! · Ends Apr 30</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <strong>Read 20 pages/day</strong>
+        <span style="font-size:12px;color:var(--text-muted);">Day 8 / 21</span>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:12px;">
+        <div style="background:var(--primary);width:38%;height:12px;border-radius:4px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Every evening · Ends May 14</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:12px;">Completed Challenges</div>
+  <table>
+    <thead>
+      <tr><th>Challenge</th><th>Duration</th><th>Completed</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>No sugar — January</td><td>31 days</td><td>Jan 2026</td><td><span class="badge badge-completed">Success</span></td></tr>
+      <tr><td>Walk 10k steps daily</td><td>14 days</td><td>Dec 2025</td><td><span class="badge badge-completed">Success</span></td></tr>
+      <tr><td>Cold showers — 21 days</td><td>21 days</td><td>Nov 2025</td><td><span class="badge badge-completed">Success</span></td></tr>
+      <tr><td>Digital detox weekend</td><td>2 days</td><td>Oct 2025</td><td><span class="badge badge-skipped">Partial</span></td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

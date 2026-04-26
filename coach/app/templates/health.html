@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Coach · Health{% endblock %}
+{% block page_title %}Health{% endblock %}
+
+{% block content %}
+<div class="grid grid-4" style="margin-bottom:16px;">
+  <div class="card">
+    <div class="card-title">Blood Pressure</div>
+    <div class="card-value" style="font-size:22px;">118 / 76</div>
+    <div class="card-sub">Last checked 2 days ago</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Weight</div>
+    <div class="card-value">82 kg</div>
+    <div class="card-sub">−0.4 kg this week</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Sleep</div>
+    <div class="card-value">7h 20m</div>
+    <div class="card-sub">Avg last 7 nights</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Resting HR</div>
+    <div class="card-value">62 bpm</div>
+    <div class="card-sub">This morning</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-title" style="margin-bottom:12px;">Upcoming Appointments</div>
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Type</th><th>Doctor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026-05-08</td><td>General checkup</td><td>Dr. Cohen</td></tr>
+        <tr><td>2026-05-22</td><td>Dentist</td><td>Dr. Farhi</td></tr>
+        <tr><td>2026-06-15</td><td>Blood work</td><td>Lab</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:12px;">Medications</div>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Dose</th><th>Frequency</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Vitamin D3</td><td>2000 IU</td><td>Daily</td></tr>
+        <tr><td>Magnesium</td><td>400 mg</td><td>Nightly</td></tr>
+        <tr><td>Omega-3</td><td>1g</td><td>With meals</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Coach · Check-ins{% endblock %}
+{% block page_title %}Check-ins{% endblock %}
+
+{% block content %}
+<div class="grid grid-2" style="margin-bottom:16px;">
+  <div class="card">
+    <div class="card-title" style="margin-bottom:16px;">Today's Check-in</div>
+    <form>
+      <div class="form-group">
+        <label class="form-label">Mood (1–10)</label>
+        <input class="form-input" type="range" min="1" max="10" value="7"
+               oninput="document.getElementById('mood-val').textContent=this.value">
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
+          Current: <strong id="mood-val">7</strong>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Energy (1–10)</label>
+        <input class="form-input" type="range" min="1" max="10" value="6"
+               oninput="document.getElementById('energy-val').textContent=this.value">
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
+          Current: <strong id="energy-val">6</strong>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" rows="3" placeholder="How are you feeling today?"></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Save Check-in</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:12px;">Streak</div>
+    <div class="card-value">12 days</div>
+    <div class="card-sub">Current streak</div>
+    <div style="margin-top:16px;">
+      <div class="card-title" style="margin-bottom:8px;">This Week</div>
+      <div style="display:flex;gap:6px;">
+        {% for day, done in [('M',true),('T',true),('W',true),('T',true),('F',false),('S',false),('S',false)] %}
+        <div style="width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+                    font-size:11px;font-weight:600;
+                    background:{% if done %}var(--success){% else %}var(--border){% endif %};
+                    color:{% if done %}white{% else %}var(--text-muted){% endif %};">
+          {{ day }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:12px;">Recent Check-ins</div>
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Mood</th><th>Energy</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Apr 25</td><td>8 / 10</td><td>7 / 10</td><td>Good workout, busy at work but managed well.</td></tr>
+      <tr><td>Apr 24</td><td>6 / 10</td><td>5 / 10</td><td>Tired after late night. Skipped gym.</td></tr>
+      <tr><td>Apr 23</td><td>9 / 10</td><td>9 / 10</td><td>Great day, finished the project milestone.</td></tr>
+      <tr><td>Apr 22</td><td>7 / 10</td><td>8 / 10</td><td>Normal day. Evening run felt great.</td></tr>
+      <tr><td>Apr 21</td><td>5 / 10</td><td>4 / 10</td><td>Headache most of the day, took it easy.</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

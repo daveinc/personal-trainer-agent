@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Coach · Milestones{% endblock %}
+{% block page_title %}Milestones{% endblock %}
+
+{% block content %}
+<div class="grid grid-3" style="margin-bottom:16px;">
+  <div class="card">
+    <div class="card-title">Achieved This Year</div>
+    <div class="card-value">7</div>
+    <div class="card-sub">Personal bests &amp; goals</div>
+  </div>
+  <div class="card">
+    <div class="card-title">In Progress</div>
+    <div class="card-value">4</div>
+    <div class="card-sub">Active goals</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Next Milestone</div>
+    <div class="card-value" style="font-size:16px;">Half marathon</div>
+    <div class="card-sub">May 12 · 16 days away</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:16px;">Upcoming Goals</div>
+  <table>
+    <thead>
+      <tr><th>Goal</th><th>Category</th><th>Target Date</th><th>Progress</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Run half marathon sub 2h</td><td>Fitness</td><td>May 12</td>
+        <td><div style="display:flex;align-items:center;gap:8px;">
+          <div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
+            <div style="background:var(--primary);width:80%;height:8px;border-radius:4px;"></div>
+          </div>80%
+        </div></td>
+      </tr>
+      <tr>
+        <td>Read 12 books this year</td><td>Learning</td><td>Dec 31</td>
+        <td><div style="display:flex;align-items:center;gap:8px;">
+          <div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
+            <div style="background:var(--primary);width:25%;height:8px;border-radius:4px;"></div>
+          </div>3/12
+        </div></td>
+      </tr>
+      <tr>
+        <td>Save ₪50k for investment</td><td>Finances</td><td>Dec 31</td>
+        <td><div style="display:flex;align-items:center;gap:8px;">
+          <div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
+            <div style="background:var(--success);width:37%;height:8px;border-radius:4px;"></div>
+          </div>37%
+        </div></td>
+      </tr>
+      <tr>
+        <td>Reach Spanish B2</td><td>Learning</td><td>Sep 30</td>
+        <td><div style="display:flex;align-items:center;gap:8px;">
+          <div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
+            <div style="background:var(--primary);width:45%;height:8px;border-radius:4px;"></div>
+          </div>45%
+        </div></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Achieved</div>
+  <div class="event-list">
+    <div class="event-item">
+      <div class="event-time" style="min-width:90px;">Apr 2026</div>
+      <div class="event-title">Lost 5 kg since January</div>
+      <span class="badge badge-completed">Health</span>
+    </div>
+    <div class="event-item">
+      <div class="event-time" style="min-width:90px;">Mar 2026</div>
+      <div class="event-title">Completed FastAPI course</div>
+      <span class="badge" style="background:#e0e7ff;color:#3730a3;">Learning</span>
+    </div>
+    <div class="event-item">
+      <div class="event-time" style="min-width:90px;">Feb 2026</div>
+      <div class="event-title">Ran first 10K race</div>
+      <span class="badge" style="background:#f0fdf4;color:#166534;">Fitness</span>
+    </div>
+    <div class="event-item">
+      <div class="event-time" style="min-width:90px;">Jan 2026</div>
+      <div class="event-title">30-day check-in streak</div>
+      <span class="badge" style="background:#fce7f3;color:#9d174d;">Habit</span>
+    </div>
+  </div>
+</div>
+{% endblock %}

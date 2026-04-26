@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Coach · Relationships{% endblock %}
+{% block page_title %}Relationships{% endblock %}
+
+{% block content %}
+<div class="grid grid-3" style="margin-bottom:16px;">
+  <div class="card">
+    <div class="card-title">People Tracked</div>
+    <div class="card-value">12</div>
+    <div class="card-sub">Across 3 circles</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Due for Contact</div>
+    <div class="card-value" style="color:var(--warning);">4</div>
+    <div class="card-sub">Haven't spoken in 30+ days</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Plans This Month</div>
+    <div class="card-value">3</div>
+    <div class="card-sub">Dinners, calls, visits</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:12px;">Close Circle</div>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Relationship</th><th>Last Contact</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Maya</td><td>Partner</td><td>Today</td>
+        <td><span class="badge badge-completed">Active</span></td>
+      </tr>
+      <tr>
+        <td>Yoni</td><td>Best friend</td><td>3 days ago</td>
+        <td><span class="badge badge-completed">Good</span></td>
+      </tr>
+      <tr>
+        <td>Mom</td><td>Family</td><td>1 week ago</td>
+        <td><span class="badge" style="background:#e0e7ff;color:#3730a3;">Call soon</span></td>
+      </tr>
+      <tr>
+        <td>Dad</td><td>Family</td><td>2 weeks ago</td>
+        <td><span class="badge badge-skipped">Overdue</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:12px;">Extended Network</div>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>How Met</th><th>Last Contact</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Avi</td><td>University</td><td>6 weeks ago</td><td>Catch up re: startup</td></tr>
+      <tr><td>Roni</td><td>Work</td><td>2 months ago</td><td>Coffee?</td></tr>
+      <tr><td>Shlomi</td><td>CrossFit</td><td>Last week</td><td>New gym opening</td></tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% set active = "calendar_admin" %}
+{% set active = "settings" %}
 {% block title %}Coach · Edit Event{% endblock %}
 {% block page_title %}Edit Event{% endblock %}
 
 {% block content %}
 <div class="card" style="max-width:520px;">
   <div class="card-title" style="margin-bottom:16px;">{{ event.get("summary", "Event") }}</div>
-  <form method="post" action="{{ root }}/ui/admin/calendar/edit">
+  <form method="post" action="{{ root }}/ui/settings/calendar/edit">
     <input type="hidden" name="uid" value="{{ uid }}">
     <div class="form-group" style="margin-bottom:12px;">
       <label class="form-label">Title</label>
@@ -33,7 +33,7 @@
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-primary" type="submit">Save</button>
-      <a href="{{ root }}/ui/admin/calendar" class="btn btn-secondary">Cancel</a>
+      <a href="{{ root }}/ui/settings?tab=calendar" class="btn btn-secondary">Cancel</a>
     </div>
   </form>
 </div>

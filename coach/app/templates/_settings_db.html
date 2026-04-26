@@ -1,9 +1,3 @@
-{% extends "base.html" %}
-{% set active = "admin" %}
-{% block title %}Coach · Database{% endblock %}
-{% block page_title %}Database{% endblock %}
-
-{% block content %}
 <div class="grid grid-4" style="margin-bottom:16px;">
   <div class="card">
     <div class="card-title">SQLite Size</div>
@@ -50,12 +44,12 @@
       <td>{{ row.user.display_name or '—' }}</td>
       <td>{{ row.log_count }}</td>
       <td style="display:flex;gap:6px;">
-        <form method="post" action="{{ root }}/ui/admin/delete-user-logs"
+        <form method="post" action="{{ root }}/ui/settings/delete-user-logs"
               onsubmit="return confirm('Delete all workout logs for {{ row.user.username }}?')">
           <input type="hidden" name="user_id" value="{{ row.user.id }}">
           <button class="btn btn-warning btn-sm" type="submit">Clear Logs</button>
         </form>
-        <form method="post" action="{{ root }}/ui/admin/delete-user"
+        <form method="post" action="{{ root }}/ui/settings/delete-user"
               onsubmit="return confirm('Delete {{ row.user.username }} and all their data? This cannot be undone.')">
           <input type="hidden" name="user_id" value="{{ row.user.id }}">
           <button class="btn btn-danger btn-sm" type="submit">Delete User</button>
@@ -73,12 +67,12 @@
 <div class="card" style="border-color:#fca5a5;">
   <div class="card-title" style="margin-bottom:16px;color:var(--error);">Danger Zone</div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-    <form method="post" action="{{ root }}/ui/admin/wipe-logs"
+    <form method="post" action="{{ root }}/ui/settings/wipe-logs"
           onsubmit="return confirm('Wipe ALL workout logs from both databases? Users are kept. This cannot be undone.')">
       <button class="btn btn-danger" type="submit">Wipe All Logs</button>
     </form>
-    <a href="{{ root }}/ui/admin/backup" class="btn btn-primary">Download SQLite Backup</a>
-    <form method="post" action="{{ root }}/ui/admin/restore"
+    <a href="{{ root }}/ui/settings/backup" class="btn btn-primary">Download SQLite Backup</a>
+    <form method="post" action="{{ root }}/ui/settings/restore"
           enctype="multipart/form-data"
           onsubmit="return confirm('This will overwrite the current database with the uploaded file. This cannot be undone. Continue?')">
       <div style="display:flex;gap:8px;align-items:center;">
@@ -88,4 +82,3 @@
     </form>
   </div>
 </div>
-{% endblock %}

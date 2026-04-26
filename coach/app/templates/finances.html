@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Coach · Finances{% endblock %}
+{% block page_title %}Finances{% endblock %}
+
+{% block content %}
+<div class="grid grid-4" style="margin-bottom:16px;">
+  <div class="card">
+    <div class="card-title">Monthly Income</div>
+    <div class="card-value">₪18,500</div>
+    <div class="card-sub">After tax</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Expenses</div>
+    <div class="card-value">₪12,340</div>
+    <div class="card-sub">This month</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Savings</div>
+    <div class="card-value" style="color:var(--success);">₪6,160</div>
+    <div class="card-sub">33% savings rate</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Emergency Fund</div>
+    <div class="card-value">₪45,000</div>
+    <div class="card-sub">3.6 months runway</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-title" style="margin-bottom:12px;">Spending by Category</div>
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Budget</th><th>Spent</th><th>Remaining</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Housing</td><td>₪5,000</td><td>₪5,000</td><td style="color:var(--text-muted);">₪0</td></tr>
+        <tr><td>Food</td><td>₪2,500</td><td>₪2,100</td><td style="color:var(--success);">₪400</td></tr>
+        <tr><td>Transport</td><td>₪1,200</td><td>₪980</td><td style="color:var(--success);">₪220</td></tr>
+        <tr><td>Health</td><td>₪800</td><td>₪650</td><td style="color:var(--success);">₪150</td></tr>
+        <tr><td>Entertainment</td><td>₪1,000</td><td>₪1,350</td><td style="color:var(--error);">−₪350</td></tr>
+        <tr><td>Misc</td><td>₪600</td><td>₪260</td><td style="color:var(--success);">₪340</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:12px;">Goals</div>
+    <table>
+      <thead>
+        <tr><th>Goal</th><th>Target</th><th>Saved</th><th>Progress</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Vacation fund</td><td>₪8,000</td><td>₪5,500</td>
+          <td><div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
+            <div style="background:var(--primary);width:69%;height:8px;border-radius:4px;"></div>
+          </div></td>
+        </tr>
+        <tr>
+          <td>New laptop</td><td>₪6,000</td><td>₪2,200</td>
+          <td><div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
+            <div style="background:var(--primary);width:37%;height:8px;border-radius:4px;"></div>
+          </div></td>
+        </tr>
+        <tr>
+          <td>Investment account</td><td>₪50,000</td><td>₪18,700</td>
+          <td><div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
+            <div style="background:var(--success);width:37%;height:8px;border-radius:4px;"></div>
+          </div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
