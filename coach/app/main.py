@@ -2,11 +2,12 @@ import app.config as _config
 _config.load()
 
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.database import init_db
@@ -40,6 +41,11 @@ async def ingress_root_path(request: Request, call_next):
     ingress_path = request.headers.get("X-Ingress-Path", "")
     if ingress_path:
         request.scope["root_path"] = ingress_path
+    elif os.getenv("ALLOW_DIRECT_ACCESS", "False") != "True":
+        return PlainTextResponse(
+            "Direct access is disabled. Enable 'allow_direct_access' in addon settings.",
+            status_code=403,
+        )
     return await call_next(request)
 
 
