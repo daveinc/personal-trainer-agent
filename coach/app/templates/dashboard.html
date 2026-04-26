@@ -39,7 +39,7 @@
       <a href="{{ root }}/ui/fitness" class="btn btn-secondary btn-sm">View all</a>
     </div>
     <div id="dash-fitness"
-         hx-get="{{ root }}/ui/fitness/today"
+         hx-get="{{ root }}/ui/fitness/today?from=dashboard"
          hx-trigger="load"
          hx-swap="innerHTML"
          hx-on::after-request="updateDashCounts()">

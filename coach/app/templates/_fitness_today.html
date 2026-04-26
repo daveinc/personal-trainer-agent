@@ -16,18 +16,21 @@
     {% if log %}
       <span class="badge badge-{{ log.status }}">{{ log.status.capitalize() }}</span>
     {% else %}
-      <form hx-post="{{ root }}/ui/fitness/log" hx-target="#today-events" hx-swap="innerHTML" style="display:contents">
+      {% set src = "dashboard" if target == "dash-fitness" else "fitness" %}
+      <form hx-post="{{ root }}/ui/fitness/log" hx-target="#{{ target }}" hx-swap="innerHTML" style="display:contents">
         <input type="hidden" name="uid" value="{{ uid }}">
         <input type="hidden" name="title" value="{{ event.get('summary', 'Workout') }}">
         <input type="hidden" name="event_date" value="{{ start[:10] if start else '' }}">
         <input type="hidden" name="status" value="completed">
+        <input type="hidden" name="source" value="{{ src }}">
         <button class="btn btn-success btn-sm" type="submit">Done</button>
       </form>
-      <form hx-post="{{ root }}/ui/fitness/log" hx-target="#today-events" hx-swap="innerHTML" style="display:contents">
+      <form hx-post="{{ root }}/ui/fitness/log" hx-target="#{{ target }}" hx-swap="innerHTML" style="display:contents">
         <input type="hidden" name="uid" value="{{ uid }}">
         <input type="hidden" name="title" value="{{ event.get('summary', 'Workout') }}">
         <input type="hidden" name="event_date" value="{{ start[:10] if start else '' }}">
         <input type="hidden" name="status" value="skipped">
+        <input type="hidden" name="source" value="{{ src }}">
         <button class="btn btn-warning btn-sm" type="submit">Skip</button>
       </form>
     {% endif %}

@@ -16,20 +16,27 @@ templates = Jinja2Templates(directory="app/templates")
 CATEGORY = "fitness"
 
 
-def _is_fitness(event: dict) -> bool:
+def _is_user_fitness(event: dict, username: str) -> bool:
     desc = (event.get("description") or "").lower()
-    return f"[{CATEGORY}]" in desc
+    return f"[{CATEGORY}]" in desc and f"[{username.lower()}]" in desc
 
 
-@router.get("/ui/fitness/today")
-async def today_events(request: Request, db: AsyncSession = Depends(get_db)):
+def _fmt_local(dt: datetime) -> str:
+    """Format as local time for HA — no UTC conversion, HA treats naive as local."""
+    return dt.strftime("%Y-%m-%dT%H:%M:%S")
+
+
+async def _today_events_response(request: Request, db: AsyncSession, target: str):
     user = await get_current_user(request, db)
     if not user:
-        return templates.TemplateResponse(request, "_fitness_today.html", tctx(request, events=[], logs={}))
+        return templates.TemplateResponse(
+            request, "_fitness_today.html",
+            tctx(request, events=[], logs={}, target=target)
+        )
 
     try:
         raw = await get_today_events()
-        events = [e for e in raw if _is_fitness(e)]
+        events = [e for e in raw if _is_user_fitness(e, user.username)]
     except Exception:
         events = []
 
@@ -40,12 +47,20 @@ async def today_events(request: Request, db: AsyncSession = Depends(get_db)):
             WorkoutLog.event_date == today_str,
         )
     )
-    logs_today = result.scalars().all()
-    logs = {log.calendar_uid: log for log in logs_today}
+    logs = {log.calendar_uid: log for log in result.scalars().all()}
 
     return templates.TemplateResponse(
-        request, "_fitness_today.html", tctx(request, events=events, logs=logs)
+        request, "_fitness_today.html",
+        tctx(request, events=events, logs=logs, target=target)
     )
+
+
+@router.get("/ui/fitness/today")
+async def today_events(request: Request, db: AsyncSession = Depends(get_db)):
+    # 'from' param lets the dashboard request its own target ID
+    source = request.query_params.get("from", "fitness")
+    target = "dash-fitness" if source == "dashboard" else "today-events"
+    return await _today_events_response(request, db, target)
 
 
 @router.post("/ui/fitness/schedule")
@@ -59,9 +74,13 @@ async def schedule(
 ):
     user = await get_current_user(request, db)
     if not user:
-        return templates.TemplateResponse(request, "_fitness_today.html", tctx(request, events=[], logs={}))
+        return templates.TemplateResponse(
+            request, "_fitness_today.html",
+            tctx(request, events=[], logs={}, target="today-events")
+        )
 
-    start_dt = datetime.fromisoformat(f"{date}T{start_time}:00").replace(tzinfo=timezone.utc)
+    # Parse as local time — do NOT replace with UTC, HA treats naive datetimes as local
+    start_dt = datetime.fromisoformat(f"{date}T{start_time}:00")
     end_dt = start_dt + timedelta(minutes=duration)
 
     try:
@@ -71,11 +90,12 @@ async def schedule(
             end=end_dt,
             description=title,
             category=CATEGORY,
+            username=user.username,
         )
     except Exception:
         pass
 
-    return await today_events(request, db)
+    return await _today_events_response(request, db, "today-events")
 
 
 @router.post("/ui/fitness/log")
@@ -85,12 +105,17 @@ async def log_event(
     title: str = Form(...),
     event_date: str = Form(...),
     status: str = Form(...),
+    source: str = Form("fitness"),
     notes: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
 ):
     user = await get_current_user(request, db)
+    target = "dash-fitness" if source == "dashboard" else "today-events"
     if not user:
-        return templates.TemplateResponse(request, "_fitness_today.html", tctx(request, events=[], logs={}))
+        return templates.TemplateResponse(
+            request, "_fitness_today.html",
+            tctx(request, events=[], logs={}, target=target)
+        )
 
     result = await db.execute(
         select(WorkoutLog).where(
@@ -113,4 +138,4 @@ async def log_event(
         ))
     await db.commit()
 
-    return await today_events(request, db)
+    return await _today_events_response(request, db, target)

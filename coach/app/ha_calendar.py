@@ -32,7 +32,10 @@ def _headers() -> dict:
 
 
 def _fmt(dt: datetime) -> str:
-    return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    """Format datetime for HA API. Naive datetimes passed as-is (HA treats as local)."""
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+    return dt.strftime("%Y-%m-%dT%H:%M:%S")
 
 
 async def get_events(start: datetime, end: datetime) -> list[dict]:
@@ -60,8 +63,14 @@ async def create_event(
     end: datetime,
     description: Optional[str] = None,
     category: Optional[str] = None,
+    username: Optional[str] = None,
 ) -> dict:
-    desc = f"[{category}] {description}" if category else description
+    tags = ""
+    if category:
+        tags += f"[{category}]"
+    if username:
+        tags += f"[{username.lower()}]"
+    desc = f"{tags} {description}".strip() if tags else description
     payload: dict = {
         "entity_id": CALENDAR_ENTITY,
         "summary": summary,
