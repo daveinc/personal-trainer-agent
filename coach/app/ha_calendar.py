@@ -6,6 +6,7 @@ from typing import Optional
 import httpx
 
 CALENDAR_ENTITY = "calendar.coach"
+CATEGORY = "fitness"
 logger = logging.getLogger(__name__)
 
 
