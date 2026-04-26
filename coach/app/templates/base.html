@@ -9,22 +9,38 @@
   <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 </head>
 <body>
+<div class="layout">
 
-{% block nav %}
-<nav class="nav">
-  <a href="ui/dashboard" class="nav-brand">Coach<span>.</span></a>
-  <a href="ui/dashboard" class="nav-link {% if active == 'dashboard' %}active{% endif %}">Dashboard</a>
-  <a href="ui/fitness" class="nav-link {% if active == 'fitness' %}active{% endif %}">Fitness</a>
-  <div class="nav-spacer"></div>
-  {% if user %}
-  <span class="nav-user">{{ user.display_name }} &nbsp;·&nbsp; <a href="auth/logout">logout</a></span>
-  {% endif %}
-</nav>
-{% endblock %}
+  <aside class="sidebar">
+    <a href="ui/dashboard" class="sidebar-logo">Coach<span>.</span></a>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Overview</div>
+      <a href="ui/dashboard" class="nav-link {% if active == 'dashboard' %}active{% endif %}">
+        Dashboard
+      </a>
+      <div class="nav-section">Categories</div>
+      <a href="ui/fitness" class="nav-link {% if active == 'fitness' %}active{% endif %}">
+        Fitness
+      </a>
+    </nav>
+    {% if user %}
+    <div class="sidebar-footer">
+      {{ user.display_name }}<br>
+      <a href="auth/logout">Log out</a>
+    </div>
+    {% endif %}
+  </aside>
 
-<main class="page">
-  {% block content %}{% endblock %}
-</main>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+      <div class="topbar-right">{% block topbar_right %}{% endblock %}</div>
+    </div>
+    <div class="content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
 
+</div>
 </body>
 </html>

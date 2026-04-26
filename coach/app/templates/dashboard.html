@@ -1,35 +1,63 @@
 {% extends "base.html" %}
-{% set active = "dashboard" %}
 {% block title %}Coach · Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
 {% block content %}
-<div style="margin-bottom:1.75rem;">
-  <h1 style="font-size:1.5rem;font-weight:700;color:#0f172a;">
-    Good {{ greeting }}, {{ user.display_name }}.
-  </h1>
-  <p class="text-muted" style="margin-top:0.3rem;">Here's what's on for today.</p>
+<div class="grid grid-4" style="margin-bottom:20px;">
+  <div class="card">
+    <div class="card-title">HA Calendar</div>
+    <div class="card-value" style="font-size:18px;">
+      <span class="dot {% if ha_ok %}ok{% else %}error{% endif %}"></span>
+      {% if ha_ok %}Connected{% else %}Offline{% endif %}
+    </div>
+    <div class="card-sub">calendar.coach</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Today's Workouts</div>
+    <div class="card-value" id="dash-count">—</div>
+    <div class="card-sub">scheduled</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Logged Today</div>
+    <div class="card-value" id="dash-logged">—</div>
+    <div class="card-sub">completed or skipped</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Good {{ greeting }}</div>
+    <div class="card-value" style="font-size:18px;">{{ user.display_name }}</div>
+    <div class="card-sub">life coach dashboard</div>
+  </div>
 </div>
 
-<div class="card">
-  <div class="card-header">
-    <span class="card-title">Today's Fitness</span>
-    <a href="ui/fitness" class="btn btn-ghost btn-sm">View all</a>
+<div class="grid grid-2">
+  <div class="card">
+    <div class="flex justify-between items-center" style="margin-bottom:16px;">
+      <div class="card-title" style="margin:0;">Today's Fitness</div>
+      <a href="ui/fitness" class="btn btn-secondary btn-sm">View all</a>
+    </div>
+    <div id="dash-fitness"
+         hx-get="ui/fitness/today"
+         hx-trigger="load"
+         hx-swap="innerHTML"
+         hx-on::after-request="updateDashCounts()">
+      <div class="empty">Loading…</div>
+    </div>
   </div>
-  <div id="dash-fitness"
-       hx-get="ui/fitness/today"
-       hx-trigger="load"
-       hx-swap="innerHTML">
-    <div class="empty">Loading…</div>
-  </div>
-</div>
 
-<div class="card">
-  <div class="card-header">
-    <span class="card-title">Home Assistant</span>
-  </div>
-  <div class="flex items-center gap-2">
-    <span class="dot {% if ha_ok %}dot-green{% else %}dot-red{% endif %}"></span>
-    <span class="text-muted">Calendar {% if ha_ok %}connected{% else %}not reachable{% endif %}</span>
+  <div class="card">
+    <div class="card-title" style="margin-bottom:16px;">Quick Actions</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a href="ui/fitness" class="btn btn-primary">Schedule a Workout</a>
+    </div>
   </div>
 </div>
 {% endblock %}
+
+<script>
+function updateDashCounts() {
+  const items = document.querySelectorAll('#dash-fitness .event-item');
+  document.getElementById('dash-count').textContent = items.length || '0';
+  const logged = document.querySelectorAll('#dash-fitness .badge');
+  document.getElementById('dash-logged').textContent = logged.length || '0';
+}
+</script>

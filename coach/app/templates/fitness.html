@@ -1,57 +1,51 @@
 {% extends "base.html" %}
 {% set active = "fitness" %}
 {% block title %}Coach · Fitness{% endblock %}
+{% block page_title %}Fitness{% endblock %}
 
 {% block content %}
-<div style="margin-bottom:1.75rem;">
-  <h1 style="font-size:1.5rem;font-weight:700;color:#0f172a;">Fitness</h1>
-  <p class="text-muted" style="margin-top:0.3rem;">Today's schedule and workout log.</p>
-</div>
+<div class="grid grid-2">
+  <div class="card">
+    <div class="flex justify-between items-center" style="margin-bottom:16px;">
+      <div class="card-title" style="margin:0;">Today's Schedule</div>
+    </div>
+    <div id="today-events"
+         hx-get="ui/fitness/today"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
 
-<div class="card">
-  <div class="card-header">
-    <span class="card-title">Today's Schedule</span>
-  </div>
-  <div id="today-events"
-       hx-get="ui/fitness/today"
-       hx-trigger="load"
-       hx-swap="innerHTML">
-    <div class="empty">Loading…</div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-header">
-    <span class="card-title">Schedule a Workout</span>
-  </div>
-  <form hx-post="ui/fitness/schedule"
-        hx-target="#today-events"
-        hx-swap="innerHTML"
-        hx-on::after-request="if(event.detail.successful){this.reset()}">
-    <div class="form-row">
+  <div class="card">
+    <div class="card-title" style="margin-bottom:16px;">Schedule a Workout</div>
+    <form hx-post="ui/fitness/schedule"
+          hx-target="#today-events"
+          hx-swap="innerHTML"
+          hx-on::after-request="if(event.detail.successful){this.reset();document.getElementById('sched-date').valueAsDate=new Date();}">
       <div class="form-group">
         <label class="form-label">Workout</label>
         <input class="form-input" type="text" name="title" placeholder="e.g. Morning Run" required>
       </div>
-      <div class="form-group">
-        <label class="form-label">Date</label>
-        <input class="form-input" type="date" name="date" id="sched-date" required>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-input" type="date" name="date" id="sched-date" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Time</label>
+          <input class="form-input" type="time" name="start_time" required>
+        </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Start Time</label>
-        <input class="form-input" type="time" name="start_time" required>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Duration (min)</label>
+        <label class="form-label">Duration (minutes)</label>
         <input class="form-input" type="number" name="duration" value="60" min="5" max="480">
       </div>
-    </div>
-    <button class="btn btn-primary" type="submit">Add to Calendar</button>
-  </form>
+      <button class="btn btn-primary" type="submit">Add to Calendar</button>
+    </form>
+  </div>
 </div>
 {% endblock %}
-
-{% block nav %}{{ super() }}{% endblock %}
 
 <script>
 document.getElementById('sched-date').valueAsDate = new Date();
