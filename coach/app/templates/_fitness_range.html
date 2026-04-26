@@ -25,6 +25,7 @@
           <input type="hidden" name="event_date" value="{{ start[:10] if start else '' }}">
           <input type="hidden" name="status" value="completed">
           <input type="hidden" name="source" value="fitness">
+          <input type="hidden" name="view" value="{{ view }}">
           <button class="btn btn-success btn-sm" type="submit">Done</button>
         </form>
         <form hx-post="{{ root }}/ui/fitness/log" hx-target="#{{ target }}" hx-swap="innerHTML" style="display:contents">
@@ -33,6 +34,7 @@
           <input type="hidden" name="event_date" value="{{ start[:10] if start else '' }}">
           <input type="hidden" name="status" value="skipped">
           <input type="hidden" name="source" value="fitness">
+          <input type="hidden" name="view" value="{{ view }}">
           <button class="btn btn-warning btn-sm" type="submit">Skip</button>
         </form>
       {% endif %}

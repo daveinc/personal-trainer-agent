@@ -1,3 +1,4 @@
+import calendar as cal
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -78,13 +79,12 @@ async def today_events(request: Request, db: AsyncSession = Depends(get_db)):
 
 # ── This Week ──────────────────────────────────────────────────────────────
 
-@router.get("/ui/fitness/week")
-async def week_events(request: Request, db: AsyncSession = Depends(get_db)):
+async def _week_events_response(request: Request, db: AsyncSession, target: str):
     user = await get_current_user(request, db)
     if not user:
         return templates.TemplateResponse(
             request, "_fitness_range.html",
-            tctx(request, grouped={}, logs={}, target="fitness-content")
+            tctx(request, grouped={}, logs={}, target=target, view="week")
         )
     try:
         raw = await get_week_events()
@@ -99,20 +99,23 @@ async def week_events(request: Request, db: AsyncSession = Depends(get_db)):
 
     return templates.TemplateResponse(
         request, "_fitness_range.html",
-        tctx(request, grouped=_group_by_date(events), logs=logs, target="fitness-content")
+        tctx(request, grouped=_group_by_date(events), logs=logs, target=target, view="week")
     )
+
+
+@router.get("/ui/fitness/week")
+async def week_events(request: Request, db: AsyncSession = Depends(get_db)):
+    return await _week_events_response(request, db, "fitness-content")
 
 
 # ── This Month ─────────────────────────────────────────────────────────────
 
-@router.get("/ui/fitness/month")
-async def month_events(request: Request, db: AsyncSession = Depends(get_db)):
-    import calendar as cal
+async def _month_events_response(request: Request, db: AsyncSession, target: str):
     user = await get_current_user(request, db)
     if not user:
         return templates.TemplateResponse(
             request, "_fitness_range.html",
-            tctx(request, grouped={}, logs={}, target="fitness-content")
+            tctx(request, grouped={}, logs={}, target=target, view="month")
         )
     try:
         raw = await get_month_events()
@@ -128,8 +131,13 @@ async def month_events(request: Request, db: AsyncSession = Depends(get_db)):
 
     return templates.TemplateResponse(
         request, "_fitness_range.html",
-        tctx(request, grouped=_group_by_date(events), logs=logs, target="fitness-content")
+        tctx(request, grouped=_group_by_date(events), logs=logs, target=target, view="month")
     )
+
+
+@router.get("/ui/fitness/month")
+async def month_events(request: Request, db: AsyncSession = Depends(get_db)):
+    return await _month_events_response(request, db, "fitness-content")
 
 
 # ── Schedule ───────────────────────────────────────────────────────────────
@@ -178,11 +186,12 @@ async def log_event(
     event_date: str = Form(...),
     status: str = Form(...),
     source: str = Form("fitness"),
+    view: str = Form("today"),
     notes: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
 ):
     user = await get_current_user(request, db)
-    target = "dash-fitness" if source == "dashboard" else "today-events"
+    target = "dash-fitness" if source == "dashboard" else "fitness-content"
     if not user:
         return templates.TemplateResponse(
             request, "_fitness_today.html",
@@ -210,4 +219,10 @@ async def log_event(
         ))
     await db.commit()
 
-    return await _today_events_response(request, db, target)
+    if source == "dashboard":
+        return await _today_events_response(request, db, "dash-fitness")
+    if view == "week":
+        return await _week_events_response(request, db, "fitness-content")
+    if view == "month":
+        return await _month_events_response(request, db, "fitness-content")
+    return await _today_events_response(request, db, "fitness-content")
