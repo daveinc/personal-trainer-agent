@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.deps import get_db, get_current_user, tctx
+from app.deps import get_db, get_ext_db, get_current_user, tctx
 from app.ha_calendar import create_event, get_today_events, get_week_events, get_month_events
 from app.models import WorkoutLog
 
@@ -189,6 +189,7 @@ async def log_event(
     view: str = Form("today"),
     notes: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
+    ext_db: Optional[AsyncSession] = Depends(get_ext_db),
 ):
     user = await get_current_user(request, db)
     target = "dash-fitness" if source == "dashboard" else "fitness-content"
@@ -198,6 +199,7 @@ async def log_event(
             tctx(request, events=[], logs={}, target=target)
         )
 
+    # write to local SQLite
     result = await db.execute(
         select(WorkoutLog).where(
             WorkoutLog.user_id == user.id,
@@ -218,6 +220,43 @@ async def log_event(
             notes=notes,
         ))
     await db.commit()
+
+    # mirror to external DB if configured
+    if ext_db:
+        try:
+            from app.models import User as UserModel
+            ext_user = (await ext_db.execute(
+                select(UserModel).where(UserModel.id == user.id)
+            )).scalar_one_or_none()
+            if not ext_user:
+                ext_db.add(UserModel(
+                    id=user.id,
+                    username=user.username,
+                    display_name=user.display_name,
+                    created_at=user.created_at,
+                ))
+            ext_log = (await ext_db.execute(
+                select(WorkoutLog).where(
+                    WorkoutLog.user_id == user.id,
+                    WorkoutLog.calendar_uid == uid,
+                )
+            )).scalar_one_or_none()
+            if ext_log:
+                ext_log.status = status
+                ext_log.notes = notes
+            else:
+                ext_db.add(WorkoutLog(
+                    user_id=user.id,
+                    calendar_uid=uid,
+                    event_date=event_date,
+                    event_title=title,
+                    status=status,
+                    notes=notes,
+                ))
+            await ext_db.commit()
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"External DB write failed: {e}")
 
     if source == "dashboard":
         return await _today_events_response(request, db, "dash-fitness")

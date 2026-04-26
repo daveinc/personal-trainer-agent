@@ -1,16 +1,57 @@
+import logging
+import os
+from datetime import datetime, timezone, timedelta
+
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-DB_URL = "sqlite+aiosqlite:////data/coach.db"
+logger = logging.getLogger(__name__)
 
-engine = create_async_engine(DB_URL, echo=False)
-Session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+LOCAL_DB_URL = "sqlite+aiosqlite:////data/coach.db"
+
+local_engine = create_async_engine(LOCAL_DB_URL, echo=False)
+LocalSession = sessionmaker(local_engine, class_=AsyncSession, expire_on_commit=False)
+
+ext_engine = None
+ExtSession = None
 
 
 class Base(DeclarativeBase):
     pass
 
 
+def setup_ext_engine():
+    global ext_engine, ExtSession
+    url = os.getenv("EXT_DB_URL", "").strip()
+    if not url:
+        return
+    try:
+        ext_engine = create_async_engine(url, echo=False, pool_pre_ping=True)
+        ExtSession = sessionmaker(ext_engine, class_=AsyncSession, expire_on_commit=False)
+        logger.info("External DB engine configured")
+    except Exception as e:
+        logger.error(f"External DB setup failed: {e}")
+
+
 async def init_db():
-    async with engine.begin() as conn:
+    async with local_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+    if ext_engine:
+        try:
+            async with ext_engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            logger.info("External DB tables ready")
+        except Exception as e:
+            logger.error(f"External DB init failed: {e}")
+
+    await _prune_local()
+
+
+async def _prune_local():
+    from app.models import WorkoutLog
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
+    async with LocalSession() as session:
+        await session.execute(delete(WorkoutLog).where(WorkoutLog.event_date < cutoff))
+        await session.commit()

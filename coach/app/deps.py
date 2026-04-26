@@ -2,12 +2,21 @@ from typing import Optional
 from fastapi import Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import Session
+from app.database import LocalSession
 from app.models import User
 
 
 async def get_db():
-    async with Session() as session:
+    async with LocalSession() as session:
+        yield session
+
+
+async def get_ext_db():
+    from app.database import ExtSession
+    if ExtSession is None:
+        yield None
+        return
+    async with ExtSession() as session:
         yield session
 
 
@@ -32,5 +41,4 @@ def root_path(request: Request) -> str:
 
 
 def tctx(request: Request, **kwargs) -> dict:
-    """Build template context with root injected."""
     return {"root": root_path(request), **kwargs}

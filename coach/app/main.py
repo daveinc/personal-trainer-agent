@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.database import init_db
+from app.database import init_db, setup_ext_engine
 from app.deps import redirect_to
 from app.routes.auth import router as auth_router
 from app.routes.ui import router as ui_router
@@ -20,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    setup_ext_engine()
     await init_db()
     yield
 
