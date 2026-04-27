@@ -1,0 +1,83 @@
+import asyncio
+import logging
+from datetime import datetime
+
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+
+from app.database import LocalSession
+from app.models import Slot, NotificationLog
+
+logger = logging.getLogger(__name__)
+
+
+def _subtract_minutes(time_str: str, minutes: int) -> str:
+    h, m = map(int, time_str.split(":"))
+    total = max(0, h * 60 + m - minutes)
+    return f"{total // 60:02d}:{total % 60:02d}"
+
+
+async def _tick():
+    from app.services.notifier import notify_pre_slot, notify_post_slot
+
+    now = datetime.now()
+    today_name = now.strftime("%a")
+    today_str = now.strftime("%Y-%m-%d")
+    now_hm = now.strftime("%H:%M")
+
+    async with LocalSession() as db:
+        all_slots = (await db.execute(select(Slot))).scalars().all()
+        today_slots = [s for s in all_slots if s.days and today_name in s.days.split(",")]
+
+        for slot in today_slots:
+            # Pre-slot
+            if slot.start_time and slot.notify_before:
+                notify_at = _subtract_minutes(slot.start_time, slot.notify_before)
+                if now_hm == notify_at:
+                    exists = (await db.execute(
+                        select(NotificationLog).where(
+                            NotificationLog.slot_id == slot.id,
+                            NotificationLog.notif_type == "pre",
+                            NotificationLog.log_date == today_str,
+                        )
+                    )).scalar_one_or_none()
+                    if not exists:
+                        sent = await notify_pre_slot(slot)
+                        if sent:
+                            db.add(NotificationLog(
+                                slot_id=slot.id, notif_type="pre", log_date=today_str
+                            ))
+                            try:
+                                await db.commit()
+                            except IntegrityError:
+                                await db.rollback()
+
+            # Post-slot
+            if slot.end_time and now_hm == slot.end_time:
+                exists = (await db.execute(
+                    select(NotificationLog).where(
+                        NotificationLog.slot_id == slot.id,
+                        NotificationLog.notif_type == "post",
+                        NotificationLog.log_date == today_str,
+                    )
+                )).scalar_one_or_none()
+                if not exists:
+                    sent = await notify_post_slot(slot)
+                    if sent:
+                        db.add(NotificationLog(
+                            slot_id=slot.id, notif_type="post", log_date=today_str
+                        ))
+                        try:
+                            await db.commit()
+                        except IntegrityError:
+                            await db.rollback()
+
+
+async def run_scheduler():
+    logger.info("Notification scheduler started")
+    while True:
+        try:
+            await _tick()
+        except Exception as e:
+            logger.error(f"Scheduler error: {e}")
+        await asyncio.sleep(60)

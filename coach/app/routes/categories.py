@@ -10,7 +10,6 @@ templates = Jinja2Templates(directory="app/templates")
 
 PAGES = [
     ("health",        "Health"),
-    ("schedule",      "Schedule"),
     ("finances",      "Finances"),
     ("learning",      "Learning"),
     ("relationships", "Relationships"),

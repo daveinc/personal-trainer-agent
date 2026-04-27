@@ -15,6 +15,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     display_name: Mapped[str] = mapped_column(String(128), nullable=True)
     onboarding_complete: Mapped[bool] = mapped_column(Boolean, default=False)
+    unit_distance: Mapped[str] = mapped_column(String(8), default="km")
+    week_start: Mapped[str] = mapped_column(String(3), default="Mon")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
@@ -29,6 +31,7 @@ class Slot(Base):
     days: Mapped[str] = mapped_column(String(32), nullable=True)
     start_time: Mapped[str] = mapped_column(String(5), nullable=True)
     end_time: Mapped[str] = mapped_column(String(5), nullable=True)
+    notify_before: Mapped[int] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
@@ -56,6 +59,17 @@ class SessionValue(ExtBase):
     session_id: Mapped[int] = mapped_column(Integer, nullable=False)
     attribute_name: Mapped[str] = mapped_column(String(64), nullable=False)
     value: Mapped[str] = mapped_column(Text, nullable=True)
+
+
+class NotificationLog(Base):
+    __tablename__ = "notification_log"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    slot_id: Mapped[int] = mapped_column(Integer, ForeignKey("slots.id"), nullable=False)
+    notif_type: Mapped[str] = mapped_column(String(8), nullable=False)   # "pre" | "post"
+    log_date: Mapped[str] = mapped_column(String(10), nullable=False)    # "YYYY-MM-DD"
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    action_taken: Mapped[str] = mapped_column(String(16), nullable=True)
 
 
 class WorkoutLog(Base):

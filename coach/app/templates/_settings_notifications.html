@@ -1,0 +1,19 @@
+<div class="card">
+  <div class="card-title">Notification Service</div>
+  <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
+    Set <code>notify_service</code> in the addon options to the HA notify service name
+    (e.g. <code>mobile_app_my_phone</code>). Omit the <code>notify.</code> prefix.
+  </p>
+  <p style="font-size:13px;">
+    Current value: <strong>{{ notify_service or "— not configured —" }}</strong>
+  </p>
+</div>
+
+<div class="card">
+  <div class="card-title">How it works</div>
+  <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">
+    Coach listens directly to the HA event stream. When you tap a notification button,
+    HA fires a <code>mobile_app_notification_action</code> event — Coach picks it up automatically.
+    No automations or webhooks required.
+  </p>
+</div>

@@ -128,6 +128,8 @@ Design a roadmap for a fulfilling life, aligned with your values and passions. C
 - [ ] **3. Webhook receiver** — HA automation calls back into Coach when user taps a button (`mobile_app_notification_action` event)
 
 - [ ] **4. Action router** — maps incoming button action IDs to the correct Coach handler
+  - `done` → log session to MariaDB ✓
+  - `start` / `skip` / `miss` → logic TBD, needs design decision before implementing
 
 - [ ] **5. Context-aware slot suggestion** — when suggesting reschedule options, uses user's profile schedule (work days, free hours, category type) to build the button list
 
@@ -139,6 +141,10 @@ Design a roadmap for a fulfilling life, aligned with your values and passions. C
   - Two tracking modes:
     - Passive: notify before slot + notify at slot end ("Mark as done?") — Done / Not yet / Skip
     - Active: use HA mobile app sensors (location, step count, movement) to detect actual start/end without asking. Ask Dave which sensors are available and how he wants to trigger detection.
+
+- [ ] **HA sensor integration** — event stream already connected; explore what sensors are available and useful for the app. Candidates: zone events (home/away), mobile app sensors (steps, heart rate, sleep, activity), NFC tag scans. Dave also uses `input_text` helpers heavily — potential use cases TBD. input_boolean probably not useful.
+
+- [ ] **HA companion integration** — register Coach actions as native HA services (`coach.log_session`, `coach.skip_slot`, `coach.trigger_checkin`, etc.) so they're available in dashboards, scripts, and voice commands. Requires a small custom integration alongside the addon.
 
 - [ ] Populate Skills in Settings → Skills tab:
   - Active listening and coaching questioning techniques

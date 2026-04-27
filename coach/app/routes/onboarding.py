@@ -26,37 +26,29 @@ CATEGORIES = [
 
 
 @router.get("/ui/onboarding")
-async def onboarding_get(request: Request, step: int = 1, db: AsyncSession = Depends(get_db)):
+async def onboarding_get(request: Request, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     if not user:
         return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
     if user.onboarding_complete:
         return RedirectResponse(url=redirect_to(request, "ui/dashboard"), status_code=302)
     return templates.TemplateResponse(request, "onboarding.html", tctx(
-        request, user=user, step=step, categories=CATEGORIES
+        request, user=user, categories=CATEGORIES
     ))
 
 
-@router.post("/ui/onboarding/name")
-async def onboarding_name(
-    request: Request,
-    display_name: str = Form(...),
-    db: AsyncSession = Depends(get_db),
-):
-    user = await get_current_user(request, db)
-    if not user:
-        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
-    user.display_name = display_name.strip()
-    await db.commit()
-    return RedirectResponse(url=redirect_to(request, "ui/onboarding?step=2"), status_code=303)
-
-
-@router.post("/ui/onboarding/categories")
-async def onboarding_categories(request: Request, db: AsyncSession = Depends(get_db)):
+@router.post("/ui/onboarding/save")
+async def onboarding_save(request: Request, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     if not user:
         return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
     form = await request.form()
+    display_name = (form.get("display_name") or "").strip()
+    if not display_name:
+        return RedirectResponse(url=redirect_to(request, "ui/onboarding"), status_code=303)
+    user.display_name = display_name
+    user.unit_distance = form.get("unit_distance", "km")
+    user.week_start = form.get("week_start", "Mon")
     selected = form.getlist("categories")
     for slug, label in CATEGORIES:
         if slug in selected:
@@ -67,7 +59,7 @@ async def onboarding_categories(request: Request, db: AsyncSession = Depends(get
                 db.add(Slot(user_id=user.id, category=slug, label=label, schedule_type="free"))
     user.onboarding_complete = True
     await db.commit()
-    return RedirectResponse(url=redirect_to(request, "ui/profile"), status_code=303)
+    return RedirectResponse(url=redirect_to(request, "ui/schedule"), status_code=303)
 
 
 @router.post("/ui/onboarding/dismiss")

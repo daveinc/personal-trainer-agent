@@ -74,6 +74,9 @@ async def _maybe_create_ext_db():
 async def _migrate_local(conn):
     migrations = [
         "ALTER TABLE users ADD COLUMN onboarding_complete BOOLEAN DEFAULT 0",
+        "ALTER TABLE users ADD COLUMN unit_distance VARCHAR(8) DEFAULT 'km'",
+        "ALTER TABLE slots ADD COLUMN notify_before INTEGER",
+        "ALTER TABLE users ADD COLUMN week_start VARCHAR(3) DEFAULT 'Mon'",
     ]
     for sql in migrations:
         try:

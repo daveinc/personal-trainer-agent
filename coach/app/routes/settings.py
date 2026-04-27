@@ -173,6 +173,19 @@ async def restore_db(
     return RedirectResponse(url=redirect_to(request, "ui/settings"), status_code=302)
 
 
+# ── Notifications tab ──────────────────────────────────────────────────────
+
+@router.get("/ui/settings/notifications")
+async def settings_notifications(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    return templates.TemplateResponse(
+        request, "_settings_notifications.html",
+        tctx(request, user=user, notify_service=os.getenv("NOTIFY_SERVICE", ""))
+    )
+
+
 # ── Skills tab ─────────────────────────────────────────────────────────────
 
 @router.get("/ui/settings/skills")
