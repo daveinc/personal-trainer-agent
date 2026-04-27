@@ -1,0 +1,21 @@
+<div class="card-title" style="margin-bottom:16px;">Coaching Skills</div>
+<p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">
+  Define and manage the coach's active skill sets. Each skill area will be populated with specific techniques and behaviours that guide how the coach interacts with users.
+</p>
+
+{% set skills = [
+  "Active listening and coaching questioning techniques",
+  "Coaching ethics and boundaries",
+  "Neuroscience and behavioural psychology",
+  "Communication skills",
+  "Goal setting, habit formation and personal development"
+] %}
+
+{% for skill in skills %}
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:12px;">{{ skill }}</div>
+  <div style="color:var(--text-muted);font-size:13px;padding:16px;border:1px dashed var(--border);border-radius:var(--radius);text-align:center;">
+    Not yet configured — skill detail will be populated here.
+  </div>
+</div>
+{% endfor %}

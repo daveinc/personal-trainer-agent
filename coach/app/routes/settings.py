@@ -173,6 +173,16 @@ async def restore_db(
     return RedirectResponse(url=redirect_to(request, "ui/settings"), status_code=302)
 
 
+# ── Skills tab ─────────────────────────────────────────────────────────────
+
+@router.get("/ui/settings/skills")
+async def settings_skills(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    return templates.TemplateResponse(request, "_settings_skills.html", tctx(request, user=user))
+
+
 # ── Calendar tab ───────────────────────────────────────────────────────────
 
 @router.get("/ui/settings/calendar")
