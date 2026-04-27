@@ -46,8 +46,8 @@
       <div class="form-group" style="margin-bottom:0;">
         <label class="form-label">End Month</label>
         <select name="end_month" class="form-input">
-          {% for i, m in enumerate(months) %}
-          <option value="{{ i + 1 }}" {% if i == 1 %}selected{% endif %}>{{ m }}</option>
+          {% for m in months %}
+          <option value="{{ loop.index }}" {% if loop.index == 2 %}selected{% endif %}>{{ m }}</option>
           {% endfor %}
         </select>
       </div>
