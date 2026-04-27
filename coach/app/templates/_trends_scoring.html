@@ -1,0 +1,81 @@
+<div class="grid grid-4" style="margin-bottom:16px;">
+  <div class="card">
+    <div class="card-title">Completed</div>
+    <div class="card-value" style="color:var(--success);">{{ completed }}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Skipped</div>
+    <div class="card-value" style="color:var(--warning);">{{ skipped }}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Missed</div>
+    <div class="card-value" style="color:var(--error);">{{ missed }}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Total Logged</div>
+    <div class="card-value">{{ total }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Scoring Formula</div>
+  <form method="post" action="{{ root }}/ui/trends/scoring/save">
+    <div class="form-group">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <input type="checkbox" id="formula_enabled" name="formula_enabled" value="true"
+               {% if rule.formula_enabled %}checked{% endif %}
+               style="width:16px;height:16px;cursor:pointer;">
+        <label for="formula_enabled" style="font-size:13px;font-weight:500;cursor:pointer;">
+          Enable formula (overrides default weight calculation)
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Formula</label>
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">
+        Available variables: <code>completed</code>, <code>skipped</code>, <code>missed</code>,
+        <code>total</code>, <code>period_days</code> &nbsp;·&nbsp;
+        Functions: <code>round()</code>, <code>abs()</code>, <code>min()</code>, <code>max()</code>
+      </div>
+      <textarea id="formula-input" name="formula" rows="3"
+                style="font-family:monospace;font-size:13px;resize:vertical;"
+                class="form-input">{{ rule.formula }}</textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <button type="button" class="btn btn-secondary"
+              hx-post="{{ root }}/ui/trends/scoring/test"
+              hx-include="#formula-input"
+              hx-target="#formula-output"
+              hx-swap="innerHTML">
+        Test with real data
+      </button>
+    </div>
+  </form>
+
+  <div style="background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);
+              padding:12px 16px;min-height:40px;font-size:14px;">
+    <span style="font-size:11px;color:var(--text-muted);margin-right:8px;">Output:</span>
+    <span id="formula-output">
+      {% if rule.formula_enabled %}
+        {% if preview_error %}
+          <span style="color:var(--error)">Error: {{ preview_error }}</span>
+        {% elif preview_result is not none %}
+          <span style="color:var(--success)">{{ preview_result }}</span>
+          <span style="color:var(--text-muted);font-size:11px;margin-left:8px;">
+            (from {{ completed }} completed, {{ skipped }} skipped, {{ missed }} missed, {{ total }} total)
+          </span>
+        {% endif %}
+      {% else %}
+        <span style="color:var(--text-muted)">Formula is disabled — hit "Test with real data" to preview</span>
+      {% endif %}
+    </span>
+  </div>
+
+  <div style="margin-top:12px;font-size:11px;color:var(--text-muted);">
+    Default formula: <code>round(completed / total * 100, 1) if total > 0 else 0</code>
+    — participation % (completed out of total logged)
+  </div>
+</div>

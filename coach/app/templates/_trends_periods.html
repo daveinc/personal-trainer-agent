@@ -1,0 +1,62 @@
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:16px;">Trend Periods</div>
+  {% if periods %}
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Months</th><th>Description</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for p in periods %}
+    <tr>
+      <td><strong>{{ p.name }}</strong></td>
+      <td>{{ months[p.start_month - 1] }} → {{ months[p.end_month - 1] }}</td>
+      <td style="color:var(--text-muted);">{{ p.description or '—' }}</td>
+      <td>
+        <form method="post" action="{{ root }}/ui/trends/periods/delete"
+              onsubmit="return confirm('Delete period {{ p.name }}?')">
+          <input type="hidden" name="period_id" value="{{ p.id }}">
+          <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No trend periods defined yet.</div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Add Period</div>
+  <form method="post" action="{{ root }}/ui/trends/periods/add">
+    <div class="form-row" style="margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Name</label>
+        <input class="form-input" type="text" name="name" placeholder="e.g. Winter" required>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Start Month</label>
+        <select name="start_month" class="form-input">
+          {% for m in months %}
+          <option value="{{ loop.index }}">{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">End Month</label>
+        <select name="end_month" class="form-input">
+          {% for i, m in enumerate(months) %}
+          <option value="{{ i + 1 }}" {% if i == 1 %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description (optional)</label>
+      <input class="form-input" type="text" name="description"
+             placeholder="e.g. Reduced outdoor activity, more indoor cooking">
+    </div>
+    <button class="btn btn-primary" type="submit">Add Period</button>
+  </form>
+</div>

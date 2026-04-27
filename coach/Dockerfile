@@ -7,7 +7,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-LABEL version="0.3.0b"
+LABEL version="0.3.1"
 COPY app/ ./app/
 
 EXPOSE 8765

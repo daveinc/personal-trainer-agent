@@ -16,6 +16,7 @@ from app.routes.ui import router as ui_router
 from app.routes.fitness import router as fitness_router
 from app.routes.settings import router as settings_router
 from app.routes.categories import router as categories_router
+from app.routes.trends import router as trends_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -57,3 +58,4 @@ app.include_router(ui_router)
 app.include_router(fitness_router)
 app.include_router(settings_router)
 app.include_router(categories_router)
+app.include_router(trends_router)

@@ -1,0 +1,77 @@
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:16px;">Logged Observations</div>
+  {% if observations %}
+  <table>
+    <thead>
+      <tr><th>Period</th><th>Category</th><th>User</th><th>Score</th><th>Notes</th><th>Date</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for row in observations %}
+    <tr>
+      <td>{{ row.obs.period_name }}</td>
+      <td>{{ row.obs.category }}</td>
+      <td>{{ row.user.display_name if row.user else '—' }}</td>
+      <td>{{ row.obs.score or '—' }}</td>
+      <td style="color:var(--text-muted);">{{ row.obs.notes or '—' }}</td>
+      <td style="color:var(--text-muted);font-size:12px;">
+        {{ row.obs.observed_at.strftime('%Y-%m-%d') if row.obs.observed_at else '—' }}
+      </td>
+      <td>
+        <form method="post" action="{{ root }}/ui/trends/observations/delete"
+              onsubmit="return confirm('Delete this observation?')">
+          <input type="hidden" name="obs_id" value="{{ row.obs.id }}">
+          <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No observations logged yet.</div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Log Observation</div>
+  <form method="post" action="{{ root }}/ui/trends/observations/add">
+    <div class="form-row" style="margin-bottom:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Period</label>
+        {% if periods %}
+        <select name="period_name" class="form-input">
+          {% for p in periods %}
+          <option value="{{ p.name }}">{{ p.name }}</option>
+          {% endfor %}
+        </select>
+        {% else %}
+        <input class="form-input" type="text" name="period_name" placeholder="e.g. Winter 2026" required>
+        {% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Category</label>
+        <input class="form-input" type="text" name="category"
+               placeholder="e.g. Fitness" required>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">User</label>
+        <select name="user_id" class="form-input">
+          <option value="">All users</option>
+          {% for u in users %}
+          <option value="{{ u.id }}">{{ u.display_name or u.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Score (optional)</label>
+        <input class="form-input" type="text" name="score" placeholder="e.g. 64.3">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <textarea class="form-input" name="notes" rows="2"
+                placeholder="e.g. User completed 64% of workouts — lower than summer avg. More cooking activity logged."></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Log Observation</button>
+  </form>
+</div>

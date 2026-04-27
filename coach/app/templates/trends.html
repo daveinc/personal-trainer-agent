@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Coach · Trends{% endblock %}
+{% block page_title %}Trends & Scoring{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:16px;">
+  <div class="tabs">
+    <button class="tab" id="tab-scoring"      onclick="switchTab('scoring')">Scoring Formula</button>
+    <button class="tab" id="tab-periods"      onclick="switchTab('periods')">Trend Periods</button>
+    <button class="tab" id="tab-observations" onclick="switchTab('observations')">Observations</button>
+  </div>
+</div>
+<div id="trends-content"></div>
+
+<script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const url = new URL(window.location);
+  url.searchParams.set('tab', tab);
+  window.history.replaceState({}, '', url);
+  htmx.ajax('GET', '{{ root }}/ui/trends/' + tab,
+            {target: '#trends-content', swap: 'innerHTML'});
+}
+document.addEventListener('DOMContentLoaded', function() {
+  switchTab(new URLSearchParams(window.location.search).get('tab') || 'scoring');
+});
+</script>
+{% endblock %}
