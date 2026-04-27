@@ -21,6 +21,10 @@ class Base(DeclarativeBase):
     pass
 
 
+class ExtBase(DeclarativeBase):
+    pass
+
+
 def _ext_db_url() -> str:
     host = os.getenv("DB_HOST", "").strip()
     if not host:
@@ -88,6 +92,7 @@ async def init_db():
         try:
             async with ext_engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
+                await conn.run_sync(ExtBase.metadata.create_all)
             logger.info("External DB tables ready")
         except Exception as e:
             logger.error(f"External DB init failed: {e}")

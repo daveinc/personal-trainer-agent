@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% set active = "profile" %}
+{% block title %}Coach · My Schedule{% endblock %}
+{% block page_title %}My Schedule{% endblock %}
+
+{% block content %}
+
+{% for slug, meta in grouped.items() %}
+{% if meta.slots %}
+<div class="card" style="margin-bottom:16px;padding:0;">
+  <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">
+    {{ meta.label }}
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Label</th>
+        <th>Type</th>
+        <th>Days</th>
+        <th>Hours</th>
+        <th>Tracks</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for slot in meta.slots %}
+    {% if edit_slot and edit_slot.id == slot.id %}
+    <tr style="background:#f0f9ff;">
+      <td colspan="6" style="padding:16px 20px;">
+        <form method="post" action="{{ root }}/ui/profile/slot/{{ slot.id }}/save">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+            <div class="form-group" style="margin:0;min-width:160px;">
+              <label class="form-label">Label</label>
+              <input class="form-input" type="text" name="label" value="{{ slot.label }}" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Type</label>
+              <div style="display:flex;gap:12px;padding-top:6px;">
+                {% for val, name in [("fixed","Fixed"),("free","Free")] %}
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:400;">
+                  <input type="radio" name="schedule_type" value="{{ val }}" {% if slot.schedule_type == val %}checked{% endif %}>{{ name }}
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Days</label>
+              <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                {% set slot_days = slot.days.split(",") if slot.days else [] %}
+                {% for day in days %}
+                <label style="display:flex;align-items:center;gap:3px;font-size:12px;cursor:pointer;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-weight:400;">
+                  <input type="checkbox" name="days" value="{{ day }}" {% if day in slot_days %}checked{% endif %} style="width:auto;padding:0;border:none;accent-color:var(--primary);">{{ day }}
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Start</label>
+              <input class="form-input" type="time" name="start_time" style="width:120px;" value="{{ slot.start_time or '07:00' }}">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">End</label>
+              <input class="form-input" type="time" name="end_time" style="width:120px;" value="{{ slot.end_time or '09:00' }}">
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-primary btn-sm" type="submit">Save</button>
+              <a href="{{ root }}/ui/profile" class="btn btn-secondary btn-sm">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td><strong>{{ slot.label }}</strong></td>
+      <td>
+        <span class="badge" style="background:{% if slot.schedule_type == 'fixed' %}#dbeafe;color:#1d4ed8{% else %}#f1f5f9;color:#475569{% endif %};">
+          {{ slot.schedule_type|capitalize }}
+        </span>
+      </td>
+      <td style="color:var(--text-muted);font-size:12px;">{{ slot.days or '—' }}</td>
+      <td style="color:var(--text-muted);font-size:12px;">
+        {% if slot.start_time and slot.end_time %}{{ slot.start_time }} – {{ slot.end_time }}{% else %}—{% endif %}
+      </td>
+      <td style="font-size:12px;color:var(--text-muted);">
+        {% set slot_attrs = attrs_by_slot.get(slot.id, []) %}
+        {% if slot_attrs %}
+          {{ slot_attrs | map(attribute='attribute_name') | join(', ') }}
+        {% else %}
+          <a href="{{ root }}/ui/profile/slot/{{ slot.id }}/attributes" style="color:var(--primary);">+ add</a>
+        {% endif %}
+      </td>
+      <td>
+        <div style="display:flex;gap:6px;justify-content:flex-end;">
+          <a href="{{ root }}/ui/profile/slot/{{ slot.id }}/attributes" class="btn btn-secondary btn-sm">Attributes</a>
+          <a href="{{ root }}/ui/profile?edit={{ slot.id }}" class="btn btn-secondary btn-sm">Edit</a>
+          <form method="post" action="{{ root }}/ui/profile/slot/{{ slot.id }}/delete"
+                onsubmit="return confirm('Delete {{ slot.label }}?')">
+            <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endfor %}
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Add Slot</div>
+  <form method="post" action="{{ root }}/ui/profile/slot/add">
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+      <div class="form-group" style="margin:0;min-width:160px;">
+        <label class="form-label">Category</label>
+        <select name="category" class="form-input" style="width:auto;">
+          {% for slug, label in categories %}
+          <option value="{{ slug }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;min-width:180px;">
+        <label class="form-label">Label</label>
+        <input class="form-input" type="text" name="label" placeholder="e.g. Morning Run" required>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Type</label>
+        <div style="display:flex;gap:12px;padding-top:6px;">
+          {% for val, name in [("fixed","Fixed"),("free","Free")] %}
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:400;">
+            <input type="radio" name="schedule_type" value="{{ val }}" {% if val == 'free' %}checked{% endif %}>{{ name }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Days</label>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          {% for day in days %}
+          <label style="display:flex;align-items:center;gap:3px;font-size:12px;cursor:pointer;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-weight:400;">
+            <input type="checkbox" name="days" value="{{ day }}" style="width:auto;padding:0;border:none;accent-color:var(--primary);">{{ day }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Start</label>
+        <input class="form-input" type="time" name="start_time" style="width:120px;" value="07:00">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">End</label>
+        <input class="form-input" type="time" name="end_time" style="width:120px;" value="09:00">
+      </div>
+      <button class="btn btn-primary" type="submit" style="margin-bottom:1px;">Add Slot</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

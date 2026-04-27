@@ -19,6 +19,7 @@ from app.routes.categories import router as categories_router
 from app.routes.trends import router as trends_router
 from app.routes.routines import router as routines_router
 from app.routes.onboarding import router as onboarding_router
+from app.routes.profile import router as profile_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -46,7 +47,8 @@ async def onboarding_gate(request: Request, call_next):
     path = request.url.path
     if (path.startswith("/ui/") and
             not path.startswith("/ui/onboarding") and
-            not path.startswith("/ui/login")):
+            not path.startswith("/ui/login") and
+            not path.startswith("/ui/profile")):
         uid = request.cookies.get("uid")
         if uid:
             try:
@@ -86,3 +88,4 @@ app.include_router(categories_router)
 app.include_router(trends_router)
 app.include_router(routines_router)
 app.include_router(onboarding_router)
+app.include_router(profile_router)

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from sqlalchemy import String, Integer, DateTime, ForeignKey, Text, Boolean, Time
+from sqlalchemy import String, Integer, DateTime, ForeignKey, Text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
-from app.database import Base
+from app.database import Base, ExtBase
 
 
 def _now():
@@ -18,17 +18,44 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
-class UserCategorySchedule(Base):
-    __tablename__ = "user_category_schedules"
+class Slot(Base):
+    __tablename__ = "slots"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     category: Mapped[str] = mapped_column(String(64), nullable=False)
-    schedule_type: Mapped[str] = mapped_column(String(8), nullable=False, default="skip")
+    label: Mapped[str] = mapped_column(String(128), nullable=False)
+    schedule_type: Mapped[str] = mapped_column(String(8), nullable=False, default="free")
     days: Mapped[str] = mapped_column(String(32), nullable=True)
     start_time: Mapped[str] = mapped_column(String(5), nullable=True)
     end_time: Mapped[str] = mapped_column(String(5), nullable=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SlotAttribute(Base):
+    __tablename__ = "slot_attributes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    slot_id: Mapped[int] = mapped_column(Integer, ForeignKey("slots.id"), nullable=False)
+    attribute_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    unit: Mapped[str] = mapped_column(String(32), nullable=True)
+
+
+class Session(ExtBase):
+    __tablename__ = "sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    slot_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SessionValue(ExtBase):
+    __tablename__ = "session_values"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    session_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    attribute_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    value: Mapped[str] = mapped_column(Text, nullable=True)
 
 
 class WorkoutLog(Base):

@@ -65,77 +65,21 @@
     </form>
 
     {% else %}
-    <div class="sub">Hi {{ user.display_name }}! Select which areas you want to track and set your schedule for each.</div>
+    <div class="sub">Hi {{ user.display_name }}! Which areas do you want to track? You can set up the details in My Schedule after.</div>
     <div class="step-indicator">
       <div class="step-dot"></div>
       <div class="step-dot active"></div>
     </div>
     <form method="post" action="{{ root }}/ui/onboarding/categories">
-      <table class="cat-table">
-        <thead>
-          <tr>
-            <th style="width:160px;">Category</th>
-            <th>Schedule type</th>
-            <th>Days &amp; Hours</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
         {% for slug, label in categories %}
-        {% set ex = existing.get(slug) %}
-        {% set ex_type = ex.schedule_type if ex else "skip" %}
-        {% set ex_days = ex.days.split(",") if ex and ex.days else [] %}
-        <tr>
-          <td><div class="cat-name">{{ label }}</div></td>
-          <td>
-            <div class="type-options">
-              <label>
-                <input type="radio" name="type_{{ slug }}" value="fixed"
-                  {% if ex_type == "fixed" %}checked{% endif %}
-                  onchange="onTypeChange('{{ slug }}', 'fixed')">
-                Fixed
-              </label>
-              <label>
-                <input type="radio" name="type_{{ slug }}" value="free"
-                  {% if ex_type == "free" %}checked{% endif %}
-                  onchange="onTypeChange('{{ slug }}', 'free')">
-                Free
-              </label>
-              <label>
-                <input type="radio" name="type_{{ slug }}" value="skip"
-                  {% if ex_type == "skip" or not ex %}checked{% endif %}
-                  onchange="onTypeChange('{{ slug }}', 'skip')">
-                Skip
-              </label>
-            </div>
-          </td>
-          <td>
-            <div class="schedule-fields {% if ex_type != 'skip' %}visible{% endif %}" id="sched_{{ slug }}">
-              <div class="free-note" id="freenote_{{ slug }}" style="{% if ex_type != 'free' %}display:none{% endif %}">
-                Available hours — shared across free-schedule categories.
-              </div>
-              <div class="days-row">
-                {% for day in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
-                <label class="day-label">
-                  <input type="checkbox" name="days_{{ slug }}" value="{{ day }}"
-                    {% if day in ex_days %}checked{% endif %}>
-                  <span>{{ day }}</span>
-                </label>
-                {% endfor %}
-              </div>
-              <div class="time-row">
-                <input type="time" name="start_{{ slug }}" value="{{ ex.start_time if ex and ex.start_time else '07:00' }}">
-                <span>to</span>
-                <input type="time" name="end_{{ slug }}" value="{{ ex.end_time if ex and ex.end_time else '09:00' }}">
-              </div>
-            </div>
-          </td>
-        </tr>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;">
+          <input type="checkbox" name="categories" value="{{ slug }}" style="width:auto;padding:0;border:none;accent-color:#2563eb;width:16px;height:16px;">
+          {{ label }}
+        </label>
         {% endfor %}
-        </tbody>
-      </table>
-      <div style="margin-top:24px;">
-        <button class="btn btn-full" type="submit">Save &amp; Start →</button>
       </div>
+      <button class="btn btn-full" type="submit">Start →</button>
     </form>
     {% endif %}
 

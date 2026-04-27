@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% set active = "profile" %}
+{% block title %}Coach · {{ slot.label }} — Attributes{% endblock %}
+{% block page_title %}{{ slot.label }}{% endblock %}
+
+{% block content %}
+<a href="{{ root }}/ui/profile" class="btn btn-secondary btn-sm" style="margin-bottom:20px;">← Back to My Schedule</a>
+
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:4px;">{{ category_map.get(slot.category, slot.category) }}</div>
+  <div style="font-size:20px;font-weight:700;margin-bottom:4px;">{{ slot.label }}</div>
+  <div style="font-size:13px;color:var(--text-muted);">
+    {{ slot.schedule_type|capitalize }}
+    {% if slot.days %} · {{ slot.days }}{% endif %}
+    {% if slot.start_time and slot.end_time %} · {{ slot.start_time }} – {{ slot.end_time }}{% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;padding:0;">
+  <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">
+    Tracked Attributes
+  </div>
+  {% if attrs %}
+  <table>
+    <thead>
+      <tr><th>Attribute</th><th>Unit</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for attr in attrs %}
+    <tr>
+      <td><strong>{{ attr.attribute_name }}</strong></td>
+      <td style="color:var(--text-muted);">{{ attr.unit or '—' }}</td>
+      <td style="text-align:right;">
+        <form method="post" action="{{ root }}/ui/profile/slot/{{ slot.id }}/attribute/{{ attr.id }}/delete"
+              onsubmit="return confirm('Remove {{ attr.attribute_name }}?')">
+          <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No attributes defined yet — add one below.</div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Add Attribute</div>
+  <form method="post" action="{{ root }}/ui/profile/slot/{{ slot.id }}/attribute/add">
+    <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+      <div class="form-group" style="margin:0;min-width:180px;">
+        <label class="form-label">Name</label>
+        <input class="form-input" type="text" name="attribute_name" placeholder="e.g. duration" required>
+      </div>
+      <div class="form-group" style="margin:0;min-width:100px;">
+        <label class="form-label">Unit (optional)</label>
+        <input class="form-input" type="text" name="unit" placeholder="e.g. min, km">
+      </div>
+      <button class="btn btn-primary" type="submit" style="margin-bottom:1px;">Add</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
