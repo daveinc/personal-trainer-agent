@@ -4,6 +4,13 @@
 {% block page_title %}Fitness{% endblock %}
 
 {% block content %}
+<div id="steps-widget"
+     hx-get="{{ root }}/ui/fitness/steps"
+     hx-trigger="load"
+     hx-swap="innerHTML"
+     style="margin-bottom:16px;">
+</div>
+
 <div class="grid grid-2">
   <div class="card" style="grid-column: 1 / -1;">
     <div class="flex justify-between items-center" style="margin-bottom:16px;">

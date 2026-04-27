@@ -88,6 +88,32 @@
 
       <hr class="divider">
 
+      <div class="section-label">Weight units</div>
+      <div class="unit-row" style="margin-bottom:8px;">
+        <div class="unit-opt">
+          <input type="radio" name="unit_weight" value="kg" id="w-kg" checked>
+          <label for="w-kg">kg</label>
+        </div>
+        <div class="unit-opt">
+          <input type="radio" name="unit_weight" value="lbs" id="w-lbs">
+          <label for="w-lbs">lbs</label>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label">Health metrics to track</div>
+      <div class="cat-grid" style="margin-bottom:16px;">
+        {% for slug, label in health_metrics_options %}
+        <div class="cat-opt">
+          <input type="checkbox" name="health_metrics" value="{{ slug }}" id="hm-{{ slug }}">
+          <label for="hm-{{ slug }}">{{ label }}</label>
+        </div>
+        {% endfor %}
+      </div>
+
+      <hr class="divider">
+
       <div class="section-label">Areas to track</div>
       <div class="cat-grid">
         {% for slug, label in categories %}

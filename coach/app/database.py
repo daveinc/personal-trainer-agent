@@ -79,6 +79,9 @@ async def _migrate_local(conn):
         "ALTER TABLE users ADD COLUMN week_start VARCHAR(3) DEFAULT 'Mon'",
         "ALTER TABLE users ADD COLUMN currency VARCHAR(8) DEFAULT '$'",
         "ALTER TABLE users ADD COLUMN savings_target REAL DEFAULT 0.0",
+        "ALTER TABLE users ADD COLUMN health_metrics VARCHAR(256) DEFAULT ''",
+        "ALTER TABLE users ADD COLUMN unit_weight VARCHAR(4) DEFAULT 'kg'",
+        "ALTER TABLE users ADD COLUMN steps_entity VARCHAR(128)",
     ]
     for sql in migrations:
         try:

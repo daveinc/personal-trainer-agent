@@ -32,6 +32,35 @@
         </select>
       </div>
     </div>
+    <div class="form-row" style="max-width:480px;">
+      <div class="form-group">
+        <label class="form-label">Weight Units</label>
+        <select class="form-input" name="unit_weight" style="width:auto;">
+          <option value="kg" {% if (user.unit_weight or 'kg') == 'kg' %}selected{% endif %}>kg</option>
+          <option value="lbs" {% if user.unit_weight == 'lbs' %}selected{% endif %}>lbs</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Steps Entity (HA)</label>
+        <input class="form-input" type="text" name="steps_entity"
+               value="{{ user.steps_entity or '' }}"
+               placeholder="e.g. sensor.phone_steps"
+               style="max-width:220px;">
+      </div>
+    </div>
+    <div class="form-group" style="max-width:480px;">
+      <label class="form-label" style="margin-bottom:8px;">Health Metrics</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        {% set selected_metrics = (user.health_metrics or '').split(',') %}
+        {% for slug, label in [('weight','Weight'),('sleep','Sleep'),('bp','Blood Pressure'),('resting_hr','Resting HR'),('medication','Medication')] %}
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;">
+          <input type="checkbox" name="health_metrics" value="{{ slug }}"
+                 {% if slug in selected_metrics %}checked{% endif %}>
+          {{ label }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
     <button class="btn btn-primary" type="submit" style="width:auto;padding:8px 24px;">Save Preferences</button>
   </form>
 </div>

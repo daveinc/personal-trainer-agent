@@ -1,0 +1,10 @@
+{% if has_entity %}
+<div class="card" style="min-width:160px;max-width:220px;">
+  <div class="card-title">Steps Today</div>
+  {% if steps is not none %}
+  <div class="card-value">{{ "{:,}".format(steps) }}</div>
+  {% else %}
+  <div class="card-value" style="font-size:16px;color:var(--text-muted);">—</div>
+  {% endif %}
+</div>
+{% endif %}

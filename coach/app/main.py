@@ -23,6 +23,7 @@ from app.routes.onboarding import router as onboarding_router
 from app.routes.profile import router as profile_router
 from app.routes.schedule import router as schedule_router
 from app.routes.finances import router as finances_router
+from app.routes.health import router as health_router
 from app.routes.webhook import router as webhook_router
 from app.services.scheduler import run_scheduler
 from app.services.ha_events import run_event_listener
@@ -99,4 +100,5 @@ app.include_router(onboarding_router)
 app.include_router(profile_router)
 app.include_router(schedule_router)
 app.include_router(finances_router)
+app.include_router(health_router)
 app.include_router(webhook_router)

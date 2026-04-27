@@ -1,57 +1,291 @@
 {% extends "base.html" %}
+{% set active = "health" %}
 {% block title %}Coach · Health{% endblock %}
 {% block page_title %}Health{% endblock %}
 
 {% block content %}
-<div class="grid grid-4" style="margin-bottom:16px;">
-  <div class="card">
-    <div class="card-title">Blood Pressure</div>
-    <div class="card-value" style="font-size:22px;">118 / 76</div>
-    <div class="card-sub">Last checked 2 days ago</div>
+
+{% if not metrics %}
+<div class="card">
+  <div class="empty">No health metrics selected. Go to <a href="{{ root }}/ui/settings?tab=preferences" style="color:var(--primary);">Settings → Preferences</a> to choose what to track.</div>
+</div>
+{% else %}
+
+{# ── METRIC MINI CARDS ────────────────────────────────────────────────────── #}
+<div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px;">
+  {% for metric in metrics %}
+  {% set entry = latest.get(metric) %}
+  {% set is_expanded = expand == metric %}
+  <div style="flex:1;min-width:180px;cursor:pointer;"
+       onclick="toggleMetric('{{ metric }}')">
+    <div class="card" style="border:2px solid {% if is_expanded %}var(--primary){% else %}var(--border){% endif %};transition:border 0.15s;">
+      <div class="card-title">{{ metric_labels.get(metric, metric) }}</div>
+
+      {% if metric == "bp" %}
+        {% if entry %}
+        <div class="card-value" style="font-size:22px;">{{ entry.value|int }} / {{ entry.value2|int if entry.value2 else '—' }}</div>
+        <div class="card-sub">{{ entry.log_date }}</div>
+        {% else %}
+        <div class="card-value" style="font-size:16px;color:var(--text-muted);">No data</div>
+        {% endif %}
+
+      {% elif metric == "weight" %}
+        {% if entry %}
+        <div class="card-value">{{ entry.value }} {{ unit_weight }}</div>
+        {% if history.get(metric)|length > 1 %}
+        {% set prev = history[metric][1] %}
+        {% set diff = entry.value - prev.value %}
+        <div class="card-sub" style="color:{% if diff < 0 %}#16a34a{% elif diff > 0 %}#dc2626{% else %}var(--text-muted){% endif %};">
+          {% if diff > 0 %}+{% endif %}{{ "%.1f"|format(diff) }} {{ unit_weight }} since last
+        </div>
+        {% else %}
+        <div class="card-sub">{{ entry.log_date }}</div>
+        {% endif %}
+        {% else %}
+        <div class="card-value" style="font-size:16px;color:var(--text-muted);">No data</div>
+        {% endif %}
+
+      {% elif metric == "sleep" %}
+        {% if entry %}
+        {% set h = entry.value|int %}
+        {% set m = ((entry.value - h) * 60)|int %}
+        <div class="card-value">{{ h }}h {% if m %}{{ m }}m{% endif %}</div>
+        {% if history.get(metric)|length > 1 %}
+        {% set avg = (history[metric] | map(attribute='value') | list | sum) / (history[metric]|length) %}
+        <div class="card-sub">Avg {{ "%.1f"|format(avg) }}h (last {{ history[metric]|length }} nights)</div>
+        {% else %}
+        <div class="card-sub">{{ entry.log_date }}</div>
+        {% endif %}
+        {% else %}
+        <div class="card-value" style="font-size:16px;color:var(--text-muted);">No data</div>
+        {% endif %}
+
+      {% elif metric == "resting_hr" %}
+        {% if entry %}
+        <div class="card-value">{{ entry.value|int }} <span style="font-size:14px;font-weight:400;">bpm</span></div>
+        <div class="card-sub">{{ entry.log_date }}</div>
+        {% else %}
+        <div class="card-value" style="font-size:16px;color:var(--text-muted);">No data</div>
+        {% endif %}
+
+      {% elif metric == "medication" %}
+        {% set td = today_logged.get(metric) %}
+        {% if td %}
+        <div class="card-value" style="font-size:22px;">{% if td.value == 1 %}✓{% else %}✗{% endif %}</div>
+        <div class="card-sub" style="color:{% if td.value == 1 %}#16a34a{% else %}#dc2626{% endif %};">
+          {% if td.value == 1 %}Taken today{% else %}Not taken today{% endif %}
+        </div>
+        {% else %}
+        <div class="card-value" style="font-size:16px;color:var(--text-muted);">Not logged</div>
+        <div class="card-sub">Tap to log today</div>
+        {% endif %}
+      {% endif %}
+
+      <div style="font-size:11px;color:var(--primary);margin-top:8px;">
+        {% if is_expanded %}▲ collapse{% else %}▼ expand{% endif %}
+      </div>
+    </div>
   </div>
-  <div class="card">
-    <div class="card-title">Weight</div>
-    <div class="card-value">82 kg</div>
-    <div class="card-sub">−0.4 kg this week</div>
-  </div>
-  <div class="card">
-    <div class="card-title">Sleep</div>
-    <div class="card-value">7h 20m</div>
-    <div class="card-sub">Avg last 7 nights</div>
-  </div>
-  <div class="card">
-    <div class="card-title">Resting HR</div>
-    <div class="card-value">62 bpm</div>
-    <div class="card-sub">This morning</div>
-  </div>
+  {% endfor %}
 </div>
 
-<div class="grid grid-2">
-  <div class="card">
-    <div class="card-title" style="margin-bottom:12px;">Upcoming Appointments</div>
+{# ── EXPANDED METRIC PANEL ────────────────────────────────────────────────── #}
+{% for metric in metrics %}
+{% set entry = latest.get(metric) %}
+{% set entries = history.get(metric, []) %}
+<div id="panel-{{ metric }}" style="display:{% if expand == metric %}block{% else %}none{% endif %};margin-bottom:16px;">
+  <div class="card" style="border:2px solid var(--primary);">
+    <div class="flex justify-between items-center" style="margin-bottom:16px;">
+      <div class="card-title" style="margin:0;">{{ metric_labels.get(metric, metric) }} — Log & History</div>
+      <button onclick="toggleMetric('{{ metric }}')" class="btn btn-secondary btn-sm">✕ Close</button>
+    </div>
+
+    {# Entry form #}
+    <form method="post" action="{{ root }}/ui/health/entry/log" style="margin-bottom:20px;">
+      <input type="hidden" name="metric" value="{{ metric }}">
+
+      {% if metric == "bp" %}
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Systolic</label>
+          <input class="form-input" type="number" name="value" placeholder="e.g. 120" min="50" max="250" style="width:110px;" required>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Diastolic</label>
+          <input class="form-input" type="number" name="value2" placeholder="e.g. 80" min="30" max="150" style="width:110px;" required>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">Log</button>
+      </div>
+
+      {% elif metric == "weight" %}
+      <div style="display:flex;gap:8px;align-items:flex-end;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Weight ({{ unit_weight }})</label>
+          <input class="form-input" type="number" name="value" step="0.1" min="1"
+                 placeholder="e.g. {% if unit_weight == 'kg' %}75.0{% else %}165{% endif %}"
+                 style="width:130px;" required>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">Log</button>
+      </div>
+
+      {% elif metric == "sleep" %}
+      <div style="display:flex;gap:8px;align-items:flex-end;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Hours slept</label>
+          <input class="form-input" type="number" name="value" step="0.25" min="0" max="24"
+                 placeholder="e.g. 7.5" style="width:120px;" required>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">Log</button>
+      </div>
+
+      {% elif metric == "resting_hr" %}
+      <div style="display:flex;gap:8px;align-items:flex-end;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Resting HR (bpm)</label>
+          <input class="form-input" type="number" name="value" min="30" max="200"
+                 placeholder="e.g. 62" style="width:120px;" required>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">Log</button>
+      </div>
+
+      {% elif metric == "medication" %}
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-success" type="submit" name="value" value="1">✓ Taken today</button>
+        <button class="btn btn-danger" type="submit" name="value" value="0">✗ Not taken</button>
+      </div>
+      {% endif %}
+    </form>
+
+    {# History #}
+    {% if entries %}
     <table>
       <thead>
-        <tr><th>Date</th><th>Type</th><th>Doctor</th></tr>
+        <tr>
+          <th>Date</th>
+          <th>
+            {% if metric == "bp" %}Reading{% elif metric == "weight" %}{{ unit_weight }}{% elif metric == "sleep" %}Hours{% elif metric == "resting_hr" %}bpm{% else %}Status{% endif %}
+          </th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
-        <tr><td>2026-05-08</td><td>General checkup</td><td>Dr. Cohen</td></tr>
-        <tr><td>2026-05-22</td><td>Dentist</td><td>Dr. Farhi</td></tr>
-        <tr><td>2026-06-15</td><td>Blood work</td><td>Lab</td></tr>
+        {% for e in entries %}
+        <tr>
+          <td>{{ e.log_date }}</td>
+          <td>
+            {% if metric == "bp" %}{{ e.value|int }} / {{ e.value2|int if e.value2 else '—' }}
+            {% elif metric == "sleep" %}{{ e.value }}h
+            {% elif metric == "resting_hr" %}{{ e.value|int }}
+            {% elif metric == "medication" %}{% if e.value == 1 %}✓ Taken{% else %}✗ Not taken{% endif %}
+            {% else %}{{ e.value }}{% endif %}
+          </td>
+          <td>
+            <form method="post" action="{{ root }}/ui/health/entry/{{ e.id }}/delete">
+              <input type="hidden" name="metric" value="{{ metric }}">
+              <button class="btn btn-danger btn-sm" type="submit"
+                      onclick="return confirm('Delete this entry?')">✕</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
-  </div>
-  <div class="card">
-    <div class="card-title" style="margin-bottom:12px;">Medications</div>
-    <table>
-      <thead>
-        <tr><th>Name</th><th>Dose</th><th>Frequency</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Vitamin D3</td><td>2000 IU</td><td>Daily</td></tr>
-        <tr><td>Magnesium</td><td>400 mg</td><td>Nightly</td></tr>
-        <tr><td>Omega-3</td><td>1g</td><td>With meals</td></tr>
-      </tbody>
-    </table>
+    {% else %}
+    <div class="empty">No entries yet.</div>
+    {% endif %}
   </div>
 </div>
+{% endfor %}
+
+{% endif %}
+
+{# ── APPOINTMENTS ─────────────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Appointments</div>
+
+  {% if appointments %}
+  <table style="margin-bottom:20px;">
+    <thead>
+      <tr><th>Date</th><th>Time</th><th>Title</th><th>Doctor</th><th>Location</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for appt in appointments %}
+      {% if edit_appt and edit_appt.id == appt.id %}
+      <tr style="background:#f8fafc;">
+        <td colspan="6">
+          <form method="post" action="{{ root }}/ui/health/appointment/{{ appt.id }}/save">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;padding:4px 0;">
+              <input class="form-input" type="text" name="title" value="{{ appt.title }}" placeholder="Title" style="width:140px;font-size:13px;padding:4px 8px;" required>
+              <input class="form-input" type="date" name="appt_date" value="{{ appt.appt_date }}" style="width:130px;font-size:13px;padding:4px 8px;">
+              <input class="form-input" type="time" name="appt_time" value="{{ appt.appt_time or '' }}" style="width:100px;font-size:13px;padding:4px 8px;">
+              <input class="form-input" type="text" name="doctor" value="{{ appt.doctor or '' }}" placeholder="Doctor" style="width:120px;font-size:13px;padding:4px 8px;">
+              <input class="form-input" type="text" name="location" value="{{ appt.location or '' }}" placeholder="Location" style="width:120px;font-size:13px;padding:4px 8px;">
+              <button class="btn btn-primary btn-sm" type="submit">Save</button>
+              <a href="{{ root }}/ui/health" class="btn btn-secondary btn-sm">Cancel</a>
+            </div>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td>{{ appt.appt_date }}</td>
+        <td>{{ appt.appt_time or '—' }}</td>
+        <td style="font-weight:500;">{{ appt.title }}</td>
+        <td>{{ appt.doctor or '—' }}</td>
+        <td>{{ appt.location or '—' }}</td>
+        <td style="white-space:nowrap;">
+          <a href="{{ root }}/ui/health?edit_appt={{ appt.id }}" class="btn btn-secondary btn-sm">Edit</a>
+          <form method="post" action="{{ root }}/ui/health/appointment/{{ appt.id }}/delete"
+                onsubmit="return confirm('Delete this appointment?')" style="display:inline;">
+            <button class="btn btn-danger btn-sm" type="submit">✕</button>
+          </form>
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty" style="margin-bottom:20px;">No appointments yet.</div>
+  {% endif %}
+
+  <form method="post" action="{{ root }}/ui/health/appointment/add">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="form-group" style="margin:0;min-width:160px;">
+        <label class="form-label">Title</label>
+        <input class="form-input" type="text" name="title" placeholder="e.g. General checkup" required>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Date</label>
+        <input class="form-input" type="date" name="appt_date" required>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Time</label>
+        <input class="form-input" type="time" name="appt_time" style="width:110px;">
+      </div>
+      <div class="form-group" style="margin:0;min-width:120px;">
+        <label class="form-label">Doctor</label>
+        <input class="form-input" type="text" name="doctor" placeholder="Dr. Name">
+      </div>
+      <div class="form-group" style="margin:0;min-width:120px;">
+        <label class="form-label">Location</label>
+        <input class="form-input" type="text" name="location" placeholder="Clinic / Hospital">
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">+ Add</button>
+    </div>
+  </form>
+</div>
+
+<script>
+function toggleMetric(metric) {
+  const panel = document.getElementById('panel-' + metric);
+  const isOpen = panel.style.display !== 'none';
+  document.querySelectorAll('[id^="panel-"]').forEach(p => p.style.display = 'none');
+  if (!isOpen) panel.style.display = 'block';
+  const url = new URL(window.location);
+  if (!isOpen) url.searchParams.set('expand', metric);
+  else url.searchParams.delete('expand');
+  window.history.replaceState({}, '', url);
+}
+</script>
 {% endblock %}

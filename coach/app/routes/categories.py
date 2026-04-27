@@ -9,7 +9,6 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 PAGES = [
-    ("health",        "Health"),
     ("learning",      "Learning"),
     ("relationships", "Relationships"),
     ("checkins",      "Check-ins"),

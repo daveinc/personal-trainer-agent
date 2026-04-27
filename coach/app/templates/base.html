@@ -115,7 +115,10 @@ tr:last-child td { border-bottom: none; }
 <body>
 <div class="layout">
   <aside class="sidebar">
-    <a href="{{ root }}/ui/dashboard" class="sidebar-logo">Coach<span>.</span></a>
+    <a href="{{ root }}/ui/dashboard" class="sidebar-logo">
+      Coach<span>.</span>
+      <div style="font-size:10px;font-weight:400;color:#64748b;margin-top:2px;letter-spacing:0.01em;">Become who you're meant to be.</div>
+    </a>
     <nav class="sidebar-nav">
       <div class="nav-section">Overview</div>
       <a href="{{ root }}/ui/dashboard" class="nav-link {% if active == 'dashboard' %}active{% endif %}">Dashboard</a>

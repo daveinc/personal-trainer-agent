@@ -19,6 +19,9 @@ class User(Base):
     week_start: Mapped[str] = mapped_column(String(3), default="Mon")
     currency: Mapped[str] = mapped_column(String(8), default="$")
     savings_target: Mapped[float] = mapped_column(default=0.0)
+    health_metrics: Mapped[str] = mapped_column(String(256), default="")
+    unit_weight: Mapped[str] = mapped_column(String(4), default="kg")
+    steps_entity: Mapped[str] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
@@ -61,6 +64,32 @@ class SessionValue(ExtBase):
     session_id: Mapped[int] = mapped_column(Integer, nullable=False)
     attribute_name: Mapped[str] = mapped_column(String(64), nullable=False)
     value: Mapped[str] = mapped_column(Text, nullable=True)
+
+
+class HealthEntry(Base):
+    __tablename__ = "health_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    metric: Mapped[str] = mapped_column(String(32), nullable=False)
+    value: Mapped[float] = mapped_column(nullable=True)
+    value2: Mapped[float] = mapped_column(nullable=True)
+    log_date: Mapped[str] = mapped_column(String(10), nullable=False)
+    logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String(128), nullable=False)
+    doctor: Mapped[str] = mapped_column(String(128), nullable=True)
+    location: Mapped[str] = mapped_column(String(128), nullable=True)
+    appt_date: Mapped[str] = mapped_column(String(10), nullable=False)
+    appt_time: Mapped[str] = mapped_column(String(5), nullable=True)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
 class FinanceLine(Base):

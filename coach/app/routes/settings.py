@@ -192,7 +192,12 @@ async def settings_preferences_save(request: Request, db: AsyncSession = Depends
     user.display_name = (form.get("display_name") or "").strip() or user.display_name
     user.currency = (form.get("currency") or "$").strip() or "$"
     user.unit_distance = form.get("unit_distance", "km")
+    user.unit_weight = form.get("unit_weight", "kg")
     user.week_start = form.get("week_start", "Mon")
+    steps_entity = (form.get("steps_entity") or "").strip()
+    user.steps_entity = steps_entity or None
+    selected_metrics = form.getlist("health_metrics")
+    user.health_metrics = ",".join(selected_metrics)
     await db.commit()
     return RedirectResponse(url=redirect_to(request, "ui/settings?tab=preferences"), status_code=303)
 

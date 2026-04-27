@@ -12,6 +12,14 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 logger = logging.getLogger(__name__)
 
+HEALTH_METRICS_OPTIONS = [
+    ("weight",     "Weight"),
+    ("sleep",      "Sleep"),
+    ("bp",         "Blood Pressure"),
+    ("resting_hr", "Resting HR"),
+    ("medication", "Medication"),
+]
+
 CATEGORIES = [
     ("fitness",       "Fitness"),
     ("health",        "Health"),
@@ -33,7 +41,8 @@ async def onboarding_get(request: Request, db: AsyncSession = Depends(get_db)):
     if user.onboarding_complete:
         return RedirectResponse(url=redirect_to(request, "ui/dashboard"), status_code=302)
     return templates.TemplateResponse(request, "onboarding.html", tctx(
-        request, user=user, categories=CATEGORIES
+        request, user=user, categories=CATEGORIES,
+        health_metrics_options=HEALTH_METRICS_OPTIONS,
     ))
 
 
@@ -48,8 +57,11 @@ async def onboarding_save(request: Request, db: AsyncSession = Depends(get_db)):
         return RedirectResponse(url=redirect_to(request, "ui/onboarding"), status_code=303)
     user.display_name = display_name
     user.unit_distance = form.get("unit_distance", "km")
+    user.unit_weight = form.get("unit_weight", "kg")
     user.week_start = form.get("week_start", "Mon")
     user.currency = (form.get("currency") or "$").strip() or "$"
+    selected_metrics = form.getlist("health_metrics")
+    user.health_metrics = ",".join(selected_metrics)
     selected = form.getlist("categories")
     for slug, label in CATEGORIES:
         if slug in selected:

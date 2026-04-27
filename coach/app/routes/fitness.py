@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.deps import get_db, get_ext_db, get_current_user, tctx
 from app.ha_calendar import create_event, get_today_events, get_week_events, get_month_events
 from app.models import WorkoutLog
+from app.services.ha_client import get_ha_state
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -174,6 +175,25 @@ async def schedule(
         pass
 
     return await _today_events_response(request, db, "today-events")
+
+
+# ── Steps ──────────────────────────────────────────────────────────────────
+
+@router.get("/ui/fitness/steps")
+async def steps_card(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    steps = None
+    if user and user.steps_entity:
+        state = await get_ha_state(user.steps_entity)
+        if state:
+            try:
+                steps = int(float(state.get("state", 0)))
+            except (ValueError, TypeError):
+                pass
+    return templates.TemplateResponse(
+        request, "_fitness_steps.html",
+        tctx(request, steps=steps, has_entity=bool(user and user.steps_entity))
+    )
 
 
 # ── Log ────────────────────────────────────────────────────────────────────
