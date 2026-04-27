@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% set active = "routines" %}
+{% block title %}Coach · Routines{% endblock %}
+{% block page_title %}Coaching Routines{% endblock %}
+
+{% block content %}
+<p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">
+  Manage automated coaching routines. All routines default to <strong>off</strong> — enable individually before running.
+</p>
+
+<div class="card" style="padding:0;">
+  <table>
+    <thead>
+      <tr>
+        <th>Routine</th>
+        <th>Description</th>
+        <th style="width:90px;">Status</th>
+        <th style="width:160px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in routines %}
+    <tr>
+      <td><strong>{{ r.name }}</strong></td>
+      <td style="color:var(--text-muted);">{{ r.description }}</td>
+      <td>
+        {% if not r.state.enabled %}
+          <span class="badge" style="background:#f1f5f9;color:#64748b;">Off</span>
+        {% elif r.state.status == "running" %}
+          <span class="badge badge-completed">Running</span>
+        {% else %}
+          <span class="badge" style="background:#dbeafe;color:#1d4ed8;">Enabled</span>
+        {% endif %}
+      </td>
+      <td>
+        <div style="display:flex;gap:6px;justify-content:flex-end;">
+          {% if not r.state.enabled %}
+            <form method="post" action="{{ root }}/ui/routines/{{ r.slug }}/enable">
+              <button class="btn btn-secondary btn-sm" type="submit">Enable</button>
+            </form>
+          {% else %}
+            {% if r.state.status == "running" %}
+              <form method="post" action="{{ root }}/ui/routines/{{ r.slug }}/stop">
+                <button class="btn btn-warning btn-sm" type="submit">Stop</button>
+              </form>
+            {% else %}
+              <form method="post" action="{{ root }}/ui/routines/{{ r.slug }}/run">
+                <button class="btn btn-success btn-sm" type="submit">Run</button>
+              </form>
+            {% endif %}
+            <form method="post" action="{{ root }}/ui/routines/{{ r.slug }}/disable"
+                  onsubmit="return confirm('Disable {{ r.name }}?')">
+              <button class="btn btn-danger btn-sm" type="submit">Disable</button>
+            </form>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

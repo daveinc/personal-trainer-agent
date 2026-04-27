@@ -33,6 +33,7 @@
       <tr>
         <th>Username</th>
         <th>Display Name</th>
+        <th>Onboarding</th>
         <th>Workout Logs</th>
         <th>Actions</th>
       </tr>
@@ -42,8 +43,22 @@
     <tr>
       <td>{{ row.user.username }}</td>
       <td>{{ row.user.display_name or '—' }}</td>
+      <td>
+        {% if row.user.onboarding_complete %}
+          <span class="badge badge-completed">Done</span>
+        {% else %}
+          <span class="badge badge-missed">Pending</span>
+        {% endif %}
+      </td>
       <td>{{ row.log_count }}</td>
       <td style="display:flex;gap:6px;">
+        {% if not row.user.onboarding_complete %}
+        <form method="post" action="{{ root }}/ui/onboarding/dismiss"
+              onsubmit="return confirm('Dismiss onboarding for {{ row.user.username }}? They will skip the wizard.')">
+          <input type="hidden" name="user_id" value="{{ row.user.id }}">
+          <button class="btn btn-secondary btn-sm" type="submit">Dismiss Setup</button>
+        </form>
+        {% endif %}
         <form method="post" action="{{ root }}/ui/settings/delete-user-logs"
               onsubmit="return confirm('Delete all workout logs for {{ row.user.username }}?')">
           <input type="hidden" name="user_id" value="{{ row.user.id }}">

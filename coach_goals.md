@@ -111,6 +111,35 @@ Design a roadmap for a fulfilling life, aligned with your values and passions. C
 
 ## TODO
 
+- [ ] **0. Onboarding wizard** — mandatory per user, blocks app until complete
+  - Step 1: Display name
+  - Step 2: Category selection — each category gets Fixed / Free / Skip
+    - Fixed: specific days + hours for that category
+    - Free: available hours shared across multiple categories
+    - Skip: not relevant
+  - Dismiss button in Settings → user management (unlocks app without wizard)
+  - `onboarding_complete` flag on User model
+  - New model: `UserCategorySchedule` (user_id, category, schedule_type, days, start_time, end_time)
+
+- [ ] **1. User Profile page** — editable version of onboarding data, accessible from Settings
+
+- [ ] **2. Notification sender** — Coach calls HA `notify` service with action buttons (button-only, no text input — Android limitation)
+
+- [ ] **3. Webhook receiver** — HA automation calls back into Coach when user taps a button (`mobile_app_notification_action` event)
+
+- [ ] **4. Action router** — maps incoming button action IDs to the correct Coach handler
+
+- [ ] **5. Context-aware slot suggestion** — when suggesting reschedule options, uses user's profile schedule (work days, free hours, category type) to build the button list
+
+- [ ] **Activity session logging** (MariaDB) — when a session completes, log rich data per activity type. Ask Dave how he wants each of these triggered/collected:
+  - Run timing: start when user leaves home (phone sensor) OR via actionable notification tap
+  - Running duration logged at session end
+  - Health metrics during activity (heart rate etc. if available from phone sensors)
+  - Course/route if location tracking is available and user opts in
+  - Two tracking modes:
+    - Passive: notify before slot + notify at slot end ("Mark as done?") — Done / Not yet / Skip
+    - Active: use HA mobile app sensors (location, step count, movement) to detect actual start/end without asking. Ask Dave which sensors are available and how he wants to trigger detection.
+
 - [ ] Populate Skills in Settings → Skills tab:
   - Active listening and coaching questioning techniques
   - Coaching ethics and boundaries

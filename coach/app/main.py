@@ -17,6 +17,8 @@ from app.routes.fitness import router as fitness_router
 from app.routes.settings import router as settings_router
 from app.routes.categories import router as categories_router
 from app.routes.trends import router as trends_router
+from app.routes.routines import router as routines_router
+from app.routes.onboarding import router as onboarding_router
 
 logging.basicConfig(level=logging.INFO)
 
@@ -40,6 +42,29 @@ app.add_middleware(
 
 
 @app.middleware("http")
+async def onboarding_gate(request: Request, call_next):
+    path = request.url.path
+    if (path.startswith("/ui/") and
+            not path.startswith("/ui/onboarding") and
+            not path.startswith("/ui/login")):
+        uid = request.cookies.get("uid")
+        if uid:
+            try:
+                from app.database import LocalSession
+                from app.models import User
+                from sqlalchemy import select
+                async with LocalSession() as db:
+                    user = (await db.execute(select(User).where(User.id == int(uid)))).scalar_one_or_none()
+                    if user and not user.onboarding_complete:
+                        ingress = request.headers.get("X-Ingress-Path", "")
+                        from fastapi.responses import RedirectResponse
+                        return RedirectResponse(url=f"{ingress}/ui/onboarding", status_code=302)
+            except Exception:
+                pass
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def ingress_root_path(request: Request, call_next):
     ingress_path = request.headers.get("X-Ingress-Path", "")
     if ingress_path:
@@ -59,3 +84,5 @@ app.include_router(fitness_router)
 app.include_router(settings_router)
 app.include_router(categories_router)
 app.include_router(trends_router)
+app.include_router(routines_router)
+app.include_router(onboarding_router)

@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import String, Integer, DateTime, ForeignKey, Text
+from sqlalchemy import String, Integer, DateTime, ForeignKey, Text, Boolean, Time
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
 
@@ -14,7 +14,21 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     display_name: Mapped[str] = mapped_column(String(128), nullable=True)
+    onboarding_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class UserCategorySchedule(Base):
+    __tablename__ = "user_category_schedules"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    category: Mapped[str] = mapped_column(String(64), nullable=False)
+    schedule_type: Mapped[str] = mapped_column(String(8), nullable=False, default="skip")
+    days: Mapped[str] = mapped_column(String(32), nullable=True)
+    start_time: Mapped[str] = mapped_column(String(5), nullable=True)
+    end_time: Mapped[str] = mapped_column(String(5), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
 
 
 class WorkoutLog(Base):
@@ -49,6 +63,16 @@ class TrendPeriod(Base):
     end_month: Mapped[int] = mapped_column(Integer, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class RoutineState(Base):
+    __tablename__ = "routine_states"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    slug: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    enabled: Mapped[bool] = mapped_column(default=False)
+    status: Mapped[str] = mapped_column(String(16), default="idle")
+    last_run: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class TrendObservation(Base):
