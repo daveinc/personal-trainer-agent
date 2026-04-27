@@ -1,66 +1,145 @@
 {% extends "base.html" %}
 {% set active = "dashboard" %}
 {% block title %}Coach · Dashboard{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
+{% block page_title %}Good {{ greeting }}, {{ user.display_name }}{% endblock %}
 
 {% block content %}
-<div class="grid grid-4" style="margin-bottom:20px;">
-  <div class="card">
-    <div class="card-title">HA Calendar</div>
-    <div class="card-value" style="font-size:18px;"
-         hx-get="{{ root }}/ui/ha-status"
-         hx-trigger="load"
-         hx-swap="innerHTML">
-      <span style="color:#94a3b8;font-size:13px;">checking…</span>
-    </div>
-    <div class="card-sub">calendar.coach</div>
-  </div>
-  <div class="card">
-    <div class="card-title">Today's Workouts</div>
-    <div class="card-value" id="dash-count">—</div>
-    <div class="card-sub">scheduled</div>
-  </div>
-  <div class="card">
-    <div class="card-title">Logged Today</div>
-    <div class="card-value" id="dash-logged">—</div>
-    <div class="card-sub">completed or skipped</div>
-  </div>
-  <div class="card">
-    <div class="card-title">Good {{ greeting }}</div>
-    <div class="card-value" style="font-size:18px;">{{ user.display_name }}</div>
-    <div class="card-sub">life coach dashboard</div>
-  </div>
+
+{# ── CATEGORY CHIPS ───────────────────────────────────────────────────────── #}
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+  {% if active_categories %}
+    {% for cat in active_categories %}
+    <a href="{{ root }}/ui/schedule"
+       style="display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;
+              background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;font-size:12px;font-weight:600;text-decoration:none;">
+      {{ category_map.get(cat, cat) }}
+    </a>
+    {% endfor %}
+  {% else %}
+    <span style="font-size:13px;color:var(--text-muted);">No slots scheduled for today.</span>
+  {% endif %}
 </div>
 
-<div class="grid grid-2">
-  <div class="card">
-    <div class="flex justify-between items-center" style="margin-bottom:16px;">
-      <div class="card-title" style="margin:0;">Today's Fitness</div>
-      <a href="{{ root }}/ui/fitness" class="btn btn-secondary btn-sm">View all</a>
+{# ── TODAY'S SLOTS ────────────────────────────────────────────────────────── #}
+<div class="card" style="margin-bottom:16px;">
+  <div class="flex justify-between items-center" style="margin-bottom:12px;">
+    <div class="card-title" style="margin:0;">
+      {% if today_slots %}Today{% elif upcoming_day %}Next — {{ upcoming_day }} {{ upcoming_date.strftime('%b %d') if upcoming_date else '' }}{% else %}Upcoming{% endif %}
     </div>
-    <div id="dash-fitness"
-         hx-get="{{ root }}/ui/fitness/today?from=dashboard"
-         hx-trigger="load"
-         hx-swap="innerHTML"
-         hx-on::after-request="updateDashCounts()">
-      <div class="empty">Loading…</div>
+    <a href="{{ root }}/ui/schedule" class="btn btn-secondary btn-sm">View Schedule</a>
+  </div>
+
+  {% set display_slots = today_slots if today_slots else upcoming_slots %}
+  {% if display_slots %}
+  <div class="event-list">
+    {% for slot in display_slots %}
+    <a href="{{ root }}/ui/schedule?selected={{ slot.id }}"
+       style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit;">
+      <div class="event-time">{{ slot.start_time or '—' }}{% if slot.end_time %} – {{ slot.end_time }}{% endif %}</div>
+      <div class="event-title" style="flex:1;font-weight:500;">{{ slot.label }}</div>
+      <span class="badge" style="background:#f1f5f9;color:#475569;">{{ category_map.get(slot.category, slot.category) }}</span>
+      {% if slot.notify_before %}
+      <span style="font-size:11px;color:var(--text-muted);">🔔 {{ slot.notify_before }}m</span>
+      {% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">Nothing scheduled. <a href="{{ root }}/ui/schedule" style="color:var(--primary);">Add a slot →</a></div>
+  {% endif %}
+</div>
+
+{# ── CALENDAR ─────────────────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="flex justify-between items-center" style="margin-bottom:16px;">
+    <div class="tabs">
+      <button class="tab active" id="tab-week" onclick="showCal('week')">Week</button>
+      <button class="tab" id="tab-day" onclick="showCal('day')">Day</button>
+      <button class="tab" id="tab-month" onclick="showCal('month')">Month</button>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title" style="margin-bottom:16px;">Quick Actions</div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <a href="{{ root }}/ui/fitness" class="btn btn-primary">Schedule a Workout</a>
+  {# WEEK VIEW #}
+  <div id="cal-week">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;">
+      {% for d in week_data %}
+      <div style="min-height:100px;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;
+                    color:{% if d.is_today %}var(--primary){% else %}var(--text-muted){% endif %};
+                    margin-bottom:6px;padding-bottom:4px;
+                    border-bottom:2px solid {% if d.is_today %}var(--primary){% else %}var(--border){% endif %};">
+          {{ d.day_name }}<br>
+          <span style="font-size:14px;font-weight:{% if d.is_today %}700{% else %}400{% endif %};">{{ d.date.day }}</span>
+        </div>
+        {% for slot in d.slots %}
+        <a href="{{ root }}/ui/schedule?selected={{ slot.id }}"
+           style="display:block;background:#eff6ff;color:#1d4ed8;
+                  border-radius:4px;padding:4px 6px;font-size:11px;margin-bottom:4px;
+                  text-decoration:none;line-height:1.3;">
+          {% if slot.start_time %}<span style="opacity:0.75;">{{ slot.start_time }}</span><br>{% endif %}
+          {{ slot.label }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
+  </div>
+
+  {# DAY VIEW #}
+  <div id="cal-day" style="display:none;">
+    {% set today_data = week_data | selectattr('is_today') | list %}
+    {% if today_data %}{% set td = today_data[0] %}
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px;">{{ today.strftime('%A, %B %d') }}</div>
+    {% if td.slots %}
+    <div class="event-list">
+      {% for slot in td.slots %}
+      <a href="{{ root }}/ui/schedule?selected={{ slot.id }}"
+         style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit;">
+        <div class="event-time">{{ slot.start_time or '—' }}{% if slot.end_time %} – {{ slot.end_time }}{% endif %}</div>
+        <div class="event-title" style="flex:1;font-weight:500;">{{ slot.label }}</div>
+        <span class="badge" style="background:#f1f5f9;color:#475569;">{{ category_map.get(slot.category, slot.category) }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">Nothing scheduled for today.</div>
+    {% endif %}
+    {% endif %}
+  </div>
+
+  {# MONTH VIEW #}
+  <div id="cal-month" style="display:none;">
+    {% set month_start = today.replace(day=1) %}
+    {% if week_start == "Sun" %}
+      {% set first_weekday = (month_start.weekday() + 1) % 7 %}
+    {% else %}
+      {% set first_weekday = month_start.weekday() %}
+    {% endif %}
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px;">{{ today.strftime('%B %Y') }}</div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">
+      {% for d in days %}
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);padding:4px 0;">{{ d }}</div>
+      {% endfor %}
+      {% for _ in range(first_weekday) %}<div></div>{% endfor %}
+      {% for day_num in range(1, 32) %}
+        {% set cur_date = today.replace(day=day_num) if day_num <= 28 else none %}
+        <div style="padding:4px;border-radius:4px;min-height:32px;font-size:12px;
+                    background:{% if day_num == today.day %}var(--primary){% else %}transparent{% endif %};
+                    color:{% if day_num == today.day %}white{% else %}var(--text){% endif %};">
+          {{ day_num }}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="empty" style="margin-top:12px;">Full month slot view coming soon.</div>
   </div>
 </div>
 
 <script>
-function updateDashCounts() {
-  const items = document.querySelectorAll('#dash-fitness .event-item');
-  document.getElementById('dash-count').textContent = items.length || '0';
-  const logged = document.querySelectorAll('#dash-fitness .badge');
-  document.getElementById('dash-logged').textContent = logged.length || '0';
+function showCal(view) {
+  ['week','day','month'].forEach(v => {
+    document.getElementById('cal-' + v).style.display = v === view ? 'block' : 'none';
+    document.getElementById('tab-' + v).classList.toggle('active', v === view);
+  });
 }
 </script>
 {% endblock %}
