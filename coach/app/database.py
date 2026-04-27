@@ -2,7 +2,7 @@ import logging
 import os
 from datetime import datetime, timezone, timedelta
 
-from sqlalchemy import delete
+from sqlalchemy import delete, text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
@@ -67,9 +67,21 @@ async def _maybe_create_ext_db():
         logger.warning(f"Could not create '{name}', will try connecting anyway: {e}")
 
 
+async def _migrate_local(conn):
+    migrations = [
+        "ALTER TABLE users ADD COLUMN onboarding_complete BOOLEAN DEFAULT 0",
+    ]
+    for sql in migrations:
+        try:
+            await conn.execute(text(sql))
+        except Exception:
+            pass
+
+
 async def init_db():
     async with local_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await _migrate_local(conn)
 
     if ext_engine:
         await _maybe_create_ext_db()
