@@ -6,6 +6,7 @@
 {% block content %}
 <div style="margin-bottom:16px;">
   <div class="tabs" id="settings-tabs">
+    <button class="tab" id="tab-preferences" onclick="switchTab('preferences')">Preferences</button>
     <button class="tab" id="tab-db" onclick="switchTab('db')">Database</button>
     <button class="tab" id="tab-calendar" onclick="switchTab('calendar')">Calendar</button>
     <button class="tab" id="tab-notifications" onclick="switchTab('notifications')">Notifications</button>
@@ -24,7 +25,7 @@ function switchTab(tab) {
   htmx.ajax('GET', '{{ root }}/ui/settings/' + tab, {target: '#settings-content', swap: 'innerHTML'});
 }
 document.addEventListener('DOMContentLoaded', function() {
-  const tab = new URLSearchParams(window.location.search).get('tab') || 'db';
+  const tab = new URLSearchParams(window.location.search).get('tab') || 'preferences';
   switchTab(tab);
 });
 </script>

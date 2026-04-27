@@ -49,6 +49,7 @@ async def onboarding_save(request: Request, db: AsyncSession = Depends(get_db)):
     user.display_name = display_name
     user.unit_distance = form.get("unit_distance", "km")
     user.week_start = form.get("week_start", "Mon")
+    user.currency = (form.get("currency") or "$").strip() or "$"
     selected = form.getlist("categories")
     for slug, label in CATEGORIES:
         if slug in selected:

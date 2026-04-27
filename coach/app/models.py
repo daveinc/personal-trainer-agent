@@ -17,6 +17,8 @@ class User(Base):
     onboarding_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     unit_distance: Mapped[str] = mapped_column(String(8), default="km")
     week_start: Mapped[str] = mapped_column(String(3), default="Mon")
+    currency: Mapped[str] = mapped_column(String(8), default="$")
+    savings_target: Mapped[float] = mapped_column(default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
@@ -59,6 +61,17 @@ class SessionValue(ExtBase):
     session_id: Mapped[int] = mapped_column(Integer, nullable=False)
     attribute_name: Mapped[str] = mapped_column(String(64), nullable=False)
     value: Mapped[str] = mapped_column(Text, nullable=True)
+
+
+class FinanceLine(Base):
+    __tablename__ = "finance_lines"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    label: Mapped[str] = mapped_column(String(128), nullable=False)
+    line_type: Mapped[str] = mapped_column(String(8), nullable=False)  # "income" | "expense"
+    amount: Mapped[float] = mapped_column(default=0.0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
 class NotificationLog(Base):

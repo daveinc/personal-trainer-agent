@@ -77,6 +77,8 @@ async def _migrate_local(conn):
         "ALTER TABLE users ADD COLUMN unit_distance VARCHAR(8) DEFAULT 'km'",
         "ALTER TABLE slots ADD COLUMN notify_before INTEGER",
         "ALTER TABLE users ADD COLUMN week_start VARCHAR(3) DEFAULT 'Mon'",
+        "ALTER TABLE users ADD COLUMN currency VARCHAR(8) DEFAULT '$'",
+        "ALTER TABLE users ADD COLUMN savings_target REAL DEFAULT 0.0",
     ]
     for sql in migrations:
         try:

@@ -1,75 +1,187 @@
 {% extends "base.html" %}
+{% set active = "finances" %}
 {% block title %}Coach · Finances{% endblock %}
 {% block page_title %}Finances{% endblock %}
 
 {% block content %}
-<div class="grid grid-4" style="margin-bottom:16px;">
-  <div class="card">
+
+{# ── SUMMARY BAR ──────────────────────────────────────────────────────────── #}
+<div class="grid grid-4" style="margin-bottom:20px;">
+  <div class="card" style="text-align:center;">
     <div class="card-title">Monthly Income</div>
-    <div class="card-value">₪18,500</div>
-    <div class="card-sub">After tax</div>
+    <div class="card-value" style="color:#16a34a;">{{ currency }}{{ "%.2f"|format(total_income) }}</div>
   </div>
-  <div class="card">
-    <div class="card-title">Expenses</div>
-    <div class="card-value">₪12,340</div>
-    <div class="card-sub">This month</div>
+  <div class="card" style="text-align:center;">
+    <div class="card-title">Monthly Expenses</div>
+    <div class="card-value" style="color:#dc2626;">{{ currency }}{{ "%.2f"|format(total_expense) }}</div>
   </div>
-  <div class="card">
-    <div class="card-title">Savings</div>
-    <div class="card-value" style="color:var(--success);">₪6,160</div>
-    <div class="card-sub">33% savings rate</div>
+  <div class="card" style="text-align:center;">
+    <div class="card-title">Net Savings</div>
+    <div class="card-value" style="color:{% if net_savings >= 0 %}#16a34a{% else %}#dc2626{% endif %};">
+      {{ currency }}{{ "%.2f"|format(net_savings) }}
+    </div>
   </div>
-  <div class="card">
-    <div class="card-title">Emergency Fund</div>
-    <div class="card-value">₪45,000</div>
-    <div class="card-sub">3.6 months runway</div>
+  <div class="card" style="text-align:center;">
+    <div class="card-title">Savings Rate</div>
+    <div class="card-value" style="color:{% if savings_rate >= 20 %}#16a34a{% elif savings_rate > 0 %}#d97706{% else %}#dc2626{% endif %};">
+      {{ savings_rate }}%
+    </div>
+    {% if savings_target > 0 %}
+    <div class="card-sub">Target: {{ currency }}{{ "%.2f"|format(savings_target) }}/mo</div>
+    {% endif %}
   </div>
 </div>
 
-<div class="grid grid-2">
+{# ── INCOME + EXPENSES ────────────────────────────────────────────────────── #}
+<div class="grid grid-2" style="margin-bottom:16px;">
+
+  {# INCOME #}
   <div class="card">
-    <div class="card-title" style="margin-bottom:12px;">Spending by Category</div>
-    <table>
+    <div class="card-title" style="color:#16a34a;margin-bottom:16px;">Income Sources</div>
+
+    {% if income_lines %}
+    <table style="margin-bottom:16px;">
       <thead>
-        <tr><th>Category</th><th>Budget</th><th>Spent</th><th>Remaining</th></tr>
+        <tr>
+          <th>Source</th>
+          <th style="text-align:right;">Monthly</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
-        <tr><td>Housing</td><td>₪5,000</td><td>₪5,000</td><td style="color:var(--text-muted);">₪0</td></tr>
-        <tr><td>Food</td><td>₪2,500</td><td>₪2,100</td><td style="color:var(--success);">₪400</td></tr>
-        <tr><td>Transport</td><td>₪1,200</td><td>₪980</td><td style="color:var(--success);">₪220</td></tr>
-        <tr><td>Health</td><td>₪800</td><td>₪650</td><td style="color:var(--success);">₪150</td></tr>
-        <tr><td>Entertainment</td><td>₪1,000</td><td>₪1,350</td><td style="color:var(--error);">−₪350</td></tr>
-        <tr><td>Misc</td><td>₪600</td><td>₪260</td><td style="color:var(--success);">₪340</td></tr>
+        {% for line in income_lines %}
+        <tr>
+          <td>
+            <form method="post" action="{{ root }}/ui/finances/line/{{ line.id }}/edit"
+                  style="display:flex;gap:6px;align-items:center;">
+              <input class="form-input" type="text" name="label" value="{{ line.label }}"
+                     style="width:120px;padding:4px 8px;font-size:13px;">
+              <input class="form-input" type="number" name="amount" value="{{ line.amount }}"
+                     step="0.01" min="0" style="width:90px;padding:4px 8px;font-size:13px;">
+              <button class="btn btn-secondary btn-sm" type="submit">Save</button>
+            </form>
+          </td>
+          <td style="text-align:right;font-weight:600;color:#16a34a;white-space:nowrap;">
+            {{ currency }}{{ "%.2f"|format(line.amount) }}
+          </td>
+          <td>
+            <form method="post" action="{{ root }}/ui/finances/line/{{ line.id }}/delete"
+                  onsubmit="return confirm('Remove {{ line.label }}?')" style="display:inline;">
+              <button class="btn btn-danger btn-sm" type="submit">✕</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
       </tbody>
     </table>
+    {% else %}
+    <div class="empty" style="margin-bottom:16px;">No income sources yet.</div>
+    {% endif %}
+
+    <form method="post" action="{{ root }}/ui/finances/line/add">
+      <input type="hidden" name="line_type" value="income">
+      <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="margin:0;flex:1;min-width:120px;">
+          <label class="form-label">Source</label>
+          <input class="form-input" type="text" name="label" placeholder="e.g. Salary" required>
+        </div>
+        <div class="form-group" style="margin:0;width:110px;">
+          <label class="form-label">Amount / mo</label>
+          <input class="form-input" type="number" name="amount" placeholder="0.00" step="0.01" min="0" required>
+        </div>
+        <button class="btn btn-success btn-sm" type="submit" style="margin-bottom:1px;">+ Add</button>
+      </div>
+    </form>
   </div>
+
+  {# EXPENSES #}
   <div class="card">
-    <div class="card-title" style="margin-bottom:12px;">Goals</div>
-    <table>
+    <div class="card-title" style="color:#dc2626;margin-bottom:16px;">Expense Categories</div>
+
+    {% if expense_lines %}
+    <table style="margin-bottom:16px;">
       <thead>
-        <tr><th>Goal</th><th>Target</th><th>Saved</th><th>Progress</th></tr>
+        <tr>
+          <th>Category</th>
+          <th style="text-align:right;">Monthly</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
+        {% for line in expense_lines %}
         <tr>
-          <td>Vacation fund</td><td>₪8,000</td><td>₪5,500</td>
-          <td><div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
-            <div style="background:var(--primary);width:69%;height:8px;border-radius:4px;"></div>
-          </div></td>
+          <td>
+            <form method="post" action="{{ root }}/ui/finances/line/{{ line.id }}/edit"
+                  style="display:flex;gap:6px;align-items:center;">
+              <input class="form-input" type="text" name="label" value="{{ line.label }}"
+                     style="width:120px;padding:4px 8px;font-size:13px;">
+              <input class="form-input" type="number" name="amount" value="{{ line.amount }}"
+                     step="0.01" min="0" style="width:90px;padding:4px 8px;font-size:13px;">
+              <button class="btn btn-secondary btn-sm" type="submit">Save</button>
+            </form>
+          </td>
+          <td style="text-align:right;font-weight:600;color:#dc2626;white-space:nowrap;">
+            {{ currency }}{{ "%.2f"|format(line.amount) }}
+          </td>
+          <td>
+            <form method="post" action="{{ root }}/ui/finances/line/{{ line.id }}/delete"
+                  onsubmit="return confirm('Remove {{ line.label }}?')" style="display:inline;">
+              <button class="btn btn-danger btn-sm" type="submit">✕</button>
+            </form>
+          </td>
         </tr>
-        <tr>
-          <td>New laptop</td><td>₪6,000</td><td>₪2,200</td>
-          <td><div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
-            <div style="background:var(--primary);width:37%;height:8px;border-radius:4px;"></div>
-          </div></td>
-        </tr>
-        <tr>
-          <td>Investment account</td><td>₪50,000</td><td>₪18,700</td>
-          <td><div style="background:var(--border);border-radius:4px;height:8px;width:100px;">
-            <div style="background:var(--success);width:37%;height:8px;border-radius:4px;"></div>
-          </div></td>
-        </tr>
+        {% endfor %}
       </tbody>
     </table>
+    {% else %}
+    <div class="empty" style="margin-bottom:16px;">No expense categories yet.</div>
+    {% endif %}
+
+    <form method="post" action="{{ root }}/ui/finances/line/add">
+      <input type="hidden" name="line_type" value="expense">
+      <div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="margin:0;flex:1;min-width:120px;">
+          <label class="form-label">Category</label>
+          <input class="form-input" type="text" name="label" placeholder="e.g. Rent" required>
+        </div>
+        <div class="form-group" style="margin:0;width:110px;">
+          <label class="form-label">Amount / mo</label>
+          <input class="form-input" type="number" name="amount" placeholder="0.00" step="0.01" min="0" required>
+        </div>
+        <button class="btn btn-danger btn-sm" type="submit" style="margin-bottom:1px;">+ Add</button>
+      </div>
+    </form>
   </div>
 </div>
+
+{# ── SAVINGS GOAL ─────────────────────────────────────────────────────────── #}
+<div class="card">
+  <div class="card-title" style="margin-bottom:12px;">Monthly Savings Goal</div>
+  <form method="post" action="{{ root }}/ui/finances/goal/save">
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+      <div class="form-group" style="margin:0;width:200px;">
+        <label class="form-label">Target ({{ currency }} / month)</label>
+        <input class="form-input" type="number" name="savings_target"
+               value="{{ savings_target }}" step="0.01" min="0" placeholder="0.00">
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">Save Goal</button>
+    </div>
+  </form>
+  {% if savings_target > 0 %}
+  {% set pct = (net_savings / savings_target * 100) | round(1) %}
+  {% set progress = [[pct, 0] | max, 100] | min %}
+  <div style="margin-top:16px;max-width:400px;">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:4px;">
+      <span>Progress toward goal</span>
+      <span>{{ pct }}%</span>
+    </div>
+    <div style="height:8px;background:var(--border);border-radius:99px;overflow:hidden;">
+      <div style="height:100%;width:{{ progress }}%;
+                  background:{% if progress >= 100 %}#16a34a{% elif progress >= 50 %}#d97706{% else %}#dc2626{% endif %};
+                  border-radius:99px;"></div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
 {% endblock %}

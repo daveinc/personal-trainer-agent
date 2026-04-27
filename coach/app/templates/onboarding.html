@@ -62,6 +62,18 @@
 
       <hr class="divider">
 
+      <div class="section-label">Currency symbol</div>
+      <div class="form-group">
+        <input type="text" name="currency" value="$" placeholder="$ € £ ₪ …"
+               list="currency-list" style="max-width:120px;" maxlength="8">
+        <datalist id="currency-list">
+          <option value="$"><option value="€"><option value="£">
+          <option value="₪"><option value="¥"><option value="₹">
+        </datalist>
+      </div>
+
+      <hr class="divider">
+
       <div class="section-label">Week starts on</div>
       <div class="unit-row" style="margin-bottom:8px;">
         <div class="unit-opt">

@@ -173,6 +173,30 @@ async def restore_db(
     return RedirectResponse(url=redirect_to(request, "ui/settings"), status_code=302)
 
 
+# ── Preferences tab ────────────────────────────────────────────────────────
+
+@router.get("/ui/settings/preferences")
+async def settings_preferences(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    return templates.TemplateResponse(request, "_settings_preferences.html", tctx(request, user=user))
+
+
+@router.post("/ui/settings/preferences/save")
+async def settings_preferences_save(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    form = await request.form()
+    user.display_name = (form.get("display_name") or "").strip() or user.display_name
+    user.currency = (form.get("currency") or "$").strip() or "$"
+    user.unit_distance = form.get("unit_distance", "km")
+    user.week_start = form.get("week_start", "Mon")
+    await db.commit()
+    return RedirectResponse(url=redirect_to(request, "ui/settings?tab=preferences"), status_code=303)
+
+
 # ── Notifications tab ──────────────────────────────────────────────────────
 
 @router.get("/ui/settings/notifications")
