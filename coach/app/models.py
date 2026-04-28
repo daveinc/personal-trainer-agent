@@ -115,6 +115,33 @@ class FinanceLine(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class LearningItem(Base):
+    __tablename__ = "learning_items"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    item_type: Mapped[str] = mapped_column(String(16), nullable=False)  # "course"|"book"|"skill"
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    meta: Mapped[str] = mapped_column(String(256), nullable=True)       # platform / author
+    progress: Mapped[int] = mapped_column(Integer, nullable=True)       # 0-100 for courses
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="active")
+    current_level: Mapped[str] = mapped_column(String(64), nullable=True)
+    target_level: Mapped[str] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class Person(Base):
+    __tablename__ = "people"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    relationship: Mapped[str] = mapped_column(String(64), nullable=True)
+    last_contact: Mapped[str] = mapped_column(String(10), nullable=True)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class NotificationLog(Base):
     __tablename__ = "notification_log"
 

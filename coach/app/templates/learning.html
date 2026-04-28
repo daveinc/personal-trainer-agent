@@ -1,92 +1,260 @@
 {% extends "base.html" %}
+{% set active = "learning" %}
 {% block title %}Coach · Learning{% endblock %}
 {% block page_title %}Learning{% endblock %}
 
 {% block content %}
+
+{# ── SUMMARY CARDS ─────────────────────────────────────────────────────────── #}
 <div class="grid grid-3" style="margin-bottom:16px;">
   <div class="card">
     <div class="card-title">Courses In Progress</div>
-    <div class="card-value">3</div>
-    <div class="card-sub">1 due this month</div>
+    <div class="card-value">{{ active_courses }}</div>
+    <div class="card-sub">Active or paused</div>
   </div>
   <div class="card">
     <div class="card-title">Books</div>
-    <div class="card-value">2 reading</div>
-    <div class="card-sub">5 in queue</div>
+    <div class="card-value">{{ reading_books }} reading</div>
+    <div class="card-sub">{{ queue_books }} in queue</div>
   </div>
   <div class="card">
-    <div class="card-title">Hours This Week</div>
-    <div class="card-value">4h 20m</div>
-    <div class="card-sub">Goal: 5h</div>
+    <div class="card-title">Skills Tracked</div>
+    <div class="card-value">{{ skills_count }}</div>
+    <div class="card-sub">With progress targets</div>
   </div>
 </div>
 
+{# ── COURSES ───────────────────────────────────────────────────────────────── #}
 <div class="card" style="margin-bottom:16px;">
   <div class="card-title" style="margin-bottom:12px;">Courses</div>
-  <table>
+  {% if courses %}
+  <table style="margin-bottom:16px;">
     <thead>
-      <tr><th>Course</th><th>Platform</th><th>Progress</th><th>Status</th></tr>
+      <tr><th>Course</th><th>Platform</th><th>Progress</th><th>Status</th><th></th></tr>
     </thead>
     <tbody>
-      <tr>
-        <td>FastAPI Deep Dive</td><td>Udemy</td>
-        <td><div style="display:flex;align-items:center;gap:8px;">
-          <div style="background:var(--border);border-radius:4px;height:8px;width:120px;">
-            <div style="background:var(--primary);width:72%;height:8px;border-radius:4px;"></div>
-          </div>72%
-        </div></td>
-        <td><span class="badge" style="background:#e0e7ff;color:#3730a3;">Active</span></td>
+      {% for c in courses %}
+      {% if edit_item and edit_item.id == c.id %}
+      <tr style="background:#f8fafc;">
+        <td colspan="5">
+          <form method="post" action="{{ root }}/ui/learning/item/{{ c.id }}/save">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;padding:4px 0;">
+              <input class="form-input" type="text" name="title" value="{{ c.title }}" placeholder="Course title" style="width:180px;font-size:13px;padding:4px 8px;" required>
+              <input class="form-input" type="text" name="meta" value="{{ c.meta or '' }}" placeholder="Platform" style="width:120px;font-size:13px;padding:4px 8px;">
+              <input class="form-input" type="number" name="progress" value="{{ c.progress or 0 }}" min="0" max="100" style="width:70px;font-size:13px;padding:4px 8px;" placeholder="%">
+              <select class="form-input" name="status" style="width:110px;font-size:13px;padding:4px 8px;">
+                {% for s in ["active","paused","done"] %}
+                <option value="{{ s }}" {% if c.status == s %}selected{% endif %}>{{ s|capitalize }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-primary btn-sm" type="submit">Save</button>
+              <a href="{{ root }}/ui/learning" class="btn btn-secondary btn-sm">Cancel</a>
+            </div>
+          </form>
+        </td>
       </tr>
+      {% else %}
       <tr>
-        <td>Spanish — Intermediate</td><td>Duolingo</td>
-        <td><div style="display:flex;align-items:center;gap:8px;">
-          <div style="background:var(--border);border-radius:4px;height:8px;width:120px;">
-            <div style="background:var(--primary);width:45%;height:8px;border-radius:4px;"></div>
-          </div>45%
-        </div></td>
-        <td><span class="badge" style="background:#e0e7ff;color:#3730a3;">Active</span></td>
+        <td style="font-weight:500;">{{ c.title }}</td>
+        <td>{{ c.meta or '—' }}</td>
+        <td>
+          {% if c.progress is not none %}
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="background:var(--border);border-radius:4px;height:8px;width:100px;flex-shrink:0;">
+              <div style="background:var(--primary);width:{{ c.progress }}%;height:8px;border-radius:4px;"></div>
+            </div>
+            {{ c.progress }}%
+          </div>
+          {% else %}—{% endif %}
+        </td>
+        <td>
+          {% if c.status == "done" %}<span class="badge badge-completed">Done</span>
+          {% elif c.status == "paused" %}<span class="badge badge-skipped">Paused</span>
+          {% else %}<span class="badge" style="background:#e0e7ff;color:#3730a3;">Active</span>{% endif %}
+        </td>
+        <td style="white-space:nowrap;">
+          <a href="{{ root }}/ui/learning?edit={{ c.id }}" class="btn btn-secondary btn-sm">Edit</a>
+          <form method="post" action="{{ root }}/ui/learning/item/{{ c.id }}/delete"
+                onsubmit="return confirm('Delete this course?')" style="display:inline;">
+            <button class="btn btn-danger btn-sm" type="submit">✕</button>
+          </form>
+        </td>
       </tr>
-      <tr>
-        <td>Machine Learning A-Z</td><td>Coursera</td>
-        <td><div style="display:flex;align-items:center;gap:8px;">
-          <div style="background:var(--border);border-radius:4px;height:8px;width:120px;">
-            <div style="background:var(--primary);width:18%;height:8px;border-radius:4px;"></div>
-          </div>18%
-        </div></td>
-        <td><span class="badge badge-skipped">Paused</span></td>
-      </tr>
+      {% endif %}
+      {% endfor %}
     </tbody>
   </table>
+  {% else %}
+  <div class="empty" style="margin-bottom:16px;">No courses yet.</div>
+  {% endif %}
+  <form method="post" action="{{ root }}/ui/learning/item/add">
+    <input type="hidden" name="item_type" value="course">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="form-group" style="margin:0;min-width:180px;">
+        <label class="form-label">Course Title</label>
+        <input class="form-input" type="text" name="title" placeholder="e.g. FastAPI Deep Dive" required>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Platform</label>
+        <input class="form-input" type="text" name="meta" placeholder="Udemy, Coursera…" style="width:130px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Progress %</label>
+        <input class="form-input" type="number" name="progress" value="0" min="0" max="100" style="width:80px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Status</label>
+        <select class="form-input" name="status" style="width:110px;">
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">+ Add</button>
+    </div>
+  </form>
 </div>
 
+{# ── BOOKS + SKILLS ────────────────────────────────────────────────────────── #}
 <div class="grid grid-2">
+
   <div class="card">
     <div class="card-title" style="margin-bottom:12px;">Reading List</div>
-    <table>
+    {% if books %}
+    <table style="margin-bottom:16px;">
       <thead>
-        <tr><th>Title</th><th>Author</th><th>Status</th></tr>
+        <tr><th>Title</th><th>Author</th><th>Status</th><th></th></tr>
       </thead>
       <tbody>
-        <tr><td>Atomic Habits</td><td>James Clear</td><td><span class="badge badge-completed">Done</span></td></tr>
-        <tr><td>Deep Work</td><td>Cal Newport</td><td><span class="badge" style="background:#e0e7ff;color:#3730a3;">Reading</span></td></tr>
-        <tr><td>The Pragmatic Programmer</td><td>Hunt &amp; Thomas</td><td><span class="badge" style="background:#e0e7ff;color:#3730a3;">Reading</span></td></tr>
-        <tr><td>Clean Code</td><td>Robert Martin</td><td><span class="badge" style="background:#f1f5f9;color:#475569;">Queue</span></td></tr>
+        {% for b in books %}
+        {% if edit_item and edit_item.id == b.id %}
+        <tr style="background:#f8fafc;">
+          <td colspan="4">
+            <form method="post" action="{{ root }}/ui/learning/item/{{ b.id }}/save">
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;padding:4px 0;">
+                <input class="form-input" type="text" name="title" value="{{ b.title }}" style="width:140px;font-size:13px;padding:4px 8px;" required>
+                <input class="form-input" type="text" name="meta" value="{{ b.meta or '' }}" placeholder="Author" style="width:110px;font-size:13px;padding:4px 8px;">
+                <select class="form-input" name="status" style="width:100px;font-size:13px;padding:4px 8px;">
+                  {% for s in ["reading","queue","done"] %}
+                  <option value="{{ s }}" {% if b.status == s %}selected{% endif %}>{{ s|capitalize }}</option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn-primary btn-sm" type="submit">Save</button>
+                <a href="{{ root }}/ui/learning" class="btn btn-secondary btn-sm">Cancel</a>
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td style="font-weight:500;">{{ b.title }}</td>
+          <td>{{ b.meta or '—' }}</td>
+          <td>
+            {% if b.status == "done" %}<span class="badge badge-completed">Done</span>
+            {% elif b.status == "reading" %}<span class="badge" style="background:#e0e7ff;color:#3730a3;">Reading</span>
+            {% else %}<span class="badge" style="background:#f1f5f9;color:#475569;">Queue</span>{% endif %}
+          </td>
+          <td style="white-space:nowrap;">
+            <a href="{{ root }}/ui/learning?edit={{ b.id }}" class="btn btn-secondary btn-sm">Edit</a>
+            <form method="post" action="{{ root }}/ui/learning/item/{{ b.id }}/delete"
+                  onsubmit="return confirm('Delete?')" style="display:inline;">
+              <button class="btn btn-danger btn-sm" type="submit">✕</button>
+            </form>
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
       </tbody>
     </table>
+    {% else %}
+    <div class="empty" style="margin-bottom:16px;">No books yet.</div>
+    {% endif %}
+    <form method="post" action="{{ root }}/ui/learning/item/add">
+      <input type="hidden" name="item_type" value="book">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+        <div class="form-group" style="margin:0;min-width:140px;">
+          <label class="form-label">Title</label>
+          <input class="form-input" type="text" name="title" placeholder="Book title" required>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Author</label>
+          <input class="form-input" type="text" name="meta" placeholder="Author" style="width:120px;">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Status</label>
+          <select class="form-input" name="status" style="width:100px;">
+            <option value="reading">Reading</option>
+            <option value="queue">Queue</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">+ Add</button>
+      </div>
+    </form>
   </div>
+
   <div class="card">
     <div class="card-title" style="margin-bottom:12px;">Skills</div>
-    <table>
+    {% if skills %}
+    <table style="margin-bottom:16px;">
       <thead>
-        <tr><th>Skill</th><th>Level</th><th>Target</th></tr>
+        <tr><th>Skill</th><th>Current</th><th>Target</th><th></th></tr>
       </thead>
       <tbody>
-        <tr><td>Python</td><td>Advanced</td><td>Expert</td></tr>
-        <tr><td>Spanish</td><td>B1</td><td>B2</td></tr>
-        <tr><td>Piano</td><td>Beginner</td><td>Intermediate</td></tr>
-        <tr><td>Public Speaking</td><td>Intermediate</td><td>Confident</td></tr>
+        {% for s in skills %}
+        {% if edit_item and edit_item.id == s.id %}
+        <tr style="background:#f8fafc;">
+          <td colspan="4">
+            <form method="post" action="{{ root }}/ui/learning/item/{{ s.id }}/save">
+              <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;padding:4px 0;">
+                <input class="form-input" type="text" name="title" value="{{ s.title }}" placeholder="Skill" style="width:130px;font-size:13px;padding:4px 8px;" required>
+                <input class="form-input" type="text" name="current_level" value="{{ s.current_level or '' }}" placeholder="Current" style="width:100px;font-size:13px;padding:4px 8px;">
+                <input class="form-input" type="text" name="target_level" value="{{ s.target_level or '' }}" placeholder="Target" style="width:100px;font-size:13px;padding:4px 8px;">
+                <button class="btn btn-primary btn-sm" type="submit">Save</button>
+                <a href="{{ root }}/ui/learning" class="btn btn-secondary btn-sm">Cancel</a>
+              </div>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td style="font-weight:500;">{{ s.title }}</td>
+          <td>{{ s.current_level or '—' }}</td>
+          <td>{{ s.target_level or '—' }}</td>
+          <td style="white-space:nowrap;">
+            <a href="{{ root }}/ui/learning?edit={{ s.id }}" class="btn btn-secondary btn-sm">Edit</a>
+            <form method="post" action="{{ root }}/ui/learning/item/{{ s.id }}/delete"
+                  onsubmit="return confirm('Delete?')" style="display:inline;">
+              <button class="btn btn-danger btn-sm" type="submit">✕</button>
+            </form>
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
       </tbody>
     </table>
+    {% else %}
+    <div class="empty" style="margin-bottom:16px;">No skills yet.</div>
+    {% endif %}
+    <form method="post" action="{{ root }}/ui/learning/item/add">
+      <input type="hidden" name="item_type" value="skill">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+        <div class="form-group" style="margin:0;min-width:130px;">
+          <label class="form-label">Skill</label>
+          <input class="form-input" type="text" name="title" placeholder="e.g. Python" required>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Current Level</label>
+          <input class="form-input" type="text" name="current_level" placeholder="Beginner" style="width:110px;">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Target</label>
+          <input class="form-input" type="text" name="target_level" placeholder="Advanced" style="width:110px;">
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">+ Add</button>
+      </div>
+    </form>
   </div>
+
 </div>
 {% endblock %}

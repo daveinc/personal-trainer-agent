@@ -1,64 +1,107 @@
 {% extends "base.html" %}
+{% set active = "relationships" %}
 {% block title %}Coach · Relationships{% endblock %}
 {% block page_title %}Relationships{% endblock %}
 
 {% block content %}
+
+{# ── SUMMARY CARDS ─────────────────────────────────────────────────────────── #}
 <div class="grid grid-3" style="margin-bottom:16px;">
   <div class="card">
     <div class="card-title">People Tracked</div>
-    <div class="card-value">12</div>
-    <div class="card-sub">Across 3 circles</div>
+    <div class="card-value">{{ total }}</div>
+    <div class="card-sub">In your network</div>
   </div>
   <div class="card">
-    <div class="card-title">Due for Contact</div>
-    <div class="card-value" style="color:var(--warning);">4</div>
-    <div class="card-sub">Haven't spoken in 30+ days</div>
+    <div class="card-title">Overdue</div>
+    <div class="card-value" style="color:var(--warning);">{{ due }}</div>
+    <div class="card-sub">30+ days without contact</div>
   </div>
   <div class="card">
-    <div class="card-title">Plans This Month</div>
-    <div class="card-value">3</div>
-    <div class="card-sub">Dinners, calls, visits</div>
+    <div class="card-title">Call Soon</div>
+    <div class="card-value" style="color:#3730a3;">{{ call_soon }}</div>
+    <div class="card-sub">8–29 days since contact</div>
   </div>
 </div>
 
-<div class="card" style="margin-bottom:16px;">
-  <div class="card-title" style="margin-bottom:12px;">Close Circle</div>
-  <table>
-    <thead>
-      <tr><th>Name</th><th>Relationship</th><th>Last Contact</th><th>Status</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Maya</td><td>Partner</td><td>Today</td>
-        <td><span class="badge badge-completed">Active</span></td>
-      </tr>
-      <tr>
-        <td>Yoni</td><td>Best friend</td><td>3 days ago</td>
-        <td><span class="badge badge-completed">Good</span></td>
-      </tr>
-      <tr>
-        <td>Mom</td><td>Family</td><td>1 week ago</td>
-        <td><span class="badge" style="background:#e0e7ff;color:#3730a3;">Call soon</span></td>
-      </tr>
-      <tr>
-        <td>Dad</td><td>Family</td><td>2 weeks ago</td>
-        <td><span class="badge badge-skipped">Overdue</span></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
+{# ── PEOPLE TABLE ──────────────────────────────────────────────────────────── #}
 <div class="card">
-  <div class="card-title" style="margin-bottom:12px;">Extended Network</div>
-  <table>
+  <div class="card-title" style="margin-bottom:12px;">Your Network</div>
+  {% if enriched %}
+  <table style="margin-bottom:20px;">
     <thead>
-      <tr><th>Name</th><th>How Met</th><th>Last Contact</th><th>Notes</th></tr>
+      <tr><th>Name</th><th>Relationship</th><th>Last Contact</th><th>Status</th><th>Notes</th><th></th></tr>
     </thead>
     <tbody>
-      <tr><td>Avi</td><td>University</td><td>6 weeks ago</td><td>Catch up re: startup</td></tr>
-      <tr><td>Roni</td><td>Work</td><td>2 months ago</td><td>Coffee?</td></tr>
-      <tr><td>Shlomi</td><td>CrossFit</td><td>Last week</td><td>New gym opening</td></tr>
+      {% for e in enriched %}
+      {% set p = e.person %}
+      {% if edit_person and edit_person.id == p.id %}
+      <tr style="background:#f8fafc;">
+        <td colspan="6">
+          <form method="post" action="{{ root }}/ui/relationships/person/{{ p.id }}/save">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;padding:4px 0;">
+              <input class="form-input" type="text" name="name" value="{{ p.name }}" placeholder="Name" style="width:120px;font-size:13px;padding:4px 8px;" required>
+              <input class="form-input" type="text" name="relationship" value="{{ p.relationship or '' }}" placeholder="e.g. Friend" style="width:110px;font-size:13px;padding:4px 8px;">
+              <input class="form-input" type="date" name="last_contact" value="{{ p.last_contact or '' }}" style="width:140px;font-size:13px;padding:4px 8px;">
+              <input class="form-input" type="text" name="notes" value="{{ p.notes or '' }}" placeholder="Notes" style="width:160px;font-size:13px;padding:4px 8px;">
+              <button class="btn btn-primary btn-sm" type="submit">Save</button>
+              <a href="{{ root }}/ui/relationships" class="btn btn-secondary btn-sm">Cancel</a>
+            </div>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td style="font-weight:500;">{{ p.name }}</td>
+        <td>{{ p.relationship or '—' }}</td>
+        <td>{{ p.last_contact or '—' }}</td>
+        <td>
+          <span class="badge" style="background:{{ e.status_bg }};color:{{ e.status_color }};">
+            {{ e.status_label }}
+          </span>
+        </td>
+        <td style="color:var(--text-muted);">{{ p.notes or '—' }}</td>
+        <td style="white-space:nowrap;">
+          <form method="post" action="{{ root }}/ui/relationships/person/{{ p.id }}/contact"
+                style="display:inline;">
+            <button class="btn btn-success btn-sm" type="submit" title="Log contact today">✓</button>
+          </form>
+          <a href="{{ root }}/ui/relationships?edit={{ p.id }}" class="btn btn-secondary btn-sm">Edit</a>
+          <form method="post" action="{{ root }}/ui/relationships/person/{{ p.id }}/delete"
+                onsubmit="return confirm('Remove {{ p.name }}?')" style="display:inline;">
+            <button class="btn btn-danger btn-sm" type="submit">✕</button>
+          </form>
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
     </tbody>
   </table>
+  {% else %}
+  <div class="empty" style="margin-bottom:20px;">No people tracked yet. Add someone below.</div>
+  {% endif %}
+
+  <form method="post" action="{{ root }}/ui/relationships/person/add">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+      <div class="form-group" style="margin:0;min-width:130px;">
+        <label class="form-label">Name</label>
+        <input class="form-input" type="text" name="name" placeholder="e.g. Maya" required>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Relationship</label>
+        <input class="form-input" type="text" name="relationship" placeholder="Friend, Family…" style="width:140px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Last Contact</label>
+        <input class="form-input" type="date" name="last_contact" value="{{ today }}">
+      </div>
+      <div class="form-group" style="margin:0;min-width:160px;">
+        <label class="form-label">Notes</label>
+        <input class="form-input" type="text" name="notes" placeholder="Optional note">
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit" style="margin-bottom:1px;">+ Add</button>
+    </div>
+  </form>
 </div>
+
 {% endblock %}

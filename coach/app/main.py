@@ -25,6 +25,8 @@ from app.routes.schedule import router as schedule_router
 from app.routes.checkins import router as checkins_router
 from app.routes.finances import router as finances_router
 from app.routes.health import router as health_router
+from app.routes.learning import router as learning_router
+from app.routes.relationships import router as relationships_router
 from app.routes.webhook import router as webhook_router
 from app.services.scheduler import run_scheduler
 from app.services.ha_events import run_event_listener
@@ -103,4 +105,6 @@ app.include_router(schedule_router)
 app.include_router(checkins_router)
 app.include_router(finances_router)
 app.include_router(health_router)
+app.include_router(learning_router)
+app.include_router(relationships_router)
 app.include_router(webhook_router)
