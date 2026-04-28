@@ -1,48 +1,60 @@
 {% extends "base.html" %}
+{% set active = "checkins" %}
 {% block title %}Coach · Check-ins{% endblock %}
 {% block page_title %}Check-ins{% endblock %}
 
 {% block content %}
 <div class="grid grid-2" style="margin-bottom:16px;">
+
+  {# ── Today's form ── #}
   <div class="card">
-    <div class="card-title" style="margin-bottom:16px;">Today's Check-in</div>
-    <form>
+    <div class="card-title" style="margin-bottom:16px;">
+      {% if today_entry %}Today's Check-in <span style="color:var(--success);font-size:11px;">✓ Logged</span>{% else %}Today's Check-in{% endif %}
+    </div>
+    <form method="post" action="{{ root }}/ui/checkins/log">
       <div class="form-group">
         <label class="form-label">Mood (1–10)</label>
-        <input class="form-input" type="range" min="1" max="10" value="7"
+        <input class="form-input" type="range" min="1" max="10"
+               value="{{ today_entry.mood if today_entry else 7 }}" name="mood"
                oninput="document.getElementById('mood-val').textContent=this.value">
         <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
-          Current: <strong id="mood-val">7</strong>
+          Current: <strong id="mood-val">{{ today_entry.mood if today_entry else 7 }}</strong>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Energy (1–10)</label>
-        <input class="form-input" type="range" min="1" max="10" value="6"
+        <input class="form-input" type="range" min="1" max="10"
+               value="{{ today_entry.energy if today_entry else 6 }}" name="energy"
                oninput="document.getElementById('energy-val').textContent=this.value">
         <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">
-          Current: <strong id="energy-val">6</strong>
+          Current: <strong id="energy-val">{{ today_entry.energy if today_entry else 6 }}</strong>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Notes</label>
-        <textarea class="form-input" rows="3" placeholder="How are you feeling today?"></textarea>
+        <textarea class="form-input" name="notes" rows="3"
+                  placeholder="How are you feeling today?">{{ today_entry.notes if today_entry else '' }}</textarea>
       </div>
-      <button class="btn btn-primary" type="submit">Save Check-in</button>
+      <button class="btn btn-primary" type="submit">
+        {% if today_entry %}Update Check-in{% else %}Save Check-in{% endif %}
+      </button>
     </form>
   </div>
+
+  {# ── Streak + week dots ── #}
   <div class="card">
     <div class="card-title" style="margin-bottom:12px;">Streak</div>
-    <div class="card-value">12 days</div>
+    <div class="card-value">{{ streak }} day{% if streak != 1 %}s{% endif %}</div>
     <div class="card-sub">Current streak</div>
-    <div style="margin-top:16px;">
+    <div style="margin-top:20px;">
       <div class="card-title" style="margin-bottom:8px;">This Week</div>
       <div style="display:flex;gap:6px;">
-        {% for day, done in [('M',true),('T',true),('W',true),('T',true),('F',false),('S',false),('S',false)] %}
+        {% for label, done in week_data %}
         <div style="width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;
                     font-size:11px;font-weight:600;
                     background:{% if done %}var(--success){% else %}var(--border){% endif %};
                     color:{% if done %}white{% else %}var(--text-muted){% endif %};">
-          {{ day }}
+          {{ label }}
         </div>
         {% endfor %}
       </div>
@@ -50,19 +62,33 @@
   </div>
 </div>
 
+{# ── History ── #}
 <div class="card">
   <div class="card-title" style="margin-bottom:12px;">Recent Check-ins</div>
+  {% if entries %}
   <table>
     <thead>
-      <tr><th>Date</th><th>Mood</th><th>Energy</th><th>Notes</th></tr>
+      <tr><th>Date</th><th>Mood</th><th>Energy</th><th>Notes</th><th></th></tr>
     </thead>
     <tbody>
-      <tr><td>Apr 25</td><td>8 / 10</td><td>7 / 10</td><td>Good workout, busy at work but managed well.</td></tr>
-      <tr><td>Apr 24</td><td>6 / 10</td><td>5 / 10</td><td>Tired after late night. Skipped gym.</td></tr>
-      <tr><td>Apr 23</td><td>9 / 10</td><td>9 / 10</td><td>Great day, finished the project milestone.</td></tr>
-      <tr><td>Apr 22</td><td>7 / 10</td><td>8 / 10</td><td>Normal day. Evening run felt great.</td></tr>
-      <tr><td>Apr 21</td><td>5 / 10</td><td>4 / 10</td><td>Headache most of the day, took it easy.</td></tr>
+      {% for e in entries %}
+      <tr>
+        <td>{{ e.log_date }}</td>
+        <td>{{ e.mood }} / 10</td>
+        <td>{{ e.energy }} / 10</td>
+        <td style="color:var(--text-muted);">{{ e.notes or '—' }}</td>
+        <td>
+          <form method="post" action="{{ root }}/ui/checkins/{{ e.id }}/delete"
+                onsubmit="return confirm('Delete this check-in?')" style="display:inline;">
+            <button class="btn btn-danger btn-sm" type="submit">✕</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
     </tbody>
   </table>
+  {% else %}
+  <div class="empty">No check-ins yet. Log your first one above.</div>
+  {% endif %}
 </div>
 {% endblock %}

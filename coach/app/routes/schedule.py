@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import date, timedelta
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
@@ -9,12 +10,36 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.deps import get_db, get_current_user, redirect_to, tctx
 from app.models import Slot, SlotAttribute
 from app.routes.onboarding import CATEGORIES
+from app.ha_calendar import get_week_events
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 logger = logging.getLogger(__name__)
 
 CATEGORY_MAP = dict(CATEGORIES)
+_KNOWN_CATEGORIES = set(CATEGORY_MAP.keys())
+
+
+def _prep_cal_events(raw: list) -> dict:
+    """Filter out checkins, extract useful fields, group by date string."""
+    by_date = {}
+    for e in raw:
+        desc = (e.get("description") or "").lower()
+        if "[checkin]" in desc:
+            continue
+        dt = e.get("start", {}).get("dateTime", "") or e.get("start", {}).get("date", "")
+        day = dt[:10]
+        if not day:
+            continue
+        category = next(
+            (t for t in re.findall(r'\[([^\]]+)\]', desc) if t in _KNOWN_CATEGORIES), ""
+        )
+        by_date.setdefault(day, []).append({
+            "summary": e.get("summary", "Event"),
+            "time": dt[11:16] if len(dt) > 10 else "",
+            "category": category,
+        })
+    return by_date
 _DAYS_MON = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 _DAYS_SUN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -82,6 +107,11 @@ async def schedule_page(request: Request, selected: int = None, edit: int = None
         )
         week_data.append({"date": d, "day_name": day_name, "slots": day_slots, "is_today": d == today})
 
+    try:
+        cal_by_date = _prep_cal_events(await get_week_events())
+    except Exception:
+        cal_by_date = {}
+
     selected_slot = None
     if selected:
         selected_slot = next((s for s in slots if s.id == selected), None)
@@ -98,8 +128,9 @@ async def schedule_page(request: Request, selected: int = None, edit: int = None
 
     return templates.TemplateResponse(request, "schedule_new.html", tctx(
         request, user=user, active="schedule",
-        slots=slots, week_data=week_data,
+        slots=slots, week_data=week_data, cal_by_date=cal_by_date,
         upcoming_slots=upcoming_slots, upcoming_day=upcoming_day, upcoming_date=upcoming_date,
+        today_cal=cal_by_date.get(today.strftime("%Y-%m-%d"), []),
         selected_slot=selected_slot, edit_slot=edit_slot,
         categories=CATEGORIES, category_map=CATEGORY_MAP,
         category_attributes=CATEGORY_ATTRIBUTES,

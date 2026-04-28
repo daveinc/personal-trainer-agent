@@ -71,13 +71,20 @@
       {% if upcoming_date and upcoming_date == today %}Today{% elif upcoming_day %}Next — {{ upcoming_day }} {{ upcoming_date.strftime('%b %d') if upcoming_date else '' }}{% else %}Upcoming{% endif %}
     </div>
   </div>
-  {% if upcoming_slots %}
+  {% if upcoming_slots or today_cal %}
   <div class="event-list">
     {% for slot in upcoming_slots | sort(attribute='start_time') %}
     <div class="event-item" style="cursor:pointer;" onclick="selectSlot({{ slot.id }})">
       <div class="event-time">{{ slot.start_time or '—' }}{% if slot.end_time %} – {{ slot.end_time }}{% endif %}</div>
       <div class="event-title">{{ slot.label }}</div>
       <span class="badge" style="background:#f1f5f9;color:#475569;">{{ category_map.get(slot.category, slot.category) }}</span>
+    </div>
+    {% endfor %}
+    {% for ev in today_cal | sort(attribute='time') %}
+    <div class="event-item">
+      <div class="event-time">{{ ev.time or '—' }}</div>
+      <div class="event-title">{{ ev.summary }}</div>
+      {% if ev.category %}<span class="badge" style="background:#f0fdf4;color:#15803d;">{{ category_map.get(ev.category, ev.category) }}</span>{% endif %}
     </div>
     {% endfor %}
   </div>
@@ -244,6 +251,13 @@
           {{ slot.label }}
         </a>
         {% endfor %}
+        {% for ev in cal_by_date.get(d.date.strftime('%Y-%m-%d'), []) %}
+        <div style="display:block;background:#f0fdf4;color:#15803d;
+                    border-radius:4px;padding:4px 6px;font-size:11px;margin-bottom:4px;line-height:1.3;">
+          {% if ev.time %}<span style="opacity:0.75;">{{ ev.time }}</span><br>{% endif %}
+          {{ ev.summary }}
+        </div>
+        {% endfor %}
       </div>
       {% endfor %}
     </div>
@@ -256,13 +270,20 @@
     {% if today_data %}
     {% set td = today_data[0] %}
     <div style="font-size:15px;font-weight:600;margin-bottom:12px;">{{ today.strftime('%A, %B %d') }}</div>
-    {% if td.slots %}
+    {% if td.slots or today_cal %}
     <div class="event-list">
       {% for slot in td.slots | sort(attribute='start_time') %}
       <div class="event-item" style="cursor:pointer;" onclick="location.href='{{ root }}/ui/schedule?selected={{ slot.id }}'">
         <div class="event-time">{{ slot.start_time or '—' }}{% if slot.end_time %} – {{ slot.end_time }}{% endif %}</div>
         <div class="event-title">{{ slot.label }}</div>
         <span class="badge" style="background:#f1f5f9;color:#475569;">{{ category_map.get(slot.category, slot.category) }}</span>
+      </div>
+      {% endfor %}
+      {% for ev in today_cal | sort(attribute='time') %}
+      <div class="event-item">
+        <div class="event-time">{{ ev.time or '—' }}</div>
+        <div class="event-title">{{ ev.summary }}</div>
+        {% if ev.category %}<span class="badge" style="background:#f0fdf4;color:#15803d;">{{ category_map.get(ev.category, ev.category) }}</span>{% endif %}
       </div>
       {% endfor %}
     </div>

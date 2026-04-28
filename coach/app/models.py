@@ -92,6 +92,18 @@ class Appointment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class CheckIn(Base):
+    __tablename__ = "checkins"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    mood: Mapped[int] = mapped_column(Integer, nullable=False)
+    energy: Mapped[int] = mapped_column(Integer, nullable=False)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    log_date: Mapped[str] = mapped_column(String(10), nullable=False)
+    logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class FinanceLine(Base):
     __tablename__ = "finance_lines"
 
