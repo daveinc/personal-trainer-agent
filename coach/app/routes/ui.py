@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_current_user, redirect_to, tctx
-from app.models import Slot
+from app.models import Slot, CheckIn
 from app.routes.schedule import _get_week, _get_days, _today_or_next, CATEGORY_MAP
 
 router = APIRouter()
@@ -55,13 +55,48 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
         )
         week_data.append({"date": d, "day_name": day_name, "slots": day_slots, "is_today": d == today})
 
+    # Check-in data for dashboard
+    seven_days_ago = today - timedelta(days=6)
+    checkins_query = select(CheckIn).where(
+        CheckIn.user_id == user.id,
+        CheckIn.log_date >= seven_days_ago.strftime("%Y-%m-%d"),
+        CheckIn.log_date <= today.strftime("%Y-%m-%d")
+    ).order_by(CheckIn.log_date)
+    checkins = (await db.execute(checkins_query)).scalars().all()
+
+    mood_avg = round(sum([c.mood for c in checkins]) / len(checkins), 1) if checkins else 0
+    energy_avg = round(sum([c.energy for c in checkins]) / len(checkins), 1) if checkins else 0
+
+    has_checkin_today = any(c.log_date == today.strftime("%Y-%m-%d") for c in checkins)
+
+    # Calculate streak
+    streak = 0
+    if checkins:
+        # Get unique dates of checkins within the 7-day window
+        checked_in_dates = sorted(list(set([datetime.strptime(c.log_date, "%Y-%m-%d").date() for c in checkins])), reverse=True)
+        
+        current_day = today
+        if not has_checkin_today:
+             # If no checkin today, check streak ending yesterday
+            current_day = today - timedelta(days=1)
+            
+        for _ in range(7):  # Check for up to 7 consecutive days
+            if current_day in checked_in_dates:
+                streak += 1
+                current_day -= timedelta(days=1)
+            else:
+                break
+    
     return templates.TemplateResponse(request, "dashboard.html", tctx(
         request, user=user, greeting=greeting,
         today_slots=today_slots, upcoming_slots=upcoming_slots,
         upcoming_day=upcoming_day, upcoming_date=upcoming_date,
         active_categories=active_categories, category_map=CATEGORY_MAP,
         week_data=week_data, days=days, today=today, week_start=week_start,
+        mood_avg=mood_avg, energy_avg=energy_avg, streak=streak,
+        has_checkin_today=has_checkin_today,
     ))
+
 
 
 @router.get("/ui/ha-status")
