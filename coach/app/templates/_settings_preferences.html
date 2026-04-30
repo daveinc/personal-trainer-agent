@@ -13,6 +13,18 @@
         <datalist id="currency-list">
           <option value="$"><option value="€"><option value="£">
           <option value="₪"><option value="¥"><option value="₹">
+          <option value="A$">
+          <option value="C$">
+          <option value="CHF">
+          <option value="CN¥">
+          <option value="HK$">
+          <option value="Rp">
+          <option value="Mex$">
+          <option value="NZ$">
+          <option value="S$">
+          <option value="₩">
+          <option value="฿">
+          <option value="₺">
         </datalist>
       </div>
     </div>
@@ -22,6 +34,8 @@
         <select class="form-input" name="unit_distance" style="width:auto;">
           <option value="km" {% if user.unit_distance == 'km' %}selected{% endif %}>km</option>
           <option value="mi" {% if user.unit_distance == 'mi' %}selected{% endif %}>mi</option>
+          <option value="ft" {% if user.unit_distance == 'ft' %}selected{% endif %}>feet</option>
+          <option value="nm" {% if user.unit_distance == 'nm' %}selected{% endif %}>nautical miles</option>
         </select>
       </div>
       <div class="form-group">
@@ -38,6 +52,8 @@
         <select class="form-input" name="unit_weight" style="width:auto;">
           <option value="kg" {% if (user.unit_weight or 'kg') == 'kg' %}selected{% endif %}>kg</option>
           <option value="lbs" {% if user.unit_weight == 'lbs' %}selected{% endif %}>lbs</option>
+          <option value="st" {% if user.unit_weight == 'st' %}selected{% endif %}>stone</option>
+          <option value="g" {% if user.unit_weight == 'g' %}selected{% endif %}>grams</option>
         </select>
       </div>
       <div class="form-group">
