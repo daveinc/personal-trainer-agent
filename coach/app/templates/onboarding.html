@@ -8,133 +8,145 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f8fafc; color: #1e293b; font-size: 14px; }
     .wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 40px; width: 100%; max-width: 560px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 40px; width: 100%; max-width: 680px; }
     .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
     .title span { color: #2563eb; }
     .sub { color: #64748b; margin-bottom: 28px; font-size: 13px; }
-    .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin: 24px 0 12px; }
+    .step-indicator { display: flex; gap: 8px; margin-bottom: 28px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; }
+    .step-dot.active { background: #2563eb; }
     .form-group { margin-bottom: 16px; }
-    label.field-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-    input[type=text] { width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: white; }
-    input[type=text]:focus { border-color: #2563eb; }
-    .unit-row { display: flex; gap: 10px; }
-    .unit-opt { flex: 1; }
-    .unit-opt input[type=radio] { display: none; }
-    .unit-opt label { display: block; text-align: center; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
-    .unit-opt input[type=radio]:checked + label { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
-    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 24px; }
-    .cat-opt input[type=checkbox] { display: none; }
-    .cat-opt label { display: block; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
-    .cat-opt input[type=checkbox]:checked + label { border-color: #2563eb; background: #eff6ff; color: #2563eb; }
-    .btn { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+    input[type=text], input[type=time] { width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; background: white; }
+    input[type=text]:focus, input[type=time]:focus { border-color: #2563eb; }
+    .btn { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
     .btn:hover { background: #1d4ed8; }
-    .btn:disabled { background: #94a3b8; cursor: not-allowed; }
-    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 20px 0; }
+    .btn-full { width: 100%; }
+
+    .cat-table { width: 100%; border-collapse: collapse; }
+    .cat-table th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; }
+    .cat-table td { padding: 10px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    .cat-table tr:last-child td { border-bottom: none; }
+    .cat-name { font-weight: 600; font-size: 13px; }
+    .type-options { display: flex; gap: 16px; }
+    .type-options label { display: flex; align-items: center; gap: 5px; font-weight: 400; cursor: pointer; margin-bottom: 0; white-space: nowrap; }
+    .schedule-fields { margin-top: 10px; display: none; }
+    .schedule-fields.visible { display: block; }
+    .days-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .day-label { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 400; cursor: pointer; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 3px 8px; margin-bottom: 0; }
+    .day-label input { width: auto; padding: 0; border: none; accent-color: #2563eb; }
+    .day-label input:checked + span { color: #2563eb; font-weight: 600; }
+    .time-row { display: flex; gap: 12px; align-items: center; }
+    .time-row input { width: 120px; }
+    .time-row span { color: #64748b; font-size: 12px; }
+    .free-note { font-size: 12px; color: #64748b; margin-bottom: 8px; }
   </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
     <div class="title">Coach<span>.</span></div>
-    <div class="sub">Let's get you set up.</div>
 
-    <form method="post" action="{{ root }}/ui/onboarding/save">
-
-      <div class="section-label">Your name</div>
+    {% if step == 1 %}
+    <div class="sub">Let's get you set up. First, what should we call you?</div>
+    <div class="step-indicator">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+    </div>
+    <form method="post" action="{{ root }}/ui/onboarding/name">
       <div class="form-group">
-        <input type="text" name="display_name" value="{{ user.display_name or '' }}"
-               placeholder="e.g. Dave" autofocus required id="name-input">
+        <label for="display_name">Your name</label>
+        <input type="text" id="display_name" name="display_name"
+               value="{{ user.display_name or '' }}"
+               placeholder="e.g. Dave" autofocus required>
       </div>
-
-      <hr class="divider">
-
-      <div class="section-label">Distance units</div>
-      <div class="unit-row" style="margin-bottom:8px;">
-        <div class="unit-opt">
-          <input type="radio" name="unit_distance" value="km" id="u-km" checked>
-          <label for="u-km">km</label>
-        </div>
-        <div class="unit-opt">
-          <input type="radio" name="unit_distance" value="mi" id="u-mi">
-          <label for="u-mi">mi</label>
-        </div>
-      </div>
-
-      <hr class="divider">
-
-      <div class="section-label">Currency symbol</div>
-      <div class="form-group">
-        <input type="text" name="currency" value="$" placeholder="$ € £ ₪ …"
-               list="currency-list" style="max-width:120px;" maxlength="8">
-        <datalist id="currency-list">
-          <option value="$"><option value="€"><option value="£">
-          <option value="₪"><option value="¥"><option value="₹">
-        </datalist>
-      </div>
-
-      <hr class="divider">
-
-      <div class="section-label">Week starts on</div>
-      <div class="unit-row" style="margin-bottom:8px;">
-        <div class="unit-opt">
-          <input type="radio" name="week_start" value="Sun" id="w-sun">
-          <label for="w-sun">Sunday</label>
-        </div>
-        <div class="unit-opt">
-          <input type="radio" name="week_start" value="Mon" id="w-mon" checked>
-          <label for="w-mon">Monday</label>
-        </div>
-      </div>
-
-      <hr class="divider">
-
-      <div class="section-label">Weight units</div>
-      <div class="unit-row" style="margin-bottom:8px;">
-        <div class="unit-opt">
-          <input type="radio" name="unit_weight" value="kg" id="w-kg" checked>
-          <label for="w-kg">kg</label>
-        </div>
-        <div class="unit-opt">
-          <input type="radio" name="unit_weight" value="lbs" id="w-lbs">
-          <label for="w-lbs">lbs</label>
-        </div>
-      </div>
-
-      <hr class="divider">
-
-      <div class="section-label">Health metrics to track</div>
-      <div class="cat-grid" style="margin-bottom:16px;">
-        {% for slug, label in health_metrics_options %}
-        <div class="cat-opt">
-          <input type="checkbox" name="health_metrics" value="{{ slug }}" id="hm-{{ slug }}">
-          <label for="hm-{{ slug }}">{{ label }}</label>
-        </div>
-        {% endfor %}
-      </div>
-
-      <hr class="divider">
-
-      <div class="section-label">Areas to track</div>
-      <div class="cat-grid">
-        {% for slug, label in categories %}
-        <div class="cat-opt">
-          <input type="checkbox" name="categories" value="{{ slug }}" id="cat-{{ slug }}">
-          <label for="cat-{{ slug }}">{{ label }}</label>
-        </div>
-        {% endfor %}
-      </div>
-
-      <button class="btn" type="submit" id="save-btn" disabled>Save &amp; Start →</button>
+      <button class="btn btn-full" type="submit">Next →</button>
     </form>
+
+    {% else %}
+    <div class="sub">Hi {{ user.display_name }}! Select which areas you want to track and set your schedule for each.</div>
+    <div class="step-indicator">
+      <div class="step-dot"></div>
+      <div class="step-dot active"></div>
+    </div>
+    <form method="post" action="{{ root }}/ui/onboarding/categories">
+      <table class="cat-table">
+        <thead>
+          <tr>
+            <th style="width:160px;">Category</th>
+            <th>Schedule type</th>
+            <th>Days &amp; Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for slug, label in categories %}
+        {% set ex = existing.get(slug) %}
+        {% set ex_type = ex.schedule_type if ex else "skip" %}
+        {% set ex_days = ex.days.split(",") if ex and ex.days else [] %}
+        <tr>
+          <td><div class="cat-name">{{ label }}</div></td>
+          <td>
+            <div class="type-options">
+              <label>
+                <input type="radio" name="type_{{ slug }}" value="fixed"
+                  {% if ex_type == "fixed" %}checked{% endif %}
+                  onchange="onTypeChange('{{ slug }}', 'fixed')">
+                Fixed
+              </label>
+              <label>
+                <input type="radio" name="type_{{ slug }}" value="free"
+                  {% if ex_type == "free" %}checked{% endif %}
+                  onchange="onTypeChange('{{ slug }}', 'free')">
+                Free
+              </label>
+              <label>
+                <input type="radio" name="type_{{ slug }}" value="skip"
+                  {% if ex_type == "skip" or not ex %}checked{% endif %}
+                  onchange="onTypeChange('{{ slug }}', 'skip')">
+                Skip
+              </label>
+            </div>
+          </td>
+          <td>
+            <div class="schedule-fields {% if ex_type != 'skip' %}visible{% endif %}" id="sched_{{ slug }}">
+              <div class="free-note" id="freenote_{{ slug }}" style="{% if ex_type != 'free' %}display:none{% endif %}">
+                Available hours — shared across free-schedule categories.
+              </div>
+              <div class="days-row">
+                {% for day in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
+                <label class="day-label">
+                  <input type="checkbox" name="days_{{ slug }}" value="{{ day }}"
+                    {% if day in ex_days %}checked{% endif %}>
+                  <span>{{ day }}</span>
+                </label>
+                {% endfor %}
+              </div>
+              <div class="time-row">
+                <input type="time" name="start_{{ slug }}" value="{{ ex.start_time if ex and ex.start_time else '07:00' }}">
+                <span>to</span>
+                <input type="time" name="end_{{ slug }}" value="{{ ex.end_time if ex and ex.end_time else '09:00' }}">
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <div style="margin-top:24px;">
+        <button class="btn btn-full" type="submit">Save &amp; Start →</button>
+      </div>
+    </form>
+    {% endif %}
+
   </div>
 </div>
 <script>
-  const nameInput = document.getElementById('name-input');
-  const saveBtn = document.getElementById('save-btn');
-  nameInput.addEventListener('input', () => {
-    saveBtn.disabled = nameInput.value.trim() === '';
-  });
-  if (nameInput.value.trim()) saveBtn.disabled = false;
+function onTypeChange(slug, type) {
+  const sched = document.getElementById('sched_' + slug);
+  const freenote = document.getElementById('freenote_' + slug);
+  sched.classList.toggle('visible', type !== 'skip');
+  if (freenote) freenote.style.display = (type === 'free') ? 'block' : 'none';
+}
 </script>
 </body>
 </html>

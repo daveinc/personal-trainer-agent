@@ -25,6 +25,19 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class UserCategorySchedule(Base):
+    __tablename__ = "user_category_schedules"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    category: Mapped[str] = mapped_column(String(64), nullable=False)
+    schedule_type: Mapped[str] = mapped_column(String(8), nullable=False, default="skip")
+    days: Mapped[str] = mapped_column(String(32), nullable=True)
+    start_time: Mapped[str] = mapped_column(String(5), nullable=True)
+    end_time: Mapped[str] = mapped_column(String(5), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
 class Slot(Base):
     __tablename__ = "slots"
 
