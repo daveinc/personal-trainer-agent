@@ -14,7 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_ext_db, get_current_user, redirect_to, tctx
 from app.ha_calendar import CATEGORY, create_event, delete_event, get_all_events, update_event
-from app.models import User, WorkoutLog
+from app.models import User, WorkoutLog, UserCategorySchedule
+from app.routes.onboarding import CATEGORIES
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -213,6 +214,41 @@ async def settings_notifications(request: Request, db: AsyncSession = Depends(ge
         request, "_settings_notifications.html",
         tctx(request, user=user, notify_service=os.getenv("NOTIFY_SERVICE", ""))
     )
+
+
+# ── Categories tab ─────────────────────────────────────────────────────────
+
+@router.get("/ui/settings/categories")
+async def settings_categories(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    existing = {
+        r.category: r for r in
+        (await db.execute(select(UserCategorySchedule).where(UserCategorySchedule.user_id == user.id))).scalars().all()
+    }
+    return templates.TemplateResponse(request, "_settings_categories.html",
+        tctx(request, user=user, categories=CATEGORIES, existing=existing))
+
+
+@router.post("/ui/settings/categories/save")
+async def settings_categories_save(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    form = await request.form()
+    await db.execute(delete(UserCategorySchedule).where(UserCategorySchedule.user_id == user.id))
+    for slug, _ in CATEGORIES:
+        stype = form.get(f"type_{slug}", "skip")
+        days = ",".join(form.getlist(f"days_{slug}")) if stype != "skip" else ""
+        start_time = form.get(f"start_{slug}", "") if stype != "skip" else ""
+        end_time = form.get(f"end_{slug}", "") if stype != "skip" else ""
+        db.add(UserCategorySchedule(
+            user_id=user.id, category=slug, schedule_type=stype,
+            days=days or None, start_time=start_time or None, end_time=end_time or None,
+        ))
+    await db.commit()
+    return RedirectResponse(url=redirect_to(request, "ui/settings?tab=categories"), status_code=303)
 
 
 # ── Skills tab ─────────────────────────────────────────────────────────────

@@ -1,0 +1,84 @@
+<style>
+  .cat-table { width: 100%; border-collapse: collapse; }
+  .cat-table th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; }
+  .cat-table td { padding: 10px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  .cat-table tr:last-child td { border-bottom: none; }
+  .cat-name { font-weight: 600; font-size: 13px; }
+  .type-options { display: flex; gap: 16px; }
+  .type-options label { display: flex; align-items: center; gap: 5px; font-weight: 400; cursor: pointer; white-space: nowrap; }
+  .schedule-fields { margin-top: 10px; display: none; }
+  .schedule-fields.visible { display: block; }
+  .days-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .day-label { display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 3px 8px; }
+  .day-label input { width: auto; padding: 0; border: none; accent-color: #2563eb; }
+  .day-label input:checked + span { color: #2563eb; font-weight: 600; }
+  .time-row { display: flex; gap: 12px; align-items: center; }
+  .time-row input[type=time] { width: 120px; padding: 4px 8px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; }
+  .free-note { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+</style>
+
+<div class="card">
+  <div class="card-title" style="margin-bottom:16px;">Active Categories</div>
+  <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">
+    Set which life areas you want to track and how they fit into your schedule.
+  </p>
+  <form method="post" action="{{ root }}/ui/settings/categories/save">
+    <table class="cat-table">
+      <thead>
+        <tr>
+          <th style="width:160px;">Category</th>
+          <th>Schedule type</th>
+          <th>Days &amp; Hours</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for slug, label in categories %}
+      {% set ex = existing.get(slug) %}
+      {% set ex_type = ex.schedule_type if ex else "skip" %}
+      {% set ex_days = ex.days.split(",") if ex and ex.days else [] %}
+      <tr>
+        <td><div class="cat-name">{{ label }}</div></td>
+        <td>
+          <div class="type-options">
+            <label><input type="radio" name="type_{{ slug }}" value="fixed" {% if ex_type == "fixed" %}checked{% endif %} onchange="catTypeChange('{{ slug }}','fixed')"> Fixed</label>
+            <label><input type="radio" name="type_{{ slug }}" value="free"  {% if ex_type == "free"  %}checked{% endif %} onchange="catTypeChange('{{ slug }}','free')"> Free</label>
+            <label><input type="radio" name="type_{{ slug }}" value="skip"  {% if ex_type == "skip" or not ex %}checked{% endif %} onchange="catTypeChange('{{ slug }}','skip')"> Skip</label>
+          </div>
+        </td>
+        <td>
+          <div class="schedule-fields {% if ex_type != 'skip' %}visible{% endif %}" id="sched_{{ slug }}">
+            <div class="free-note" id="freenote_{{ slug }}" style="{% if ex_type != 'free' %}display:none{% endif %}">
+              Available hours — shared across free-schedule categories.
+            </div>
+            <div class="days-row">
+              {% for day in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] %}
+              <label class="day-label">
+                <input type="checkbox" name="days_{{ slug }}" value="{{ day }}" {% if day in ex_days %}checked{% endif %}>
+                <span>{{ day }}</span>
+              </label>
+              {% endfor %}
+            </div>
+            <div class="time-row">
+              <input type="time" name="start_{{ slug }}" value="{{ ex.start_time if ex and ex.start_time else '07:00' }}">
+              <span style="color:#64748b;font-size:12px;">to</span>
+              <input type="time" name="end_{{ slug }}" value="{{ ex.end_time if ex and ex.end_time else '09:00' }}">
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div style="margin-top:20px;">
+      <button class="btn btn-primary" type="submit" style="width:auto;padding:8px 24px;">Save Categories</button>
+    </div>
+  </form>
+</div>
+
+<script>
+function catTypeChange(slug, type) {
+  document.getElementById('sched_' + slug).classList.toggle('visible', type !== 'skip');
+  const fn = document.getElementById('freenote_' + slug);
+  if (fn) fn.style.display = (type === 'free') ? 'block' : 'none';
+}
+</script>
