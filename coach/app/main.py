@@ -61,20 +61,25 @@ async def onboarding_gate(request: Request, call_next):
             not path.startswith("/ui/onboarding") and
             not path.startswith("/ui/login") and
             not path.startswith("/ui/profile")):
-        uid = request.cookies.get("uid")
-        if uid:
-            try:
-                from app.database import LocalSession
-                from app.models import User
-                from sqlalchemy import select
-                async with LocalSession() as db:
-                    user = (await db.execute(select(User).where(User.id == int(uid)))).scalar_one_or_none()
-                    if user and not user.onboarding_complete:
-                        ingress = request.headers.get("X-Ingress-Path", "")
-                        from fastapi.responses import RedirectResponse
-                        return RedirectResponse(url=f"{ingress}/ui/onboarding", status_code=302)
-            except Exception:
-                pass
+        try:
+            from app.database import LocalSession
+            from app.models import User
+            from sqlalchemy import select
+            async with LocalSession() as db:
+                user = None
+                ha_username = request.headers.get("X-Remote-User-Name")
+                if ha_username:
+                    user = (await db.execute(select(User).where(User.username == ha_username))).scalar_one_or_none()
+                else:
+                    uid = request.cookies.get("uid")
+                    if uid:
+                        user = (await db.execute(select(User).where(User.id == int(uid)))).scalar_one_or_none()
+                if user and not user.onboarding_complete:
+                    ingress = request.headers.get("X-Ingress-Path", "")
+                    from fastapi.responses import RedirectResponse
+                    return RedirectResponse(url=f"{ingress}/ui/onboarding", status_code=302)
+        except Exception:
+            pass
     return await call_next(request)
 
 
@@ -88,6 +93,8 @@ async def ingress_root_path(request: Request, call_next):
 
 @app.get("/")
 async def root(request: Request):
+    if request.headers.get("X-Remote-User-Name"):
+        return RedirectResponse(url=redirect_to(request, "ui/dashboard"), status_code=302)
     return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
 
 

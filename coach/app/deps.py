@@ -21,6 +21,18 @@ async def get_ext_db():
 
 
 async def get_current_user(request: Request, db: AsyncSession) -> Optional[User]:
+    ha_username = request.headers.get("X-Remote-User-Name")
+    if ha_username:
+        ha_display = request.headers.get("X-Remote-User-Display-Name", ha_username)
+        result = await db.execute(select(User).where(User.username == ha_username))
+        user = result.scalar_one_or_none()
+        if not user:
+            user = User(username=ha_username, display_name=ha_display)
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+        return user
+
     uid = request.cookies.get("uid")
     if not uid:
         return None
