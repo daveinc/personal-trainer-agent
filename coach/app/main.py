@@ -28,6 +28,7 @@ from app.routes.health import router as health_router
 from app.routes.learning import router as learning_router
 from app.routes.relationships import router as relationships_router
 from app.routes.webhook import router as webhook_router
+from app.routes.goals import router as goals_router
 from app.services.scheduler import run_scheduler
 from app.services.ha_events import run_event_listener
 
@@ -115,3 +116,4 @@ app.include_router(health_router)
 app.include_router(learning_router)
 app.include_router(relationships_router)
 app.include_router(webhook_router)
+app.include_router(goals_router)

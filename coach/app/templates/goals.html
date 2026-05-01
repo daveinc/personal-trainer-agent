@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% set active = "goals" %}
+{% block title %}Coach · Goals{% endblock %}
+{% block page_title %}Goals{% endblock %}
+
+{% block topbar_right %}
+<button class="btn btn-primary btn-sm" onclick="document.getElementById('add-goal-form').style.display='block';this.style.display='none';">+ New Goal</button>
+{% endblock %}
+
+{% block content %}
+
+{# ── ADD GOAL FORM ─────────────────────────────────────────────────────────── #}
+<div id="add-goal-form" style="display:none;" class="card" style="margin-bottom:16px;">
+  <div class="card-title" style="margin-bottom:12px;">New Goal</div>
+  <form method="post" action="{{ root }}/ui/goals/add">
+    <div class="form-row" style="margin-bottom:12px;">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Title *</label>
+        <input class="form-input" type="text" name="title" placeholder="e.g. Run a 5K" required>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Category</label>
+        <input class="form-input" type="text" name="category" placeholder="fitness, health…">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Start Date</label>
+        <input class="form-input" type="date" name="start_date">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Deadline</label>
+        <input class="form-input" type="date" name="deadline">
+      </div>
+    </div>
+    <div class="form-row" style="margin-bottom:12px;">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Total Steps <span class="text-muted">(for step goals)</span></label>
+        <input class="form-input" type="number" name="total_steps" placeholder="e.g. 30" min="1" style="width:120px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Target Value</label>
+        <input class="form-input" type="number" name="target_value" placeholder="e.g. 5.0" step="any" style="width:120px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Unit</label>
+        <input class="form-input" type="text" name="target_unit" placeholder="km, kg…" style="width:80px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Start Value</label>
+        <input class="form-input" type="number" name="start_value" placeholder="e.g. 0.0" step="any" style="width:120px;">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label class="form-label">Notes</label>
+      <input class="form-input" type="text" name="notes" placeholder="Optional context">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" type="submit">Save Goal</button>
+      <button class="btn btn-secondary" type="button" onclick="document.getElementById('add-goal-form').style.display='none';document.querySelector('.btn-primary.btn-sm').style.display='inline-flex';">Cancel</button>
+    </div>
+  </form>
+</div>
+
+{# ── ACTIVE GOALS ──────────────────────────────────────────────────────────── #}
+{% set active_goals = goals | selectattr("is_active") | list %}
+{% set done_goals = goals | rejectattr("is_active") | list %}
+
+{% if active_goals %}
+<div style="margin-bottom:8px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Active — {{ active_goals|length }}</div>
+{% for goal in active_goals %}
+{% set prog = progress_map[goal.id] %}
+{% set done = steps_done(prog) %}
+<div class="card" style="margin-bottom:12px;">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:600;font-size:14px;margin-bottom:2px;">{{ goal.title }}</div>
+      <div style="font-size:12px;color:var(--text-muted);">
+        {{ goal.category }}{% if goal.deadline %} · Due {{ goal.deadline }}{% endif %}
+        {% if goal.notes %} · {{ goal.notes }}{% endif %}
+      </div>
+
+      {# Step-based progress bar #}
+      {% if goal.total_steps %}
+      {% set pct = [[(done / goal.total_steps * 100)|int, 0]|max, 100]|min %}
+      <div style="margin-top:10px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <div style="background:var(--border);border-radius:4px;height:8px;flex:1;">
+            <div style="background:var(--primary);width:{{ pct }}%;height:8px;border-radius:4px;transition:width 0.3s;"></div>
+          </div>
+          <span style="font-size:12px;color:var(--text-muted);white-space:nowrap;">{{ done }} / {{ goal.total_steps }}</span>
+        </div>
+      </div>
+      {% elif goal.target_value %}
+      <div style="margin-top:6px;font-size:12px;color:var(--text-muted);">
+        Target: {{ goal.target_value }}{% if goal.target_unit %} {{ goal.target_unit }}{% endif %}
+        {% if goal.start_value is not none %} (from {{ goal.start_value }}){% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0;">
+      {# Step logging buttons #}
+      {% if goal.total_steps %}
+      <div style="display:flex;gap:4px;">
+        {% for n in [1, 5, 10] %}
+        <form method="post" action="{{ root }}/ui/goals/{{ goal.id }}/progress" style="display:inline;">
+          <input type="hidden" name="steps" value="{{ n }}">
+          <button class="btn btn-primary btn-sm" type="submit">+{{ n }}</button>
+        </form>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div style="display:flex;gap:4px;">
+        <form method="post" action="{{ root }}/ui/goals/{{ goal.id }}/complete" style="display:inline;">
+          <button class="btn btn-success btn-sm" type="submit" onclick="return confirm('Mark goal as achieved?')">✓ Done</button>
+        </form>
+        <form method="post" action="{{ root }}/ui/goals/{{ goal.id }}/delete"
+              onsubmit="return confirm('Delete this goal?')" style="display:inline;">
+          <button class="btn btn-danger btn-sm" type="submit">✕</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# Recent progress log #}
+  {% if prog %}
+  <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px;">
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Recent</div>
+    {% for p in prog[:3] %}
+    <div style="font-size:12px;color:var(--text-muted);padding:2px 0;">
+      {{ p.logged_at }} — +{{ p.steps_added }}{% if p.note %} · {{ p.note }}{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {# Log with note form #}
+  {% if goal.total_steps %}
+  <div style="margin-top:8px;">
+    <form method="post" action="{{ root }}/ui/goals/{{ goal.id }}/progress" style="display:flex;gap:6px;align-items:flex-end;">
+      <input type="number" class="form-input" name="steps" value="1" min="1" style="width:70px;font-size:13px;padding:4px 8px;" placeholder="Steps">
+      <input type="text" class="form-input" name="note" placeholder="Note (optional)" style="flex:1;font-size:13px;padding:4px 8px;">
+      <button class="btn btn-secondary btn-sm" type="submit">Log</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+{% else %}
+<div class="empty">No active goals. Add one above.</div>
+{% endif %}
+
+{# ── COMPLETED GOALS ───────────────────────────────────────────────────────── #}
+{% if done_goals %}
+<div style="margin-top:24px;margin-bottom:8px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Achieved — {{ done_goals|length }}</div>
+{% for goal in done_goals %}
+<div class="card" style="margin-bottom:8px;opacity:0.75;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div>
+      <span class="badge badge-completed" style="margin-right:8px;">✓</span>
+      <span style="font-weight:600;">{{ goal.title }}</span>
+      <span style="font-size:12px;color:var(--text-muted);margin-left:8px;">{{ goal.category }}</span>
+      {% if goal.achieved_at %}<span style="font-size:12px;color:var(--text-muted);margin-left:8px;">Achieved {{ goal.achieved_at }}</span>{% endif %}
+    </div>
+    <div style="display:flex;gap:4px;">
+      <form method="post" action="{{ root }}/ui/goals/{{ goal.id }}/reopen" style="display:inline;">
+        <button class="btn btn-secondary btn-sm" type="submit">Reopen</button>
+      </form>
+      <form method="post" action="{{ root }}/ui/goals/{{ goal.id }}/delete"
+            onsubmit="return confirm('Delete this goal?')" style="display:inline;">
+        <button class="btn btn-danger btn-sm" type="submit">✕</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

@@ -220,3 +220,35 @@ class TrendObservation(Base):
     score: Mapped[str] = mapped_column(String(64), nullable=True)
     notes: Mapped[str] = mapped_column(Text, nullable=True)
     observed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class Goal(Base):
+    __tablename__ = "goals"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    category: Mapped[str] = mapped_column(String(64), nullable=False)
+    metric: Mapped[str] = mapped_column(String(64), nullable=True)       # links to category metric for auto-progress
+    target_value: Mapped[float] = mapped_column(nullable=True)
+    target_unit: Mapped[str] = mapped_column(String(32), nullable=True)
+    start_value: Mapped[float] = mapped_column(nullable=True)
+    total_steps: Mapped[int] = mapped_column(Integer, nullable=True)     # for step-based goals
+    start_date: Mapped[str] = mapped_column(String(10), nullable=True)
+    deadline: Mapped[str] = mapped_column(String(10), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    achieved_at: Mapped[str] = mapped_column(String(10), nullable=True)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class GoalProgress(Base):
+    __tablename__ = "goal_progress"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    goal_id: Mapped[int] = mapped_column(Integer, ForeignKey("goals.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    steps_added: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    note: Mapped[str] = mapped_column(String(256), nullable=True)
+    logged_at: Mapped[str] = mapped_column(String(10), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

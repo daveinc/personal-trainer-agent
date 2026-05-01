@@ -4,18 +4,15 @@ FastAPI + Jinja2 + HTMX + SQLite/MariaDB personal life coach, packaged as an HA 
 
 - **Repo:** https://github.com/daveinc/personal-trainer-agent
 - **Addon slug:** `1226bac9_coach`
-- **Current version:** 0.3.0 (deployed on HA)
+- **Current version:** 0.4.6 (deployed on HA)
 - **Target:** aarch64 (Raspberry Pi)
 
-## Status (v0.3.0)
-Auth, dashboard, fitness page, settings (DB + calendar tabs), 8 category page shells — all built.
-All 8 non-fitness category pages show static data, not wired to real data yet.
+## Status (v0.4.7)
+Auth (HA ingress auto-login), dashboard, all category pages wired to DB (health, finances, fitness, learning, relationships, routines, trends, check-ins), settings (preferences + categories tabs), onboarding with Fixed/Free/Skip schedule.
 
 ## Next priorities
-1. Real password auth (bcrypt — currently any input logs in)
-2. Wire check-in form to DB (template exists, no backend)
-3. Wire one category end-to-end (Health or Finances as the model)
-4. AI agent integration (Claude API, design model-agnostic from day one)
+1. AI agent integration (Claude API, model-agnostic)
+2. Real password auth (bcrypt — currently any input logs in)
 
 ## Release workflow (critical — both steps required)
 1. Bump version in `config.json` AND `LABEL version=` in `Dockerfile`
