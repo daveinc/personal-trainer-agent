@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_ext_db, get_current_user, redirect_to, tctx
 from app.ha_calendar import CATEGORY, create_event, delete_event, get_all_events, update_event
-from app.models import User, WorkoutLog, UserCategorySchedule
+from app.models import User, WorkoutLog, UserCategorySchedule, Skill
 from app.routes.onboarding import CATEGORIES
 
 router = APIRouter()
@@ -253,12 +253,53 @@ async def settings_categories_save(request: Request, db: AsyncSession = Depends(
 
 # ── Skills tab ─────────────────────────────────────────────────────────────
 
+PSYCHOLOGY_SKILLS = [
+    {"name": "Streaks", "category": "Motivation", "description": "Tracks user's streak of completing tasks or activities.", "enabled": True},
+    {"name": "Step Chunking", "category": "Behavior Modification", "description": "Divides long-term goals into manageable, achievable steps.", "enabled": True},
+    {"name": "Nudges", "category": "Personalization", "description": "Subtle prompts to encourage desired behaviors or actions.", "enabled": True},
+    {"name": "Celebration Moments", "category": "Positive Reinforcement", "description": "Encourages users with positive feedback and achievements.", "enabled": True},
+    {"name": "Reframing", "category": "Cognitive Behavior Therapy", "description": "Helps change negative thoughts and beliefs to improve mental well-being.", "enabled": True},
+    {"name": "Reflection Prompts", "category": "Growth Mindset", "description": "Provides prompts to reflect on experiences for personal growth and improvement.", "enabled": True},
+]
+
+
 @router.get("/ui/settings/skills")
 async def settings_skills(request: Request, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     if not user:
         return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
-    return templates.TemplateResponse(request, "_settings_skills.html", tctx(request, user=user))
+
+    skills = (await db.execute(select(Skill))).scalars().all()
+    if not skills:
+        for s in PSYCHOLOGY_SKILLS:
+            db.add(Skill(name=s["name"], category=s["category"], description=s["description"], enabled=s["enabled"]))
+        await db.commit()
+        skills = (await db.execute(select(Skill))).scalars().all()
+
+    return templates.TemplateResponse(request, "_settings_skills.html", tctx(request, user=user, skills=skills))
+
+
+@router.get("/settings/skills/defaults")
+async def get_skills_defaults():
+    return PSYCHOLOGY_SKILLS
+
+
+@router.get("/settings/skills")
+async def get_skills(db: AsyncSession = Depends(get_db)):
+    skills = (await db.execute(select(Skill))).scalars().all()
+    return [{"id": s.id, "name": s.name, "category": s.category, "description": s.description, "enabled": s.enabled} for s in skills]
+
+
+@router.post("/settings/skills")
+async def toggle_skill_enabled(request: Request, db: AsyncSession = Depends(get_db)):
+    form = await request.form()
+    skill_id = int(form.get("id"))
+    skill = (await db.execute(select(Skill).where(Skill.id == skill_id))).scalar_one_or_none()
+    if skill:
+        skill.enabled = not skill.enabled
+        await db.commit()
+    skills = (await db.execute(select(Skill))).scalars().all()
+    return [{"id": s.id, "name": s.name, "category": s.category, "description": s.description, "enabled": s.enabled} for s in skills]
 
 
 # ── Calendar tab ───────────────────────────────────────────────────────────

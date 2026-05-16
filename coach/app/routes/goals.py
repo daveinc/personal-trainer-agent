@@ -166,3 +166,39 @@ async def goals_delete(goal_id: int, request: Request, db: AsyncSession = Depend
     await db.execute(delete(Goal).where(Goal.id == goal_id, Goal.user_id == user.id))
     await db.commit()
     return RedirectResponse(url=redirect_to(request, "ui/goals"), status_code=303)
+
+
+# ── Goals Progress API ────────────────────────────────────────────────────
+
+@router.get("/goals/progress")
+async def get_goals_progress(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return {"error": "Not authenticated"}, 401
+
+    goals = (await db.execute(
+        select(Goal).where(Goal.user_id == user.id, Goal.is_active == True)
+    )).scalars().all()
+
+    progress = []
+    for goal in goals:
+        entries = (await db.execute(
+            select(GoalProgress).where(GoalProgress.goal_id == goal.id)
+        )).scalars().all()
+
+        current_value = sum(e.steps_added for e in entries)
+        if goal.target_value:
+            percent_complete = min(100, (current_value / goal.target_value) * 100)
+        elif goal.total_steps:
+            percent_complete = min(100, (current_value / goal.total_steps) * 100)
+        else:
+            percent_complete = 0
+
+        progress.append({
+            "id": goal.id,
+            "metric_name": goal.title,
+            "unit": goal.target_unit,
+            "percent_complete": round(percent_complete, 2)
+        })
+
+    return progress

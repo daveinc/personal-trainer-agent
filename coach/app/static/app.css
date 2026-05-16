@@ -251,3 +251,11 @@ tr:hover td { background: #f8fafc; }
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-2 { grid-template-columns: 1fr; }
 }
+
+/* Mobile sidebar enhancements */
+@media (max-width: 767px) {
+  .sidebar { width: 48px; left: -48px; top: 0; height: 100vh; overflow: hidden; position: fixed; z-index: 999; background: #fff; transition: left 0.3s ease; }
+  .sidebar.open { left: 0; }
+  .sidebar nav .nav-item span.label, .sidebar nav .nav-item .text, .sidebar .logo-text { display: none; }
+  #hamburger-toggle { display: block; position: fixed; left: 12px; top: 12px; width: 32px; height: 32px; background: none; border: none; cursor: pointer; z-index: 1001; }
+}

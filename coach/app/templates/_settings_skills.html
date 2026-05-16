@@ -1,21 +1,50 @@
-<div class="card-title" style="margin-bottom:16px;">Coaching Skills</div>
-<p style="color:var(--text-muted);font-size:13px;margin-bottom:24px;">
-  Define and manage the coach's active skill sets. Each skill area will be populated with specific techniques and behaviours that guide how the coach interacts with users.
+<style>
+  .skill-row { display: flex; align-items: flex-start; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .skill-row:last-child { border-bottom: none; }
+  .skill-info { flex: 1; }
+  .skill-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .skill-cat { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px; }
+  .skill-desc { font-size: 13px; color: var(--text-muted); }
+  .toggle-wrap { display: flex; align-items: center; padding-top: 2px; }
+  .toggle { position: relative; display: inline-block; width: 40px; height: 22px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 22px; cursor: pointer; transition: .2s; }
+  .slider:before { content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .2s; }
+  input:checked + .slider { background: #2563eb; }
+  input:checked + .slider:before { transform: translateX(18px); }
+</style>
+
+<div class="card-title" style="margin-bottom:8px;">Coaching Skills</div>
+<p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">
+  Toggle the psychology techniques the coach uses when interacting with you.
 </p>
 
-{% set skills = [
-  "Active listening and coaching questioning techniques",
-  "Coaching ethics and boundaries",
-  "Neuroscience and behavioural psychology",
-  "Communication skills",
-  "Goal setting, habit formation and personal development"
-] %}
-
+<div class="card">
 {% for skill in skills %}
-<div class="card" style="margin-bottom:16px;">
-  <div class="card-title" style="margin-bottom:12px;">{{ skill }}</div>
-  <div style="color:var(--text-muted);font-size:13px;padding:16px;border:1px dashed var(--border);border-radius:var(--radius);text-align:center;">
-    Not yet configured — skill detail will be populated here.
+  <div class="skill-row">
+    <div class="skill-info">
+      <div class="skill-name">{{ skill.name }}</div>
+      <div class="skill-cat">{{ skill.category }}</div>
+      <div class="skill-desc">{{ skill.description }}</div>
+    </div>
+    <div class="toggle-wrap">
+      <label class="toggle">
+        <input type="checkbox" {% if skill.enabled %}checked{% endif %}
+               onchange="toggleSkill({{ skill.id }}, this)">
+        <span class="slider"></span>
+      </label>
+    </div>
   </div>
-</div>
 {% endfor %}
+</div>
+
+<script>
+async function toggleSkill(id, el) {
+  const form = new FormData();
+  form.append('id', id);
+  const resp = await fetch('{{ root }}/settings/skills', { method: 'POST', body: form });
+  if (!resp.ok) {
+    el.checked = !el.checked;
+  }
+}
+</script>

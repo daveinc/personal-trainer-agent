@@ -8,7 +8,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_current_user, redirect_to, tctx
-from app.models import ScoringRule, TrendObservation, TrendPeriod, User, WorkoutLog
+from app.models import ScoringRule, TrendObservation, TrendPeriod, User, WorkoutLog, CheckIn
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -234,3 +234,78 @@ async def trends_observations_delete(
     await db.execute(delete(TrendObservation).where(TrendObservation.id == obs_id))
     await db.commit()
     return RedirectResponse(url=redirect_to(request, "ui/trends?tab=observations"), status_code=302)
+
+
+# ── Category Trends API ────────────────────────────────────────────────────
+
+@router.get("/category/{category_name}/trends")
+async def category_trends(category_name: str, request: Request, db: AsyncSession = Depends(get_db)):
+    from datetime import date, timedelta
+
+    user = await get_current_user(request, db)
+    if not user:
+        return {"error": "Not authenticated"}
+
+    today = date.today()
+    thirty_days_ago = (today - timedelta(days=30)).strftime("%Y-%m-%d")
+
+    query = select(WorkoutLog).where(
+        WorkoutLog.user_id == user.id,
+        WorkoutLog.event_date >= thirty_days_ago,
+    )
+    logs = (await db.execute(query)).scalars().all()
+
+    return {
+        "category": category_name,
+        "data_points": [(l.event_date, 1) for l in logs[-30:]],
+        "observations": []
+    }
+
+
+# ── Insights / Correlations API ───────────────────────────────────────────
+
+async def detect_correlations(user_id: int, db: AsyncSession, days: int = 30):
+    from datetime import date, timedelta
+
+    checkins = (await db.execute(
+        select(CheckIn).where(
+            CheckIn.user_id == user_id,
+            CheckIn.log_date >= (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+        )
+    )).scalars().all()
+
+    if not checkins:
+        return []
+
+    insights = []
+    mood_values = [c.mood for c in checkins]
+    energy_values = [c.energy for c in checkins]
+
+    if len(mood_values) >= 2:
+        mean_mood = sum(mood_values) / len(mood_values)
+        mean_energy = sum(energy_values) / len(energy_values)
+
+        variance_mood = sum((x - mean_mood) ** 2 for x in mood_values) / len(mood_values)
+        variance_energy = sum((x - mean_energy) ** 2 for x in energy_values) / len(energy_values)
+
+        if variance_mood > 0 and variance_energy > 0:
+            covariance = sum((mood_values[i] - mean_mood) * (energy_values[i] - mean_energy) for i in range(len(mood_values))) / len(mood_values)
+            corr = covariance / (variance_mood * variance_energy) ** 0.5
+
+            if abs(corr) > 0.5:
+                if corr > 0:
+                    insights.append(f"Higher energy correlates with better mood (r={corr:.2f})")
+                else:
+                    insights.append(f"Higher energy correlates with lower mood (r={corr:.2f})")
+
+    return insights
+
+
+@router.get("/insights/correlations")
+async def get_correlations(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return {"error": "Not authenticated"}, 401
+
+    correlations = await detect_correlations(user.id, db)
+    return correlations

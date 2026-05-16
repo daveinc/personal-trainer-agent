@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, date, timedelta
+import random
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
@@ -7,11 +8,36 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_current_user, redirect_to, tctx
-from app.models import Slot, CheckIn
+from app.models import Slot, CheckIn, HealthEntry
 from app.routes.schedule import _get_week, _get_days, _today_or_next, CATEGORY_MAP
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+
+async def get_mood_trend(db: AsyncSession, user_id: int, days: int = 7):
+    query = select(CheckIn).where(
+        CheckIn.user_id == user_id,
+        CheckIn.log_date >= (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+    ).order_by(CheckIn.log_date)
+    results = (await db.execute(query)).scalars().all()
+    return [(c.log_date, c.mood) for c in results]
+
+
+async def get_sleep_average(db: AsyncSession, user_id: int, days: int = 7):
+    query = select(HealthEntry).where(
+        HealthEntry.user_id == user_id,
+        HealthEntry.metric == "sleep",
+        HealthEntry.log_date >= (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+    )
+    results = (await db.execute(query)).scalars().all()
+    if results:
+        return sum(e.value for e in results) / len(results)
+    return 0.0
+
+
+async def get_active_streaks(db: AsyncSession, user_id: int):
+    return []  # Placeholder - would need a Streak model
 
 
 @router.get("/ui/login")
@@ -72,21 +98,23 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
     # Calculate streak
     streak = 0
     if checkins:
-        # Get unique dates of checkins within the 7-day window
         checked_in_dates = sorted(list(set([datetime.strptime(c.log_date, "%Y-%m-%d").date() for c in checkins])), reverse=True)
-        
+
         current_day = today
         if not has_checkin_today:
-             # If no checkin today, check streak ending yesterday
-            current_day = today - timedelta(days=1)
-            
-        for _ in range(7):  # Check for up to 7 consecutive days
+             current_day = today - timedelta(days=1)
+
+        for _ in range(7):
             if current_day in checked_in_dates:
                 streak += 1
                 current_day -= timedelta(days=1)
             else:
                 break
-    
+
+    mood_trend = await get_mood_trend(db, user.id)
+    sleep_average = await get_sleep_average(db, user.id)
+    active_streaks = await get_active_streaks(db, user.id)
+
     return templates.TemplateResponse(request, "dashboard.html", tctx(
         request, user=user, greeting=greeting,
         today_slots=today_slots, upcoming_slots=upcoming_slots,
@@ -95,8 +123,37 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
         week_data=week_data, days=days, today=today, week_start=week_start,
         mood_avg=mood_avg, energy_avg=energy_avg, streak=streak,
         has_checkin_today=has_checkin_today,
+        mood_trend=mood_trend, sleep_average=sleep_average, active_streaks=active_streaks,
     ))
 
+
+@router.post("/log/quick")
+async def quick_log(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return {"error": "Not authenticated"}, 401
+
+    data = await request.json()
+
+    if "mood" in data:
+        today_str = date.today().strftime("%Y-%m-%d")
+        existing = (await db.execute(
+            select(CheckIn).where(CheckIn.user_id == user.id, CheckIn.log_date == today_str)
+        )).scalar_one_or_none()
+        if existing:
+            existing.mood = data["mood"]
+        else:
+            db.add(CheckIn(user_id=user.id, mood=data["mood"], energy=5, notes="", log_date=today_str))
+        await db.commit()
+        return {"success": True}
+
+    if "weight" in data:
+        today_str = date.today().strftime("%Y-%m-%d")
+        db.add(HealthEntry(user_id=user.id, metric="weight", value=data["weight"], log_date=today_str))
+        await db.commit()
+        return {"success": True}
+
+    return {"error": "Invalid data"}, 400
 
 
 @router.get("/ui/ha-status")
