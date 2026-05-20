@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} — Pipeline{% endblock %}
+{% block page_title %}{{ job.title }}{% endblock %}
+
+{% block topbar_right %}
+<a href="{{ root }}/ui/pipeline" class="btn btn-secondary btn-sm">← Pipeline</a>
+{% endblock %}
+
+{% block content %}
+<style>
+.stage-bar { display: flex; gap: 0; margin-bottom: 24px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.stage-step { flex: 1; padding: 10px 8px; text-align: center; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; background: var(--bg); color: var(--text-muted); border-right: 1px solid var(--border); transition: background 0.15s; }
+.stage-step:last-child { border-right: none; }
+.stage-step.active { background: var(--primary); color: #fff; }
+.stage-step.done   { background: #dcfce7; color: #15803d; }
+.note-item { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.note-item:last-child { border-bottom: none; }
+.note-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+</style>
+
+{% set stage_idx = stages.index(job.stage) if job.stage in stages else 0 %}
+
+<div class="stage-bar">
+  {% for s in stages %}
+  {% set i = loop.index0 %}
+  <div class="stage-step {% if i < stage_idx %}done{% elif i == stage_idx %}active{% endif %}">
+    {{ stage_labels[s] }}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="grid grid-2" style="margin-bottom:16px">
+  <div class="card">
+    <div class="card-title">Job Details</div>
+    <table>
+      <tr><th style="width:110px">Client</th><td>{{ job.client or "—" }}</td></tr>
+      <tr><th>Location</th><td>{{ job.location or "—" }}</td></tr>
+      <tr><th>Value</th><td>{% if job.value %}₪{{ "{:,.0f}".format(job.value) }}{% else %}—{% endif %}</td></tr>
+      <tr><th>Due</th><td>{{ job.due_date or "—" }}</td></tr>
+      <tr><th>Stage</th><td><strong>{{ stage_labels.get(job.stage, job.stage) }}</strong></td></tr>
+      <tr><th>Created</th><td>{{ job.created_at.strftime("%Y-%m-%d") }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Move Stage</div>
+    <form method="post" action="{{ root }}/ui/pipeline/{{ job.id }}/stage">
+      <div class="form-group">
+        <select name="stage">
+          {% for s in stages %}
+          <option value="{{ s }}" {% if s == job.stage %}selected{% endif %}>{{ stage_labels[s] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button class="btn btn-primary" type="submit">Update Stage</button>
+    </form>
+
+    {% if job.stage != stages[-1] %}
+    <form method="post" action="{{ root }}/ui/pipeline/{{ job.id }}/advance" style="margin-top:10px">
+      <button class="btn btn-success" type="submit">→ Advance to {{ stage_labels[stages[stages.index(job.stage)+1]] if job.stage in stages and stages.index(job.stage)+1 < stages|length else "Done" }}</button>
+    </form>
+    {% endif %}
+
+    <form method="post" action="{{ root }}/ui/pipeline/{{ job.id }}/archive" style="margin-top:10px"
+          onsubmit="return confirm('Archive this job?')">
+      <button class="btn btn-danger btn-sm" type="submit">Archive</button>
+    </form>
+  </div>
+</div>
+
+{% if job.notes %}
+<div class="card" style="margin-bottom:16px">
+  <div class="card-title">Job Notes</div>
+  <p style="font-size:13px;white-space:pre-wrap">{{ job.notes }}</p>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-title">Activity Log</div>
+  {% if notes %}
+  {% for note in notes %}
+  <div class="note-item">
+    {{ note.body }}
+    <div class="note-meta">{{ note.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="empty">No notes yet.</div>
+  {% endif %}
+
+  <form method="post" action="{{ root }}/ui/pipeline/{{ job.id }}/note" style="margin-top:16px">
+    <div class="form-group">
+      <input class="form-input" name="body" placeholder="Add a note (call made, quote sent, etc.)..." required>
+    </div>
+    <button class="btn btn-primary btn-sm" type="submit">Add Note</button>
+  </form>
+</div>
+{% endblock %}

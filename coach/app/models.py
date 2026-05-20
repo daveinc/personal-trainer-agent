@@ -263,3 +263,41 @@ class Skill(Base):
     description: Mapped[str] = mapped_column(Text, nullable=True)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+# ── Business Pipeline ──────────────────────────────────────────
+PIPELINE_STAGES = ["marketing", "offer", "design", "install", "paid"]
+PIPELINE_STAGE_LABELS = {
+    "marketing": "Marketing",
+    "offer":     "Price Offer",
+    "design":    "Design",
+    "install":   "Install",
+    "paid":      "Cash In",
+}
+
+
+class PipelineJob(Base):
+    __tablename__ = "pipeline_jobs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String(256), nullable=False)
+    client: Mapped[str] = mapped_column(String(128), nullable=True)
+    location: Mapped[str] = mapped_column(String(256), nullable=True)
+    stage: Mapped[str] = mapped_column(String(32), nullable=False, default="marketing")
+    value: Mapped[float] = mapped_column(nullable=True)
+    due_date: Mapped[str] = mapped_column(String(10), nullable=True)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
+class PipelineNote(Base):
+    __tablename__ = "pipeline_notes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[int] = mapped_column(Integer, ForeignKey("pipeline_jobs.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

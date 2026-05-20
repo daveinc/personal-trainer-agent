@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Pipeline — Coach{% endblock %}
+{% block page_title %}Business Pipeline{% endblock %}
+
+{% block topbar_right %}
+<span style="font-size:13px;color:var(--text-muted)">
+  Active value: <strong style="color:var(--text)">₪{{ "{:,.0f}".format(total_active_value) }}</strong>
+</span>
+{% endblock %}
+
+{% block content %}
+<style>
+.pipe-stages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+.pipe-col { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.pipe-col-header { padding: 10px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #fff; }
+.stage-marketing { background: #6366f1; }
+.stage-offer      { background: #f59e0b; }
+.stage-design     { background: #3b82f6; }
+.stage-install    { background: #10b981; }
+.stage-paid       { background: #22c55e; }
+.pipe-col-body { padding: 8px; min-height: 80px; }
+.pipe-card { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
+.pipe-card-title { font-weight: 600; margin-bottom: 2px; }
+.pipe-card a { color: var(--text); text-decoration: none; }
+.pipe-card a:hover { color: var(--primary); }
+.pipe-card-meta { font-size: 11px; color: var(--text-muted); }
+.pipe-card-actions { margin-top: 8px; display: flex; gap: 6px; }
+.pipe-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 12px; }
+.add-form { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.add-form h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+@media (max-width: 900px) { .pipe-stages { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .pipe-stages { grid-template-columns: 1fr; } }
+</style>
+
+<div class="pipe-stages">
+  {% for stage in stages %}
+  <div class="pipe-col">
+    <div class="pipe-col-header stage-{{ stage }}">
+      {{ stage_labels[stage] }}
+      <span style="font-weight:400;margin-left:4px">({{ by_stage[stage]|length }})</span>
+    </div>
+    <div class="pipe-col-body">
+      {% for job in by_stage[stage] %}
+      <div class="pipe-card">
+        <div class="pipe-card-title">
+          <a href="{{ root }}/ui/pipeline/{{ job.id }}">{{ job.title }}</a>
+        </div>
+        {% if job.client %}
+        <div class="pipe-card-meta">{{ job.client }}</div>
+        {% endif %}
+        {% if job.value %}
+        <div class="pipe-card-meta">₪{{ "{:,.0f}".format(job.value) }}</div>
+        {% endif %}
+        {% if job.due_date %}
+        <div class="pipe-card-meta">Due: {{ job.due_date }}</div>
+        {% endif %}
+        <div class="pipe-card-actions">
+          {% if not loop.last or stage != stages[-1] %}
+          <form method="post" action="{{ root }}/ui/pipeline/{{ job.id }}/advance" style="display:inline">
+            <button class="btn btn-primary btn-sm" type="submit">→ Next</button>
+          </form>
+          {% endif %}
+          <a href="{{ root }}/ui/pipeline/{{ job.id }}" class="btn btn-secondary btn-sm">View</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="pipe-empty">—</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Add Job Form -->
+<div class="add-form">
+  <h3>Add New Job</h3>
+  <form method="post" action="{{ root }}/ui/pipeline/add">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Job Title *</label>
+        <input class="form-input" name="title" required placeholder="e.g. CCTV — Savyon office">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Client</label>
+        <input class="form-input" name="client" placeholder="Client name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Stage</label>
+        <select name="stage">
+          {% for s in stages %}
+          <option value="{{ s }}">{{ stage_labels[s] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Est. Value (₪)</label>
+        <input class="form-input" name="value" type="number" min="0" step="100" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input class="form-input" name="location" placeholder="Site address">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Due Date</label>
+        <input class="form-input" name="due_date" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" name="notes" placeholder="Any initial notes...">
+    </div>
+    <button class="btn btn-primary" type="submit">Add Job</button>
+  </form>
+</div>
+{% endblock %}
