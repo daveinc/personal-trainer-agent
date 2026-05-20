@@ -265,6 +265,33 @@ class Skill(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+# ── Daily Standup ─────────────────────────────────────────────
+class StandupEntry(Base):
+    __tablename__ = "standup_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    log_date: Mapped[str] = mapped_column(String(10), nullable=False)  # YYYY-MM-DD
+    done_items: Mapped[str] = mapped_column(Text, nullable=True)
+    new_items: Mapped[str] = mapped_column(Text, nullable=True)
+    blockers: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+# ── Calendar Config ───────────────────────────────────────────
+class CalendarConfig(Base):
+    __tablename__ = "calendar_configs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    entity_id: Mapped[str] = mapped_column(String(256), nullable=False)
+    label: Mapped[str] = mapped_column(String(128), nullable=True)
+    default_category: Mapped[str] = mapped_column(String(64), nullable=True)
+    ignore_keywords: Mapped[str] = mapped_column(Text, nullable=True)  # comma-separated
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
 # ── Business Pipeline ──────────────────────────────────────────
 PIPELINE_STAGES = ["marketing", "offer", "design", "install", "paid"]
 PIPELINE_STAGE_LABELS = {

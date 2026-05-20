@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_current_user, redirect_to, tctx
 from app.models import PipelineJob, PipelineNote, PIPELINE_STAGES, PIPELINE_STAGE_LABELS
+from app.services.notifier import fire_pipeline_event
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -85,9 +86,10 @@ async def pipeline_set_stage(job_id: int, request: Request, db: AsyncSession = D
     if job:
         form = await request.form()
         new_stage = form.get("stage") or job.stage
-        if new_stage in PIPELINE_STAGES:
+        if new_stage in PIPELINE_STAGES and new_stage != job.stage:
             job.stage = new_stage
             await db.commit()
+            await fire_pipeline_event(job.id, job.title, job.client or "", new_stage, PIPELINE_STAGE_LABELS[new_stage])
 
     return RedirectResponse(url=redirect_to(request, "ui/pipeline"), status_code=303)
 
@@ -105,8 +107,10 @@ async def pipeline_advance(job_id: int, request: Request, db: AsyncSession = Dep
     if job:
         idx = PIPELINE_STAGES.index(job.stage) if job.stage in PIPELINE_STAGES else 0
         if idx < len(PIPELINE_STAGES) - 1:
-            job.stage = PIPELINE_STAGES[idx + 1]
+            new_stage = PIPELINE_STAGES[idx + 1]
+            job.stage = new_stage
             await db.commit()
+            await fire_pipeline_event(job.id, job.title, job.client or "", new_stage, PIPELINE_STAGE_LABELS[new_stage])
 
     return RedirectResponse(url=redirect_to(request, "ui/pipeline"), status_code=303)
 

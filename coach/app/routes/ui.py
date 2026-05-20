@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_current_user, redirect_to, tctx
-from app.models import Slot, CheckIn, HealthEntry
+from app.models import Slot, CheckIn, HealthEntry, StandupEntry
 from app.routes.schedule import _get_week, _get_days, _today_or_next, CATEGORY_MAP
 
 router = APIRouter()
@@ -115,6 +115,11 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
     sleep_average = await get_sleep_average(db, user.id)
     active_streaks = await get_active_streaks(db, user.id)
 
+    today_str = today.strftime("%Y-%m-%d")
+    standup_done = (await db.execute(
+        select(StandupEntry).where(StandupEntry.user_id == user.id, StandupEntry.log_date == today_str)
+    )).scalar_one_or_none() is not None
+
     return templates.TemplateResponse(request, "dashboard.html", tctx(
         request, user=user, greeting=greeting,
         today_slots=today_slots, upcoming_slots=upcoming_slots,
@@ -124,6 +129,7 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
         mood_avg=mood_avg, energy_avg=energy_avg, streak=streak,
         has_checkin_today=has_checkin_today,
         mood_trend=mood_trend, sleep_average=sleep_average, active_streaks=active_streaks,
+        standup_done=standup_done,
     ))
 
 
@@ -154,6 +160,32 @@ async def quick_log(request: Request, db: AsyncSession = Depends(get_db)):
         return {"success": True}
 
     return {"error": "Invalid data"}, 400
+
+
+@router.post("/ui/standup/submit")
+async def standup_submit(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+
+    form = await request.form()
+    today_str = date.today().strftime("%Y-%m-%d")
+    existing = (await db.execute(
+        select(StandupEntry).where(StandupEntry.user_id == user.id, StandupEntry.log_date == today_str)
+    )).scalar_one_or_none()
+
+    if not existing:
+        entry = StandupEntry(
+            user_id=user.id,
+            log_date=today_str,
+            done_items=(form.get("done") or "").strip() or None,
+            new_items=(form.get("new") or "").strip() or None,
+            blockers=(form.get("blockers") or "").strip() or None,
+        )
+        db.add(entry)
+        await db.commit()
+
+    return RedirectResponse(url=redirect_to(request, "ui/dashboard"), status_code=303)
 
 
 @router.get("/ui/ha-status")

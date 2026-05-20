@@ -72,6 +72,33 @@ async def notify_post_slot(slot) -> bool:
     })
 
 
+async def fire_pipeline_event(job_id: int, job_title: str, client: str, stage: str, stage_label: str) -> bool:
+    token = _token()
+    if not token:
+        return False
+    payload = {
+        "event_type": "coach_pipeline_stage_changed",
+        "event_data": {
+            "job_id": job_id,
+            "title": job_title,
+            "client": client or "",
+            "stage": stage,
+            "stage_label": stage_label,
+        },
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10) as c:
+            r = await c.post(
+                f"{_HA_API}/events/coach_pipeline_stage_changed",
+                json=payload["event_data"],
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            return r.status_code in (200, 201)
+    except Exception as e:
+        logger.error(f"Pipeline event fire failed: {e}")
+        return False
+
+
 async def notify_daily_brief() -> bool:
     svc = _service()
     if not svc:
