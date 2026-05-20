@@ -1,6 +1,6 @@
 {
   "name": "Coach",
-  "version": "0.4.11",
+  "version": "0.4.15",
   "slug": "coach",
   "description": "Life coach with calendar integration, check-ins, and progress tracking.",
   "url": "https://github.com/daveinc/personal-trainer-agent",
@@ -24,7 +24,8 @@
     "db_user": "",
     "db_password": "",
     "db_name": "",
-    "notify_service": ""
+    "notify_service": "",
+    "calendar_entity": "calendar.coach"
   },
   "schema": {
     "db_host": "str?",
@@ -32,6 +33,7 @@
     "db_user": "str?",
     "db_password": "password?",
     "db_name": "str?",
-    "notify_service": "str?"
+    "notify_service": "str?",
+    "calendar_entity": "str?"
   }
 }

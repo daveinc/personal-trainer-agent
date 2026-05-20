@@ -21,23 +21,19 @@ _KNOWN_CATEGORIES = set(CATEGORY_MAP.keys())
 
 
 def _prep_cal_events(raw: list) -> dict:
-    """Filter out checkins, extract useful fields, group by date string."""
+    """Normalize and group calendar events by date, filtering out checkins."""
+    from app.ha_calendar import normalize_event
     by_date = {}
     for e in raw:
-        desc = (e.get("description") or "").lower()
-        if "[checkin]" in desc:
+        ev = normalize_event(e)
+        if ev["category"] == "checkins":
             continue
-        dt = e.get("start", {}).get("dateTime", "") or e.get("start", {}).get("date", "")
-        day = dt[:10]
-        if not day:
+        if not ev["date"]:
             continue
-        category = next(
-            (t for t in re.findall(r'\[([^\]]+)\]', desc) if t in _KNOWN_CATEGORIES), ""
-        )
-        by_date.setdefault(day, []).append({
-            "summary": e.get("summary", "Event"),
-            "time": dt[11:16] if len(dt) > 10 else "",
-            "category": category,
+        by_date.setdefault(ev["date"], []).append({
+            "summary":  ev["summary"],
+            "time":     ev["time"],
+            "category": ev["category"],
         })
     return by_date
 _DAYS_MON = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]

@@ -70,3 +70,37 @@ async def notify_post_slot(slot) -> bool:
             ],
         },
     })
+
+
+async def notify_daily_brief() -> bool:
+    svc = _service()
+    if not svc:
+        logger.warning("NOTIFY_SERVICE not configured — daily brief skipped")
+        return False
+
+    try:
+        from app.ha_calendar import get_today_events
+        events = await get_today_events()
+    except Exception as e:
+        logger.warning(f"Could not fetch calendar events: {e}")
+        events = []
+
+    if events:
+        lines = []
+        for ev in events:
+            prefix = f"{ev['time']} " if ev.get("time") else ""
+            lines.append(f"• {prefix}{ev['summary']}")
+        message = "\n".join(lines)
+    else:
+        message = "No events scheduled today."
+
+    return await _call_ha(f"services/notify/{svc}", {
+        "title": "Good morning, Dave",
+        "message": message,
+        "data": {
+            "tag": "coach_daily_brief",
+            "actions": [
+                {"action": "coach_brief_ack", "title": "Got it"},
+            ],
+        },
+    })

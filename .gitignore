@@ -5,3 +5,7 @@ __pycache__/
 .venv/
 *.db
 *.sqlite
+
+# Personal data / local-only tools — never commit
+seed_*.json
+run_seed.py

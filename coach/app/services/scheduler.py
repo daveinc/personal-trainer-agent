@@ -10,11 +10,29 @@ from app.models import Slot, NotificationLog
 
 logger = logging.getLogger(__name__)
 
+_daily_brief_sent: str = ""  # tracks date string of last sent brief
+
 
 def _subtract_minutes(time_str: str, minutes: int) -> str:
     h, m = map(int, time_str.split(":"))
     total = max(0, h * 60 + m - minutes)
     return f"{total // 60:02d}:{total % 60:02d}"
+
+
+async def _check_daily_brief(now: datetime, today_str: str):
+    global _daily_brief_sent
+    if _daily_brief_sent == today_str:
+        return
+    # Weekdays only, fire at 07:00
+    if now.weekday() >= 5:  # 5=Sat, 6=Sun
+        return
+    if now.strftime("%H:%M") != "07:00":
+        return
+    from app.services.notifier import notify_daily_brief
+    sent = await notify_daily_brief()
+    if sent:
+        _daily_brief_sent = today_str
+        logger.info(f"Daily brief sent for {today_str}")
 
 
 async def _tick():
@@ -24,6 +42,8 @@ async def _tick():
     today_name = now.strftime("%a")
     today_str = now.strftime("%Y-%m-%d")
     now_hm = now.strftime("%H:%M")
+
+    await _check_daily_brief(now, today_str)
 
     async with LocalSession() as db:
         all_slots = (await db.execute(select(Slot))).scalars().all()
