@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_current_user, redirect_to, tctx
 from app.models import FinanceLine, User
+from app.services.spent import get_monthly_pulse
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -30,6 +31,8 @@ async def finances_page(request: Request, db: AsyncSession = Depends(get_db)):
     net_savings   = total_income - total_expense
     savings_rate  = round(net_savings / total_income * 100, 1) if total_income > 0 else 0.0
 
+    spent_pulse = await get_monthly_pulse()
+
     return templates.TemplateResponse(request, "finances.html", tctx(
         request, user=user, active="finances",
         income_lines=income_lines, expense_lines=expense_lines,
@@ -37,6 +40,7 @@ async def finances_page(request: Request, db: AsyncSession = Depends(get_db)):
         net_savings=net_savings, savings_rate=savings_rate,
         currency=getattr(user, "currency", "$") or "$",
         savings_target=getattr(user, "savings_target", 0.0) or 0.0,
+        spent_pulse=spent_pulse,
     ))
 
 
