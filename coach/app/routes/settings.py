@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.deps import get_db, get_ext_db, get_current_user, redirect_to, tctx
 from app.ha_calendar import CATEGORY, create_event, delete_event, get_all_events, update_event
-from app.models import User, WorkoutLog, UserCategorySchedule, Skill
+from app.models import User, WorkoutLog, UserCategorySchedule, Skill, CalendarConfig
 from app.routes.onboarding import CATEGORIES
 
 router = APIRouter()
@@ -319,11 +319,58 @@ async def settings_calendar(
     if user_filter:
         events = [e for e in events if _event_user(e) == user_filter]
     events.sort(key=lambda e: e.get("start", {}).get("dateTime", ""))
+
+    cal_configs = (await db.execute(
+        select(CalendarConfig).where(CalendarConfig.user_id == user.id).order_by(CalendarConfig.created_at)
+    )).scalars().all()
+
     return templates.TemplateResponse(
         request, "_settings_calendar.html",
         tctx(request, events=events, all_users=all_users,
-             user_filter=user_filter, event_user=_event_user)
+             user_filter=user_filter, event_user=_event_user,
+             cal_configs=cal_configs, categories=CATEGORIES)
     )
+
+
+@router.post("/ui/settings/calendar-config/add")
+async def cal_config_add(
+    request: Request,
+    entity_id: str = Form(...),
+    label: str = Form(""),
+    default_category: str = Form(""),
+    ignore_keywords: str = Form(""),
+    db: AsyncSession = Depends(get_db),
+):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    entity_id = entity_id.strip()
+    if entity_id:
+        db.add(CalendarConfig(
+            user_id=user.id,
+            entity_id=entity_id,
+            label=label.strip() or None,
+            default_category=default_category.strip() or None,
+            ignore_keywords=ignore_keywords.strip() or None,
+        ))
+        await db.commit()
+    return RedirectResponse(url=redirect_to(request, "ui/settings?tab=calendar"), status_code=303)
+
+
+@router.post("/ui/settings/calendar-config/{config_id}/delete")
+async def cal_config_delete(
+    config_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    await db.execute(
+        delete(CalendarConfig).where(CalendarConfig.id == config_id, CalendarConfig.user_id == user.id)
+    )
+    await db.commit()
+    return RedirectResponse(url=redirect_to(request, "ui/settings?tab=calendar"), status_code=303)
 
 
 @router.get("/ui/settings/calendar/edit")
