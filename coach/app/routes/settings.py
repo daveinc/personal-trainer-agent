@@ -205,14 +205,36 @@ async def settings_preferences_save(request: Request, db: AsyncSession = Depends
 
 # ── Notifications tab ──────────────────────────────────────────────────────
 
+async def _get_notify_services() -> list[str]:
+    import httpx as _httpx
+    token = os.getenv("SUPERVISOR_TOKEN", "")
+    if not token:
+        return []
+    try:
+        async with _httpx.AsyncClient(timeout=5) as client:
+            r = await client.get(
+                "http://supervisor/core/api/services",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            if r.status_code == 200:
+                domains = r.json()
+                notify_domain = next((d for d in domains if d.get("domain") == "notify"), None)
+                if notify_domain:
+                    return [f"notify.{svc}" for svc in notify_domain.get("services", {}).keys()]
+    except Exception:
+        pass
+    return []
+
+
 @router.get("/ui/settings/notifications")
 async def settings_notifications(request: Request, db: AsyncSession = Depends(get_db)):
     user = await get_current_user(request, db)
     if not user:
         return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    notify_services = await _get_notify_services()
     return templates.TemplateResponse(
         request, "_settings_notifications.html",
-        tctx(request, user=user)
+        tctx(request, user=user, notify_services=notify_services)
     )
 
 
@@ -223,10 +245,8 @@ async def settings_notifications_save(request: Request, db: AsyncSession = Depen
         return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
     form = await request.form()
     svc = (form.get("notify_service") or "").strip()
-    target = (form.get("notify_target") or "").strip()
-    lead_raw = form.get("notification_lead_minutes", "").strip()
+    lead_raw = (form.get("notification_lead_minutes") or "").strip()
     user.notify_service = svc or None
-    user.notify_target = target or None
     try:
         user.notification_lead_minutes = int(lead_raw) if lead_raw else None
     except ValueError:

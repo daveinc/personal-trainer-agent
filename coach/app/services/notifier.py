@@ -74,14 +74,14 @@ async def notify_post_slot(slot) -> bool:
 
 async def notify_calendar_event(event: dict, notify_service: str, notify_target: str | None = None) -> bool:
     """
-    Send an actionable push notification 30 min before a calendar event.
-    event: dict with title, start, end, all_day (from get_calendar_events_with_dt).
-    notify_service: e.g. "mobile_app_notepro" (without "notify." prefix).
+    Send an actionable push notification before a calendar event.
+    notify_service: full name (e.g. "notify.mobile_app_notepro") or bare (e.g. "mobile_app_notepro").
     """
     if not notify_service:
         logger.warning("notify_service not configured — skipping calendar event notification")
         return False
 
+    svc_name = notify_service.removeprefix("notify.")
     start_str = event["start"].strftime("%H:%M") if not event.get("all_day") else "All day"
     message = f"{event['title']} at {start_str}"
     title_key = event["title"][:30]
@@ -101,7 +101,7 @@ async def notify_calendar_event(event: dict, notify_service: str, notify_target:
     if notify_target:
         payload["target"] = notify_target
 
-    return await _call_ha(f"services/notify/{notify_service}", payload)
+    return await _call_ha(f"services/notify/{svc_name}", payload)
 
 
 async def fire_pipeline_event(job_id: int, job_title: str, client: str, stage: str, stage_label: str) -> bool:

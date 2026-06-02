@@ -2,28 +2,29 @@
 <div class="card" style="margin-bottom:16px;">
   <div class="card-title" style="margin-bottom:12px;">Push Notification Service</div>
   <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">
-    Configure which HA notify service Coach uses for event reminders and slot notifications.
-    Use the service name without the <code>notify.</code> prefix.
+    Choose which HA service Coach uses to send event reminders and slot notifications.
   </p>
   <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-    <div class="form-group" style="margin:0;min-width:200px;">
+    <div class="form-group" style="margin:0;min-width:240px;">
       <label class="form-label">Notify Service</label>
+      {% if notify_services %}
+      <select name="notify_service" class="form-input" style="width:auto;">
+        <option value="">— None —</option>
+        {% for svc in notify_services %}
+        <option value="{{ svc }}" {% if user.notify_service == svc %}selected{% endif %}>{{ svc }}</option>
+        {% endfor %}
+      </select>
+      {% else %}
       <input class="form-input" type="text" name="notify_service"
              value="{{ user.notify_service or '' }}"
-             placeholder="e.g. mobile_app_notepro">
-      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Without the <code>notify.</code> prefix</div>
+             placeholder="e.g. notify.mobile_app_notepro">
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">HA not reachable — enter manually</div>
+      {% endif %}
     </div>
-    <div class="form-group" style="margin:0;min-width:200px;">
-      <label class="form-label">Notify Target <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
-      <input class="form-input" type="text" name="notify_target"
-             value="{{ user.notify_target or '' }}"
-             placeholder="e.g. notify.notepro">
-    </div>
-    <div class="form-group" style="margin:0;width:140px;">
+    <div class="form-group" style="margin:0;width:160px;">
       <label class="form-label">Lead Time (minutes)</label>
       <input class="form-input" type="number" name="notification_lead_minutes" min="1" max="120"
-             value="{{ user.notification_lead_minutes or 30 }}"
-             placeholder="30">
+             value="{{ user.notification_lead_minutes or 30 }}">
     </div>
   </div>
   <button class="btn btn-primary btn-sm" type="submit">Save</button>
@@ -33,8 +34,8 @@
 <div class="card">
   <div class="card-title">How it works</div>
   <p style="font-size:13px;color:var(--text-muted);line-height:1.6;">
-    Coach listens to the HA event stream. When a calendar event is coming up, a notification
-    fires on your phone with <strong>Done / Skip / Snooze</strong> buttons.
-    Tapping any button is logged in Coach — no automations or webhooks required.
+    Coach scans your <code>calendar.coach</code> events every minute. When an event is within
+    the lead time, a push notification fires on your phone with <strong>Done / Skip / Snooze</strong>
+    buttons. Tapping any button is logged in Coach — no automations required.
   </p>
 </div>
