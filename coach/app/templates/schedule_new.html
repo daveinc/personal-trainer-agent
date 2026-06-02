@@ -85,7 +85,12 @@
       <div class="event-time">{{ ev.time or '—' }}</div>
       <div class="event-title">{{ ev.summary }}</div>
       {% if ev.category %}<span class="badge" style="background:#f0fdf4;color:#15803d;">{{ category_map.get(ev.category, ev.category) }}</span>{% endif %}
+      <button class="btn btn-secondary btn-sm"
+        hx-get="{{ root }}/events/log/form?title={{ ev.summary | urlencode }}"
+        hx-target="#log-form-top-{{ loop.index }}"
+        hx-swap="innerHTML">Log</button>
     </div>
+    <div id="log-form-top-{{ loop.index }}"></div>
     {% endfor %}
   </div>
   {% else %}
@@ -284,7 +289,12 @@
         <div class="event-time">{{ ev.time or '—' }}</div>
         <div class="event-title">{{ ev.summary }}</div>
         {% if ev.category %}<span class="badge" style="background:#f0fdf4;color:#15803d;">{{ category_map.get(ev.category, ev.category) }}</span>{% endif %}
+        <button class="btn btn-secondary btn-sm"
+          hx-get="{{ root }}/events/log/form?title={{ ev.summary | urlencode }}"
+          hx-target="#log-form-day-{{ loop.index }}"
+          hx-swap="innerHTML">Log</button>
       </div>
+      <div id="log-form-day-{{ loop.index }}"></div>
       {% endfor %}
     </div>
     {% else %}

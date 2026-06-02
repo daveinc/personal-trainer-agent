@@ -41,7 +41,13 @@ async def handle_action(slot_id: int, verb: str):
 async def handle_event_action(event_title: str, verb: str):
     """Handle Done/Skip/Snooze tapped on a calendar event notification."""
     logger.info(f"Calendar event '{event_title}' action: {verb}")
-    # EventLog DB write wired in Step 0.3
+    from app.routes.event_log import save_event_log
+    from app.models import User
+    from sqlalchemy import select
+    async with LocalSession() as db:
+        user = (await db.execute(select(User).order_by(User.id).limit(1))).scalar_one_or_none()
+        if user:
+            await save_event_log(user.id, event_title, verb)
 
 
 async def _log_session(slot_id: int):

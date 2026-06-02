@@ -153,6 +153,18 @@
   {% endif %}
 </div>
 
+{# ── TODAY'S LOG ──────────────────────────────────────────────────────────── #}
+<div class="card" style="margin-bottom:16px;">
+  <div class="flex justify-between items-center" style="margin-bottom:12px;">
+    <div class="card-title" style="margin:0;">Today's Log</div>
+  </div>
+  <div hx-get="{{ root }}/events/log/today"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+    <div id="today-log-list" style="font-size:12px;color:var(--text-muted);">Loading…</div>
+  </div>
+</div>
+
 {# ── CALENDAR ─────────────────────────────────────────────────────────────── #}
 <div class="card">
   <div class="flex justify-between items-center" style="margin-bottom:16px;">

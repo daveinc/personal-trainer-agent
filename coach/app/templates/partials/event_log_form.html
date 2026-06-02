@@ -1,0 +1,18 @@
+<form hx-post="{{ root }}/events/log"
+      hx-target="#today-log-list"
+      hx-swap="outerHTML"
+      style="margin-top:8px;background:#f8fafc;border:1px solid var(--border);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px;">
+  <input type="hidden" name="event_title" value="{{ title }}">
+  <select name="action" class="form-input" style="width:auto;font-size:12px;padding:5px 8px;">
+    <option value="done">✅ Done</option>
+    <option value="skipped">⏭ Skipped</option>
+    <option value="postponed">🔄 Postponed</option>
+    <option value="note">📝 Note</option>
+  </select>
+  <textarea name="notes" placeholder="Outcome, follow-up, anything worth noting…"
+    style="font-size:12px;border:1px solid var(--border);border-radius:4px;padding:6px;
+           resize:vertical;font-family:inherit;min-height:48px;"></textarea>
+  <div style="display:flex;gap:6px;">
+    <button class="btn btn-primary btn-sm" type="submit">Save</button>
+  </div>
+</form>

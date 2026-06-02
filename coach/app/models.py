@@ -268,6 +268,18 @@ class Skill(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+# ── Event Log ─────────────────────────────────────────────────
+class EventLog(Base):
+    __tablename__ = "event_logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    event_title: Mapped[str] = mapped_column(String(255), nullable=False)
+    action: Mapped[str] = mapped_column(String(16), nullable=False)  # done|skipped|snoozed|postponed|note
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+    logged_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 # ── Daily Standup ─────────────────────────────────────────────
 class StandupEntry(Base):
     __tablename__ = "standup_entries"

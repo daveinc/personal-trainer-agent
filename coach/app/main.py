@@ -30,6 +30,7 @@ from app.routes.relationships import router as relationships_router
 from app.routes.webhook import router as webhook_router
 from app.routes.goals import router as goals_router
 from app.routes.pipeline import router as pipeline_router
+from app.routes.event_log import router as event_log_router
 from app.services.scheduler import run_scheduler
 from app.services.ha_events import run_event_listener
 
@@ -119,3 +120,4 @@ app.include_router(relationships_router)
 app.include_router(webhook_router)
 app.include_router(goals_router)
 app.include_router(pipeline_router)
+app.include_router(event_log_router)
