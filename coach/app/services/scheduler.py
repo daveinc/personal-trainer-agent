@@ -1,16 +1,18 @@
 import asyncio
 import logging
-from datetime import datetime
+import os
+from datetime import datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.database import LocalSession
-from app.models import Slot, NotificationLog
+from app.models import Slot, NotificationLog, User
 
 logger = logging.getLogger(__name__)
 
 _daily_brief_sent: str = ""  # tracks date string of last sent brief
+_notified_events: set[str] = set()  # event_key → notified today
 
 
 def _subtract_minutes(time_str: str, minutes: int) -> str:
@@ -35,6 +37,47 @@ async def _check_daily_brief(now: datetime, today_str: str):
         logger.info(f"Daily brief sent for {today_str}")
 
 
+async def _check_calendar_notifications(now: datetime, today_str: str):
+    global _notified_events
+    # Clear yesterday's keys at midnight
+    if now.hour == 0 and now.minute == 0:
+        _notified_events.clear()
+
+    from app.ha_calendar import get_calendar_events_with_dt
+    from app.services.notifier import notify_calendar_event
+
+    try:
+        events = await get_calendar_events_with_dt()
+    except Exception as e:
+        logger.error(f"Calendar notification check failed: {e}")
+        return
+
+    async with LocalSession() as db:
+        users = (await db.execute(select(User))).scalars().all()
+        for user in users:
+            svc = user.notify_service or os.getenv("NOTIFY_SERVICE", "")
+            if not svc:
+                continue
+            target = user.notify_target or None
+            lead = user.notification_lead_minutes or 30
+
+            for event in events:
+                if event.get("all_day"):
+                    continue
+                event_key = f"{user.id}_{event['title']}_{event['start'].isoformat()}"
+                if event_key in _notified_events:
+                    continue
+                # Normalize event start to naive local time for comparison
+                start_local = event["start"].astimezone().replace(tzinfo=None)
+                notify_at = start_local - timedelta(minutes=lead)
+                diff = abs((now - notify_at).total_seconds())
+                if diff <= 60:
+                    sent = await notify_calendar_event(event, svc, target)
+                    if sent:
+                        _notified_events.add(event_key)
+                        logger.info(f"Calendar notification sent: {event['title']} for user {user.username}")
+
+
 async def _tick():
     from app.services.notifier import notify_pre_slot, notify_post_slot
 
@@ -44,6 +87,7 @@ async def _tick():
     now_hm = now.strftime("%H:%M")
 
     await _check_daily_brief(now, today_str)
+    await _check_calendar_notifications(now, today_str)
 
     async with LocalSession() as db:
         all_slots = (await db.execute(select(Slot))).scalars().all()

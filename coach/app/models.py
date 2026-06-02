@@ -22,6 +22,9 @@ class User(Base):
     health_metrics: Mapped[str] = mapped_column(String(256), default="")
     unit_weight: Mapped[str] = mapped_column(String(4), default="kg")
     steps_entity: Mapped[str] = mapped_column(String(128), nullable=True)
+    notify_service: Mapped[str] = mapped_column(String(128), nullable=True)
+    notify_target: Mapped[str] = mapped_column(String(128), nullable=True)
+    notification_lead_minutes: Mapped[int] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

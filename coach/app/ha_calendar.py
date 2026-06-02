@@ -142,6 +142,44 @@ async def get_week_events() -> list[dict]:
     return [normalize_event(e) for e in raw]
 
 
+async def get_calendar_events_with_dt(for_date=None) -> list[dict]:
+    """
+    Fetch today's (or given date's) events and return them with start/end as datetime objects.
+    Used by the scheduler for lead-time comparison. Returns [] on any error.
+    """
+    from datetime import date as _date
+    target = for_date or _date.today()
+    start = datetime(target.year, target.month, target.day, 0, 0, 0)
+    end = datetime(target.year, target.month, target.day, 23, 59, 59)
+    try:
+        raw = await get_events(start, end)
+    except Exception as e:
+        logger.error(f"get_calendar_events_with_dt failed: {e}")
+        return []
+    events = []
+    for ev in raw:
+        s = ev.get("start", {})
+        e2 = ev.get("end", {})
+        all_day = "date" in s and "dateTime" not in s
+        try:
+            if all_day:
+                start_dt = datetime.fromisoformat(s["date"])
+                end_dt = datetime.fromisoformat(e2["date"])
+            else:
+                start_dt = datetime.fromisoformat(s["dateTime"])
+                end_dt = datetime.fromisoformat(e2["dateTime"])
+            events.append({
+                "title": ev.get("summary", "Untitled"),
+                "start": start_dt,
+                "end": end_dt,
+                "all_day": all_day,
+                "description": ev.get("description", ""),
+            })
+        except Exception:
+            continue
+    return events
+
+
 async def get_month_events() -> list[dict]:
     import calendar as cal
     now = datetime.now(timezone.utc)

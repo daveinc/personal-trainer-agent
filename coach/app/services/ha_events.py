@@ -36,21 +36,28 @@ async def _listen():
                     continue
 
                 action = payload.get("data", {}).get("action", "")
-                if not action.startswith("coach_"):
-                    continue
+                logger.info(f"HA event action: {action!r}")
 
-                parts = action.split("_")
-                if len(parts) != 3:
-                    continue
+                if action.startswith("coach_"):
+                    parts = action.split("_")
+                    if len(parts) != 3:
+                        continue
+                    try:
+                        slot_id = int(parts[1])
+                    except ValueError:
+                        continue
+                    verb = parts[2]
+                    await handle_action(slot_id, verb)
 
-                try:
-                    slot_id = int(parts[1])
-                except ValueError:
-                    continue
-
-                verb = parts[2]
-                logger.info(f"HA event: {action}")
-                await handle_action(slot_id, verb)
+                elif action.startswith("EVENT_"):
+                    from app.routes.action_router import handle_event_action
+                    # format: EVENT_{VERB}_{title}
+                    remainder = action[len("EVENT_"):]
+                    for verb in ("DONE_", "SKIP_", "SNOOZE_"):
+                        if remainder.startswith(verb):
+                            event_title = remainder[len(verb):]
+                            await handle_event_action(event_title, verb.rstrip("_").lower())
+                            break
 
 
 async def run_event_listener():

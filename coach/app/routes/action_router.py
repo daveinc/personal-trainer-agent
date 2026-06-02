@@ -38,6 +38,12 @@ async def handle_action(slot_id: int, verb: str):
         await _log_session(slot_id)
 
 
+async def handle_event_action(event_title: str, verb: str):
+    """Handle Done/Skip/Snooze tapped on a calendar event notification."""
+    logger.info(f"Calendar event '{event_title}' action: {verb}")
+    # EventLog DB write wired in Step 0.3
+
+
 async def _log_session(slot_id: int):
     if not ExtSession:
         logger.info(f"No MariaDB — session for slot {slot_id} not persisted")

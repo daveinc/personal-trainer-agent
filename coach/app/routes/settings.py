@@ -212,8 +212,27 @@ async def settings_notifications(request: Request, db: AsyncSession = Depends(ge
         return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
     return templates.TemplateResponse(
         request, "_settings_notifications.html",
-        tctx(request, user=user, notify_service=os.getenv("NOTIFY_SERVICE", ""))
+        tctx(request, user=user)
     )
+
+
+@router.post("/ui/settings/notifications/save")
+async def settings_notifications_save(request: Request, db: AsyncSession = Depends(get_db)):
+    user = await get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url=redirect_to(request, "ui/login"), status_code=302)
+    form = await request.form()
+    svc = (form.get("notify_service") or "").strip()
+    target = (form.get("notify_target") or "").strip()
+    lead_raw = form.get("notification_lead_minutes", "").strip()
+    user.notify_service = svc or None
+    user.notify_target = target or None
+    try:
+        user.notification_lead_minutes = int(lead_raw) if lead_raw else None
+    except ValueError:
+        user.notification_lead_minutes = None
+    await db.commit()
+    return RedirectResponse(url=redirect_to(request, "ui/settings?tab=notifications"), status_code=303)
 
 
 # ── Categories tab ─────────────────────────────────────────────────────────
