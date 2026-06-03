@@ -21,6 +21,14 @@ def _subtract_minutes(time_str: str, minutes: int) -> str:
     return f"{total // 60:02d}:{total % 60:02d}"
 
 
+async def _get_user_service_map() -> dict[int, str]:
+    """Returns {user_id: notify_service} for all users, using DB setting or env var fallback."""
+    async with LocalSession() as db:
+        users = (await db.execute(select(User))).scalars().all()
+    env_svc = os.getenv("NOTIFY_SERVICE", "")
+    return {u.id: (u.notify_service or env_svc) for u in users}
+
+
 async def _check_daily_brief(now: datetime, today_str: str):
     global _daily_brief_sent
     if _daily_brief_sent == today_str:
@@ -31,7 +39,9 @@ async def _check_daily_brief(now: datetime, today_str: str):
     if now.strftime("%H:%M") != "07:00":
         return
     from app.services.notifier import notify_daily_brief
-    sent = await notify_daily_brief()
+    user_svcs = await _get_user_service_map()
+    svc = next(iter(user_svcs.values()), "") if user_svcs else ""
+    sent = await notify_daily_brief(notify_svc=svc or None)
     if sent:
         _daily_brief_sent = today_str
         logger.info(f"Daily brief sent for {today_str}")
@@ -89,11 +99,14 @@ async def _tick():
     await _check_daily_brief(now, today_str)
     await _check_calendar_notifications(now, today_str)
 
+    user_svcs = await _get_user_service_map()
+
     async with LocalSession() as db:
         all_slots = (await db.execute(select(Slot))).scalars().all()
         today_slots = [s for s in all_slots if s.days and today_name in s.days.split(",")]
 
         for slot in today_slots:
+            svc = user_svcs.get(slot.user_id) or ""
             # Pre-slot
             if slot.start_time and slot.notify_before:
                 notify_at = _subtract_minutes(slot.start_time, slot.notify_before)
@@ -106,7 +119,7 @@ async def _tick():
                         )
                     )).scalar_one_or_none()
                     if not exists:
-                        sent = await notify_pre_slot(slot)
+                        sent = await notify_pre_slot(slot, notify_svc=svc or None)
                         if sent:
                             db.add(NotificationLog(
                                 slot_id=slot.id, notif_type="pre", log_date=today_str
@@ -126,7 +139,7 @@ async def _tick():
                     )
                 )).scalar_one_or_none()
                 if not exists:
-                    sent = await notify_post_slot(slot)
+                    sent = await notify_post_slot(slot, notify_svc=svc or None)
                     if sent:
                         db.add(NotificationLog(
                             slot_id=slot.id, notif_type="post", log_date=today_str

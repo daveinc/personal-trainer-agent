@@ -12,8 +12,9 @@ def _token() -> str:
     return os.getenv("SUPERVISOR_TOKEN", "")
 
 
-def _service() -> str:
-    return os.getenv("NOTIFY_SERVICE", "")
+def _service(override: str | None = None) -> str:
+    svc = override or os.getenv("NOTIFY_SERVICE", "")
+    return svc.removeprefix("notify.") if svc else ""
 
 
 async def _call_ha(path: str, payload: dict) -> bool:
@@ -37,8 +38,8 @@ async def _call_ha(path: str, payload: dict) -> bool:
         return False
 
 
-async def notify_pre_slot(slot) -> bool:
-    svc = _service()
+async def notify_pre_slot(slot, notify_svc: str | None = None) -> bool:
+    svc = _service(notify_svc)
     if not svc:
         logger.warning("NOTIFY_SERVICE not configured")
         return False
@@ -55,8 +56,8 @@ async def notify_pre_slot(slot) -> bool:
     })
 
 
-async def notify_post_slot(slot) -> bool:
-    svc = _service()
+async def notify_post_slot(slot, notify_svc: str | None = None) -> bool:
+    svc = _service(notify_svc)
     if not svc:
         return False
     return await _call_ha(f"services/notify/{svc}", {
@@ -131,8 +132,8 @@ async def fire_pipeline_event(job_id: int, job_title: str, client: str, stage: s
         return False
 
 
-async def notify_daily_brief() -> bool:
-    svc = _service()
+async def notify_daily_brief(notify_svc: str | None = None) -> bool:
+    svc = _service(notify_svc)
     if not svc:
         logger.warning("NOTIFY_SERVICE not configured — daily brief skipped")
         return False
