@@ -27,6 +27,8 @@ Plan: `plans/field-loop-spec.md`
 
 **Owner:** Worker (Phase 1) → Dave+Claude verify → Worker (Phase 2)
 
+- [x] 2026-06-19 **v0.4.27** — confirmed scheduler tight loop fix: `asyncio.sleep(60)` between ticks + `_notified_events` guard prevent duplicate calendar API calls. Version bumped in config.json + Dockerfile.
+
 ### Known gaps — next session
 - [ ] ⚡ PRIORITY: Test events from Jun 3 still in calendar.coach — delete at session start
 - [ ] Snooze does not re-fire notification — logs "snoozed" but no follow-up push
