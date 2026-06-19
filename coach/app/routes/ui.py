@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.deps import get_db, get_current_user, redirect_to, tctx
 from app.models import Slot, CheckIn, HealthEntry, StandupEntry
 from app.routes.schedule import _get_week, _get_days, _today_or_next, CATEGORY_MAP
+from app.ha_calendar import get_today_events
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -120,6 +121,11 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
         select(StandupEntry).where(StandupEntry.user_id == user.id, StandupEntry.log_date == today_str)
     )).scalar_one_or_none() is not None
 
+    try:
+        ha_events = await get_today_events()
+    except Exception:
+        ha_events = []
+
     return templates.TemplateResponse(request, "dashboard.html", tctx(
         request, user=user, greeting=greeting,
         today_slots=today_slots, upcoming_slots=upcoming_slots,
@@ -130,6 +136,7 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
         has_checkin_today=has_checkin_today,
         mood_trend=mood_trend, sleep_average=sleep_average, active_streaks=active_streaks,
         standup_done=standup_done,
+        ha_events=ha_events,
     ))
 
 
