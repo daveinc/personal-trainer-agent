@@ -1,0 +1,12 @@
+{
+  "patterns": [],
+  "directory_structure": {},
+  "total_files_analyzed": 19,
+  "frameworks_detected": [
+    "Django",
+    "ASP.NET",
+    "Rails",
+    "Express"
+  ],
+  "ai_analysis": null
+}

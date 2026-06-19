@@ -47,7 +47,7 @@ async def _listen():
                     except ValueError:
                         continue
                     verb = parts[2]
-                    await handle_action(slot_id, verb)
+                    await asyncio.shield(handle_action(slot_id, verb))
 
                 elif action.startswith("EVENT_"):
                     from app.routes.action_router import handle_event_action
@@ -56,15 +56,31 @@ async def _listen():
                     for verb in ("DONE_", "SKIP_", "SNOOZE_"):
                         if remainder.startswith(verb):
                             event_title = remainder[len(verb):]
-                            await handle_event_action(event_title, verb.rstrip("_").lower())
+                            await asyncio.shield(handle_event_action(event_title, verb.rstrip("_").lower()))
                             break
+
+                elif action.startswith("STEP_"):
+                    from app.routes.action_router import handle_step_action
+                    # format: STEP_{step_id}_{verb}
+                    parts = action.split("_", 2)
+                    if len(parts) == 3:
+                        try:
+                            step_id = int(parts[1])
+                        except ValueError:
+                            continue
+                        verb = parts[2].lower()
+                        await asyncio.shield(handle_step_action(step_id, verb))
 
 
 async def run_event_listener():
     logger.info("HA event listener started")
+    backoff = 5
     while True:
         try:
             await _listen()
+            logger.warning("HA event stream disconnected — reconnecting")
+            backoff = 5  # reset on clean exit
         except Exception as e:
-            logger.error(f"Event stream error: {e}")
-        await asyncio.sleep(5)
+            logger.warning(f"HA event stream error: {e} — reconnecting in {backoff}s")
+        await asyncio.sleep(backoff)
+        backoff = min(backoff * 2, 60)

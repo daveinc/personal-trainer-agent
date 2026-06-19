@@ -1,0 +1,119 @@
+{
+  "total_files": 1,
+  "total_settings": 9,
+  "detected_patterns": {},
+  "config_files": [
+    {
+      "file_path": "C:\\Users\\davei\\.claude\\projects\\ha\\apps\\coach\\coach\\app\\routes\\settings.py",
+      "relative_path": "settings.py",
+      "type": "python",
+      "purpose": "general_configuration",
+      "patterns": [],
+      "settings_count": 9,
+      "settings": [
+        {
+          "key": "SQLITE_PATH",
+          "value": "/data/coach.db",
+          "type": "string",
+          "env_var": null,
+          "description": ""
+        },
+        {
+          "key": "PSYCHOLOGY_SKILLS",
+          "value": [
+            {
+              "name": "Streaks",
+              "category": "Motivation",
+              "description": "Tracks user's streak of completing tasks or activities.",
+              "enabled": true
+            },
+            {
+              "name": "Step Chunking",
+              "category": "Behavior Modification",
+              "description": "Divides long-term goals into manageable, achievable steps.",
+              "enabled": true
+            },
+            {
+              "name": "Nudges",
+              "category": "Personalization",
+              "description": "Subtle prompts to encourage desired behaviors or actions.",
+              "enabled": true
+            },
+            {
+              "name": "Celebration Moments",
+              "category": "Positive Reinforcement",
+              "description": "Encourages users with positive feedback and achievements.",
+              "enabled": true
+            },
+            {
+              "name": "Reframing",
+              "category": "Cognitive Behavior Therapy",
+              "description": "Helps change negative thoughts and beliefs to improve mental well-being.",
+              "enabled": true
+            },
+            {
+              "name": "Reflection Prompts",
+              "category": "Growth Mindset",
+              "description": "Provides prompts to reflect on experiences for personal growth and improvement.",
+              "enabled": true
+            }
+          ],
+          "type": "array",
+          "env_var": null,
+          "description": ""
+        },
+        {
+          "key": "ext_stats",
+          "value": null,
+          "type": "null",
+          "env_var": null,
+          "description": ""
+        },
+        {
+          "key": "duration",
+          "value": 60,
+          "type": "integer",
+          "env_var": null,
+          "description": ""
+        },
+        {
+          "key": "tmp",
+          "value": "/data/coach_restore_tmp.db",
+          "type": "string",
+          "env_var": null,
+          "description": ""
+        },
+        {
+          "key": "imported",
+          "value": 0,
+          "type": "integer",
+          "env_var": null,
+          "description": ""
+        },
+        {
+          "key": "events",
+          "value": [],
+          "type": "array",
+          "env_var": null,
+          "description": ""
+        },
+        {
+          "key": "event",
+          "value": null,
+          "type": "null",
+          "env_var": null,
+          "description": ""
+        },
+        {
+          "key": "events",
+          "value": [],
+          "type": "array",
+          "env_var": null,
+          "description": ""
+        }
+      ],
+      "parse_errors": []
+    }
+  ],
+  "errors": []
+}

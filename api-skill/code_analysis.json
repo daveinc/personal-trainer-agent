@@ -1,0 +1,4161 @@
+{
+  "files": [
+    {
+      "file": "action_router.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "handle_action",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "verb",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 12,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_log_session",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 41,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "datetime",
+        "sqlalchemy",
+        "app.database",
+        "app.models"
+      ]
+    },
+    {
+      "file": "auth.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "login",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "username",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 13,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/auth/login')"
+          ]
+        },
+        {
+          "name": "logout",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 36,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/auth/logout')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "fastapi",
+        "fastapi.responses",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models"
+      ]
+    },
+    {
+      "file": "categories.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_make_route",
+          "parameters": [
+            {
+              "name": "slug",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 17,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "handler",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 18,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy.ext.asyncio",
+        "app.deps"
+      ]
+    },
+    {
+      "file": "checkins.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_compute_streak",
+          "parameters": [
+            {
+              "name": "dates",
+              "type_hint": "set",
+              "default": null
+            },
+            {
+              "name": "today",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": "int",
+          "docstring": null,
+          "line_number": 20,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "checkins_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 30,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/checkins')"
+          ]
+        },
+        {
+          "name": "checkins_log",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 64,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/checkins/log')"
+          ]
+        },
+        {
+          "name": "checkins_delete",
+          "parameters": [
+            {
+              "name": "entry_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 109,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/checkins/{entry_id}/delete')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "datetime",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models",
+        "app.ha_calendar",
+        "app.routes.schedule"
+      ]
+    },
+    {
+      "file": "finances.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "finances_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 18,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/finances')"
+          ]
+        },
+        {
+          "name": "line_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 48,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/finances/line/add')"
+          ]
+        },
+        {
+          "name": "line_edit",
+          "parameters": [
+            {
+              "name": "line_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 66,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/finances/line/{line_id}/edit')"
+          ]
+        },
+        {
+          "name": "line_delete",
+          "parameters": [
+            {
+              "name": "line_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 85,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/finances/line/{line_id}/delete')"
+          ]
+        },
+        {
+          "name": "goal_save",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 95,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/finances/goal/save')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models",
+        "app.services.spent"
+      ]
+    },
+    {
+      "file": "fitness.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_is_user_fitness",
+          "parameters": [
+            {
+              "name": "event",
+              "type_hint": "dict",
+              "default": null
+            },
+            {
+              "name": "username",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": "bool",
+          "docstring": null,
+          "line_number": 21,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_event_date",
+          "parameters": [
+            {
+              "name": "event",
+              "type_hint": "dict",
+              "default": null
+            }
+          ],
+          "return_type": "str",
+          "docstring": null,
+          "line_number": 26,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_group_by_date",
+          "parameters": [
+            {
+              "name": "events",
+              "type_hint": "list",
+              "default": null
+            }
+          ],
+          "return_type": "dict",
+          "docstring": null,
+          "line_number": 31,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_get_logs",
+          "parameters": [
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            },
+            {
+              "name": "user_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "date_from",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "date_to",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": "dict",
+          "docstring": null,
+          "line_number": 39,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_today_events_response",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            },
+            {
+              "name": "target",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 52,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "today_events",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 75,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/fitness/today')"
+          ]
+        },
+        {
+          "name": "_week_events_response",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            },
+            {
+              "name": "target",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 83,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "week_events",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 108,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/fitness/week')"
+          ]
+        },
+        {
+          "name": "_month_events_response",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            },
+            {
+              "name": "target",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 114,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "month_events",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 140,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/fitness/month')"
+          ]
+        },
+        {
+          "name": "schedule",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "title",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "date",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "start_time",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "duration",
+              "type_hint": "int",
+              "default": "Form(60)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 147,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/fitness/schedule')"
+          ]
+        },
+        {
+          "name": "steps_card",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 183,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/fitness/steps')"
+          ]
+        },
+        {
+          "name": "log_event",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "uid",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "title",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "event_date",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "status",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "source",
+              "type_hint": "str",
+              "default": "Form('fitness')"
+            },
+            {
+              "name": "view",
+              "type_hint": "str",
+              "default": "Form('today')"
+            },
+            {
+              "name": "notes",
+              "type_hint": "Optional[str]",
+              "default": "Form(None)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            },
+            {
+              "name": "ext_db",
+              "type_hint": "Optional[AsyncSession]",
+              "default": "Depends(get_ext_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 202,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/fitness/log')"
+          ]
+        }
+      ],
+      "comments": [
+        {
+          "line": 50,
+          "text": "\u2500\u2500 Today \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 81,
+          "text": "\u2500\u2500 This Week \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 112,
+          "text": "\u2500\u2500 This Month \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 144,
+          "text": "\u2500\u2500 Schedule \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 180,
+          "text": "\u2500\u2500 Steps \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 199,
+          "text": "\u2500\u2500 Log \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 222,
+          "text": "write to local SQLite",
+          "type": "inline"
+        },
+        {
+          "line": 244,
+          "text": "mirror to external DB if configured",
+          "type": "inline"
+        }
+      ],
+      "imports": [
+        "calendar",
+        "datetime",
+        "typing",
+        "fastapi",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.ha_calendar",
+        "app.models",
+        "app.services.ha_client",
+        "app.models",
+        "logging"
+      ]
+    },
+    {
+      "file": "goals.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_steps_done",
+          "parameters": [
+            {
+              "name": "progress",
+              "type_hint": "list",
+              "default": null
+            }
+          ],
+          "return_type": "int",
+          "docstring": null,
+          "line_number": 15,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "goals_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 20,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/goals')"
+          ]
+        },
+        {
+          "name": "goals_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 48,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/goals/add')"
+          ]
+        },
+        {
+          "name": "goals_progress",
+          "parameters": [
+            {
+              "name": "goal_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 87,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/goals/{goal_id}/progress')"
+          ]
+        },
+        {
+          "name": "goals_complete",
+          "parameters": [
+            {
+              "name": "goal_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 128,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/goals/{goal_id}/complete')"
+          ]
+        },
+        {
+          "name": "goals_reopen",
+          "parameters": [
+            {
+              "name": "goal_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 144,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/goals/{goal_id}/reopen')"
+          ]
+        },
+        {
+          "name": "goals_delete",
+          "parameters": [
+            {
+              "name": "goal_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 160,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/goals/{goal_id}/delete')"
+          ]
+        },
+        {
+          "name": "get_goals_progress",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 174,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/goals/progress')"
+          ]
+        }
+      ],
+      "comments": [
+        {
+          "line": 114,
+          "text": "auto-complete if steps done >= total_steps",
+          "type": "inline"
+        },
+        {
+          "line": 171,
+          "text": "\u2500\u2500 Goals Progress API \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        }
+      ],
+      "imports": [
+        "datetime",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models"
+      ]
+    },
+    {
+      "file": "health.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "health_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "expand",
+              "type_hint": "str",
+              "default": "None"
+            },
+            {
+              "name": "edit_appt",
+              "type_hint": "int",
+              "default": "None"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 26,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/health')"
+          ]
+        },
+        {
+          "name": "entry_log",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 69,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/health/entry/log')"
+          ]
+        },
+        {
+          "name": "entry_delete",
+          "parameters": [
+            {
+              "name": "entry_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "metric",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 94,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/health/entry/{entry_id}/delete')"
+          ]
+        },
+        {
+          "name": "appt_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 107,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/health/appointment/add')"
+          ]
+        },
+        {
+          "name": "appt_save",
+          "parameters": [
+            {
+              "name": "appt_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 126,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/health/appointment/{appt_id}/save')"
+          ]
+        },
+        {
+          "name": "appt_delete",
+          "parameters": [
+            {
+              "name": "appt_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 146,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/health/appointment/{appt_id}/delete')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "datetime",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models"
+      ]
+    },
+    {
+      "file": "learning.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "learning_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "edit",
+              "type_hint": "int",
+              "default": "None"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 17,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/learning')"
+          ]
+        },
+        {
+          "name": "item_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 48,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/learning/item/add')"
+          ]
+        },
+        {
+          "name": "item_save",
+          "parameters": [
+            {
+              "name": "item_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 74,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/learning/item/{item_id}/save')"
+          ]
+        },
+        {
+          "name": "item_delete",
+          "parameters": [
+            {
+              "name": "item_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 98,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/learning/item/{item_id}/delete')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models"
+      ]
+    },
+    {
+      "file": "onboarding.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "onboarding_get",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "step",
+              "type_hint": "int",
+              "default": "1"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 30,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/onboarding')"
+          ]
+        },
+        {
+          "name": "onboarding_name",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "display_name",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 46,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/onboarding/name')"
+          ]
+        },
+        {
+          "name": "onboarding_categories",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 60,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/onboarding/categories')"
+          ]
+        },
+        {
+          "name": "onboarding_dismiss",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "user_id",
+              "type_hint": "int",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 85,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/onboarding/dismiss')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models"
+      ]
+    },
+    {
+      "file": "pipeline.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "pipeline_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 18,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/pipeline')"
+          ]
+        },
+        {
+          "name": "pipeline_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 46,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/pipeline/add')"
+          ]
+        },
+        {
+          "name": "pipeline_set_stage",
+          "parameters": [
+            {
+              "name": "job_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 77,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/pipeline/{job_id}/stage')"
+          ]
+        },
+        {
+          "name": "pipeline_advance",
+          "parameters": [
+            {
+              "name": "job_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 98,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/pipeline/{job_id}/advance')"
+          ]
+        },
+        {
+          "name": "pipeline_add_note",
+          "parameters": [
+            {
+              "name": "job_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 119,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/pipeline/{job_id}/note')"
+          ]
+        },
+        {
+          "name": "pipeline_job_detail",
+          "parameters": [
+            {
+              "name": "job_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 135,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/pipeline/{job_id}')"
+          ]
+        },
+        {
+          "name": "pipeline_archive",
+          "parameters": [
+            {
+              "name": "job_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 160,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/pipeline/{job_id}/archive')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models",
+        "app.services.notifier"
+      ]
+    },
+    {
+      "file": "profile.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "profile_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "edit",
+              "type_hint": "int",
+              "default": "None"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 21,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/profile')"
+          ]
+        },
+        {
+          "name": "slot_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "category",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "label",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "schedule_type",
+              "type_hint": "str",
+              "default": "Form('free')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 53,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/profile/slot/add')"
+          ]
+        },
+        {
+          "name": "slot_save",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "label",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "schedule_type",
+              "type_hint": "str",
+              "default": "Form('free')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 77,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/profile/slot/{slot_id}/save')"
+          ]
+        },
+        {
+          "name": "slot_delete",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 100,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/profile/slot/{slot_id}/delete')"
+          ]
+        },
+        {
+          "name": "slot_attributes",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 111,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/profile/slot/{slot_id}/attributes')"
+          ]
+        },
+        {
+          "name": "attribute_add",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "attribute_name",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "unit",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 126,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/profile/slot/{slot_id}/attribute/add')"
+          ]
+        },
+        {
+          "name": "attribute_delete",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "attr_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 144,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/profile/slot/{slot_id}/attribute/{attr_id}/delete')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models",
+        "app.routes.onboarding"
+      ]
+    },
+    {
+      "file": "relationships.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_days_since",
+          "parameters": [
+            {
+              "name": "last_contact",
+              "type_hint": "str | None",
+              "default": null
+            }
+          ],
+          "return_type": "int",
+          "docstring": null,
+          "line_number": 17,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_status",
+          "parameters": [
+            {
+              "name": "days",
+              "type_hint": "int",
+              "default": null
+            }
+          ],
+          "return_type": "tuple",
+          "docstring": null,
+          "line_number": 26,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "relationships_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "edit",
+              "type_hint": "int",
+              "default": "None"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 37,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/relationships')"
+          ]
+        },
+        {
+          "name": "person_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 68,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/relationships/person/add')"
+          ]
+        },
+        {
+          "name": "person_save",
+          "parameters": [
+            {
+              "name": "person_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 85,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/relationships/person/{person_id}/save')"
+          ]
+        },
+        {
+          "name": "person_contact",
+          "parameters": [
+            {
+              "name": "person_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 103,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/relationships/person/{person_id}/contact')"
+          ]
+        },
+        {
+          "name": "person_delete",
+          "parameters": [
+            {
+              "name": "person_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 117,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/relationships/person/{person_id}/delete')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "datetime",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models"
+      ]
+    },
+    {
+      "file": "routines.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_sync_states",
+          "parameters": [
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            }
+          ],
+          "return_type": "dict[str, RoutineState]",
+          "docstring": null,
+          "line_number": 71,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "routines_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 86,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/routines')"
+          ]
+        },
+        {
+          "name": "routine_enable",
+          "parameters": [
+            {
+              "name": "slug",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 98,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/routines/{slug}/enable')"
+          ]
+        },
+        {
+          "name": "routine_disable",
+          "parameters": [
+            {
+              "name": "slug",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 110,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/routines/{slug}/disable')"
+          ]
+        },
+        {
+          "name": "routine_run",
+          "parameters": [
+            {
+              "name": "slug",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 123,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/routines/{slug}/run')"
+          ]
+        },
+        {
+          "name": "routine_stop",
+          "parameters": [
+            {
+              "name": "slug",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 136,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/routines/{slug}/stop')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "datetime",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models"
+      ]
+    },
+    {
+      "file": "schedule.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_prep_cal_events",
+          "parameters": [
+            {
+              "name": "raw",
+              "type_hint": "list",
+              "default": null
+            }
+          ],
+          "return_type": "dict",
+          "docstring": "Normalize and group calendar events by date, filtering out checkins.",
+          "line_number": 23,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_get_days",
+          "parameters": [
+            {
+              "name": "week_start",
+              "type_hint": "str",
+              "default": null
+            }
+          ],
+          "return_type": "list",
+          "docstring": null,
+          "line_number": 42,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_get_week",
+          "parameters": [
+            {
+              "name": "ref",
+              "type_hint": "date",
+              "default": null
+            },
+            {
+              "name": "week_start",
+              "type_hint": "str",
+              "default": "'Mon'"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 58,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_today_or_next",
+          "parameters": [
+            {
+              "name": "slots",
+              "type_hint": null,
+              "default": null
+            },
+            {
+              "name": "ref",
+              "type_hint": "date",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 66,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "schedule_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "selected",
+              "type_hint": "int",
+              "default": "None"
+            },
+            {
+              "name": "edit",
+              "type_hint": "int",
+              "default": "None"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 81,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/schedule')"
+          ]
+        },
+        {
+          "name": "slot_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 139,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/schedule/slot/add')"
+          ]
+        },
+        {
+          "name": "slot_save",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 160,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/schedule/slot/{slot_id}/save')"
+          ]
+        },
+        {
+          "name": "slot_delete",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 178,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/schedule/slot/{slot_id}/delete')"
+          ]
+        },
+        {
+          "name": "attribute_add",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "attribute_name",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "unit",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 189,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/schedule/slot/{slot_id}/attribute/add')"
+          ]
+        },
+        {
+          "name": "attribute_delete",
+          "parameters": [
+            {
+              "name": "slot_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "attr_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 203,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/schedule/slot/{slot_id}/attribute/{attr_id}/delete')"
+          ]
+        },
+        {
+          "name": "category_set_reminder",
+          "parameters": [
+            {
+              "name": "category",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "notify_before",
+              "type_hint": "int",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 214,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/schedule/category/{category}/set-reminder')"
+          ]
+        },
+        {
+          "name": "category_clear_reminders",
+          "parameters": [
+            {
+              "name": "category",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 229,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/schedule/category/{category}/clear-reminders')"
+          ]
+        }
+      ],
+      "comments": [],
+      "imports": [
+        "logging",
+        "re",
+        "datetime",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models",
+        "app.routes.onboarding",
+        "app.ha_calendar",
+        "app.ha_calendar"
+      ]
+    },
+    {
+      "file": "settings.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_event_user",
+          "parameters": [
+            {
+              "name": "event",
+              "type_hint": "dict",
+              "default": null
+            }
+          ],
+          "return_type": "str",
+          "docstring": null,
+          "line_number": 27,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "settings_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 38,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings')"
+          ]
+        },
+        {
+          "name": "settings_db",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            },
+            {
+              "name": "ext_db",
+              "type_hint": "Optional[AsyncSession]",
+              "default": "Depends(get_ext_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 51,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/db')"
+          ]
+        },
+        {
+          "name": "delete_user_logs",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "user_id",
+              "type_hint": "int",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            },
+            {
+              "name": "ext_db",
+              "type_hint": "Optional[AsyncSession]",
+              "default": "Depends(get_ext_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 92,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/delete-user-logs')"
+          ]
+        },
+        {
+          "name": "delete_user_entry",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "user_id",
+              "type_hint": "int",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            },
+            {
+              "name": "ext_db",
+              "type_hint": "Optional[AsyncSession]",
+              "default": "Depends(get_ext_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 110,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/delete-user')"
+          ]
+        },
+        {
+          "name": "wipe_logs",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            },
+            {
+              "name": "ext_db",
+              "type_hint": "Optional[AsyncSession]",
+              "default": "Depends(get_ext_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 130,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/wipe-logs')"
+          ]
+        },
+        {
+          "name": "backup_db",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 148,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/backup')"
+          ]
+        },
+        {
+          "name": "restore_db",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "file",
+              "type_hint": "UploadFile",
+              "default": "File(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 158,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/restore')"
+          ]
+        },
+        {
+          "name": "settings_preferences",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 180,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/preferences')"
+          ]
+        },
+        {
+          "name": "settings_preferences_save",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 188,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/preferences/save')"
+          ]
+        },
+        {
+          "name": "settings_notifications",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 209,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/notifications')"
+          ]
+        },
+        {
+          "name": "settings_categories",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 222,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/categories')"
+          ]
+        },
+        {
+          "name": "settings_categories_save",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 235,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/categories/save')"
+          ]
+        },
+        {
+          "name": "settings_skills",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 267,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/skills')"
+          ]
+        },
+        {
+          "name": "get_skills_defaults",
+          "parameters": [],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 283,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/settings/skills/defaults')"
+          ]
+        },
+        {
+          "name": "get_skills",
+          "parameters": [
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 288,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/settings/skills')"
+          ]
+        },
+        {
+          "name": "toggle_skill_enabled",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 294,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/settings/skills')"
+          ]
+        },
+        {
+          "name": "settings_calendar",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "user_filter",
+              "type_hint": "str",
+              "default": "''"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 308,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/calendar')"
+          ]
+        },
+        {
+          "name": "cal_config_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "entity_id",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "label",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "default_category",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "ignore_keywords",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 336,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/calendar-config/add')"
+          ]
+        },
+        {
+          "name": "cal_config_delete",
+          "parameters": [
+            {
+              "name": "config_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 361,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/calendar-config/{config_id}/delete')"
+          ]
+        },
+        {
+          "name": "calendar_edit_form",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "uid",
+              "type_hint": "str",
+              "default": "''"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 377,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/calendar/edit')"
+          ]
+        },
+        {
+          "name": "calendar_edit_submit",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "uid",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "title",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "date",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "start_time",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "duration",
+              "type_hint": "int",
+              "default": "Form(60)"
+            },
+            {
+              "name": "description",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 413,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/calendar/edit')"
+          ]
+        },
+        {
+          "name": "calendar_delete",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "uid",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 433,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/calendar/delete')"
+          ]
+        },
+        {
+          "name": "calendar_backup",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 447,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/settings/calendar/backup')"
+          ]
+        },
+        {
+          "name": "calendar_restore",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "file",
+              "type_hint": "UploadFile",
+              "default": "File(...)"
+            },
+            {
+              "name": "replace",
+              "type_hint": "bool",
+              "default": "Form(False)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 463,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/settings/calendar/restore')"
+          ]
+        }
+      ],
+      "comments": [
+        {
+          "line": 35,
+          "text": "\u2500\u2500 Main page \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 48,
+          "text": "\u2500\u2500 Database tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 177,
+          "text": "\u2500\u2500 Preferences tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 206,
+          "text": "\u2500\u2500 Notifications tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 219,
+          "text": "\u2500\u2500 Categories tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 254,
+          "text": "\u2500\u2500 Skills tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 305,
+          "text": "\u2500\u2500 Calendar tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        }
+      ],
+      "imports": [
+        "json",
+        "logging",
+        "os",
+        "re",
+        "shutil",
+        "datetime",
+        "typing",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.ha_calendar",
+        "app.models",
+        "app.routes.onboarding",
+        "app.database"
+      ]
+    },
+    {
+      "file": "trends.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_get_or_create_rule",
+          "parameters": [
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            }
+          ],
+          "return_type": "ScoringRule",
+          "docstring": null,
+          "line_number": 22,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "_eval_formula",
+          "parameters": [
+            {
+              "name": "formula",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "completed",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "skipped",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "missed",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "total",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "period_days",
+              "type_hint": "int",
+              "default": "30"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 32,
+          "is_async": false,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "trends_page",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 48,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/trends')"
+          ]
+        },
+        {
+          "name": "trends_scoring",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 59,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/trends/scoring')"
+          ]
+        },
+        {
+          "name": "trends_scoring_save",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "formula",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "formula_enabled",
+              "type_hint": "bool",
+              "default": "Form(False)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 90,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/trends/scoring/save')"
+          ]
+        },
+        {
+          "name": "trends_scoring_test",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "formula",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 107,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/trends/scoring/test')"
+          ]
+        },
+        {
+          "name": "trends_periods",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 142,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/trends/periods')"
+          ]
+        },
+        {
+          "name": "trends_periods_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "name",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "start_month",
+              "type_hint": "int",
+              "default": "Form(...)"
+            },
+            {
+              "name": "end_month",
+              "type_hint": "int",
+              "default": "Form(...)"
+            },
+            {
+              "name": "description",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 152,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/trends/periods/add')"
+          ]
+        },
+        {
+          "name": "trends_periods_delete",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "period_id",
+              "type_hint": "int",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 170,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/trends/periods/delete')"
+          ]
+        },
+        {
+          "name": "trends_observations",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 186,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/trends/observations')"
+          ]
+        },
+        {
+          "name": "trends_observations_add",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "period_name",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "category",
+              "type_hint": "str",
+              "default": "Form(...)"
+            },
+            {
+              "name": "score",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "notes",
+              "type_hint": "str",
+              "default": "Form('')"
+            },
+            {
+              "name": "user_id",
+              "type_hint": "Optional[int]",
+              "default": "Form(None)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 204,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/trends/observations/add')"
+          ]
+        },
+        {
+          "name": "trends_observations_delete",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "obs_id",
+              "type_hint": "int",
+              "default": "Form(...)"
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 226,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/trends/observations/delete')"
+          ]
+        },
+        {
+          "name": "category_trends",
+          "parameters": [
+            {
+              "name": "category_name",
+              "type_hint": "str",
+              "default": null
+            },
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 242,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/category/{category_name}/trends')"
+          ]
+        },
+        {
+          "name": "detect_correlations",
+          "parameters": [
+            {
+              "name": "user_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            },
+            {
+              "name": "days",
+              "type_hint": "int",
+              "default": "30"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 267,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "get_correlations",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 305,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/insights/correlations')"
+          ]
+        }
+      ],
+      "comments": [
+        {
+          "line": 45,
+          "text": "\u2500\u2500 Main page \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 56,
+          "text": "\u2500\u2500 Scoring tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 65,
+          "text": "Pull real counts from WorkoutLog",
+          "type": "inline"
+        },
+        {
+          "line": 139,
+          "text": "\u2500\u2500 Periods tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 183,
+          "text": "\u2500\u2500 Observations tab \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 239,
+          "text": "\u2500\u2500 Category Trends API \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        },
+        {
+          "line": 265,
+          "text": "\u2500\u2500 Insights / Correlations API \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500",
+          "type": "inline"
+        }
+      ],
+      "imports": [
+        "logging",
+        "typing",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models",
+        "datetime",
+        "datetime"
+      ]
+    },
+    {
+      "file": "ui.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "get_mood_trend",
+          "parameters": [
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            },
+            {
+              "name": "user_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "days",
+              "type_hint": "int",
+              "default": "7"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 18,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "get_sleep_average",
+          "parameters": [
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            },
+            {
+              "name": "user_id",
+              "type_hint": "int",
+              "default": null
+            },
+            {
+              "name": "days",
+              "type_hint": "int",
+              "default": "7"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 27,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "get_active_streaks",
+          "parameters": [
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": null
+            },
+            {
+              "name": "user_id",
+              "type_hint": "int",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 39,
+          "is_async": true,
+          "is_method": false,
+          "decorators": []
+        },
+        {
+          "name": "login",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 44,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/login')"
+          ]
+        },
+        {
+          "name": "dashboard",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 49,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/dashboard')"
+          ]
+        },
+        {
+          "name": "quick_log",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 137,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/log/quick')"
+          ]
+        },
+        {
+          "name": "standup_submit",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 166,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/ui/standup/submit')"
+          ]
+        },
+        {
+          "name": "ha_status",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 192,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/ha-status')"
+          ]
+        },
+        {
+          "name": "fitness",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            },
+            {
+              "name": "db",
+              "type_hint": "AsyncSession",
+              "default": "Depends(get_db)"
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 201,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.get('/ui/fitness')"
+          ]
+        }
+      ],
+      "comments": [
+        {
+          "line": 84,
+          "text": "Check-in data for dashboard",
+          "type": "inline"
+        },
+        {
+          "line": 98,
+          "text": "Calculate streak",
+          "type": "inline"
+        }
+      ],
+      "imports": [
+        "datetime",
+        "random",
+        "fastapi",
+        "fastapi.responses",
+        "fastapi.templating",
+        "sqlalchemy",
+        "sqlalchemy.ext.asyncio",
+        "app.deps",
+        "app.models",
+        "app.routes.schedule",
+        "app.ha_calendar"
+      ]
+    },
+    {
+      "file": "webhook.py",
+      "language": "Python",
+      "classes": [],
+      "functions": [
+        {
+          "name": "ha_webhook",
+          "parameters": [
+            {
+              "name": "request",
+              "type_hint": "Request",
+              "default": null
+            }
+          ],
+          "return_type": null,
+          "docstring": null,
+          "line_number": 10,
+          "is_async": true,
+          "is_method": false,
+          "decorators": [
+            "router.post('/api/webhook')"
+          ]
+        }
+      ],
+      "comments": [
+        {
+          "line": 22,
+          "text": "action format: coach_{slot_id}_{verb}",
+          "type": "inline"
+        }
+      ],
+      "imports": [
+        "logging",
+        "fastapi",
+        "fastapi.responses",
+        "app.routes.action_router"
+      ]
+    }
+  ]
+}

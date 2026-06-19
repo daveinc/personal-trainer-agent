@@ -308,13 +308,13 @@ class CalendarConfig(Base):
 
 
 # ── Business Pipeline ──────────────────────────────────────────
-PIPELINE_STAGES = ["marketing", "offer", "design", "install", "paid"]
+PIPELINE_STAGES = ["survey", "materials", "on_site", "billing", "done"]
 PIPELINE_STAGE_LABELS = {
-    "marketing": "Marketing",
-    "offer":     "Price Offer",
-    "design":    "Design",
-    "install":   "Install",
-    "paid":      "Cash In",
+    "survey":    "Survey / Quote",
+    "materials": "Materials",
+    "on_site":   "On Site",
+    "billing":   "Billing",
+    "done":      "Done",
 }
 
 
@@ -331,6 +331,23 @@ class PipelineJob(Base):
     due_date: Mapped[str] = mapped_column(String(10), nullable=True)
     notes: Mapped[str] = mapped_column(Text, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
+class JobStep(Base):
+    __tablename__ = "job_steps"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    job_id: Mapped[int] = mapped_column(Integer, ForeignKey("pipeline_jobs.id"), nullable=False)
+    stage: Mapped[str] = mapped_column(String(32), nullable=False)
+    # survey | materials | on_site | billing | done
+    label: Mapped[str] = mapped_column(String(256), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), default="pending")
+    # pending | done | skipped | blocked | snoozed
+    scheduled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    calendar_event_uid: Mapped[str] = mapped_column(String(256), nullable=True)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
 

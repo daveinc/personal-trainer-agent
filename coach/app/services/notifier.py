@@ -38,6 +38,61 @@ async def _call_ha(path: str, payload: dict) -> bool:
         return False
 
 
+STAGE_BUTTONS = {
+    "survey": [
+        {"action": "STEP_{step_id}_DONE",     "title": "Survey done ✓"},
+        {"action": "STEP_{step_id}_BLOCKED",  "title": "Can't get there"},
+        {"action": "STEP_{step_id}_SNOOZE",   "title": "Postpone"},
+    ],
+    "materials": [
+        {"action": "STEP_{step_id}_DONE",     "title": "Got everything ✓"},
+        {"action": "STEP_{step_id}_MISSING",  "title": "Something missing"},
+        {"action": "STEP_{step_id}_SNOOZE",   "title": "Postpone"},
+    ],
+    "on_site": [
+        {"action": "STEP_{step_id}_DONE",     "title": "Job done ✓"},
+        {"action": "STEP_{step_id}_PROGRESS", "title": "Still going"},
+        {"action": "STEP_{step_id}_BLOCKED",  "title": "Problem on site"},
+    ],
+    "billing": [
+        {"action": "STEP_{step_id}_DONE",     "title": "Payment received ✓"},
+        {"action": "STEP_{step_id}_INVOICED", "title": "Invoice sent, waiting"},
+        {"action": "STEP_{step_id}_MISSING",  "title": "Need to invoice"},
+    ],
+}
+
+
+async def notify_job_step(step, job_title: str, notify_svc: str, notify_target: str | None = None) -> bool:
+    """Send a stage-specific actionable notification for a JobStep."""
+    svc_name = notify_svc.removeprefix("notify.")
+    if not svc_name:
+        logger.warning("notify_svc not configured — skipping job step notification")
+        return False
+
+    button_templates = STAGE_BUTTONS.get(step.stage, [
+        {"action": "STEP_{step_id}_DONE",  "title": "Done ✓"},
+        {"action": "STEP_{step_id}_SNOOZE", "title": "Postpone"},
+    ])
+
+    actions = [
+        {"action": btn["action"].replace("{step_id}", str(step.id)), "title": btn["title"]}
+        for btn in button_templates
+    ]
+
+    payload: dict = {
+        "title": job_title,
+        "message": step.label,
+        "data": {
+            "tag": f"coach_step_{step.id}",
+            "actions": actions,
+        },
+    }
+    if notify_target:
+        payload["target"] = notify_target
+
+    return await _call_ha(f"services/notify/{svc_name}", payload)
+
+
 async def notify_pre_slot(slot, notify_svc: str | None = None) -> bool:
     svc = _service(notify_svc)
     if not svc:
