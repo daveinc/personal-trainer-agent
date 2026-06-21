@@ -140,7 +140,7 @@
   {% if ha_events %}
   <div class="event-list" style="margin-bottom:16px;">
     {% for ev in ha_events %}
-    <div onclick="openEventPopup({{ ev | tojson }})"
+    <div data-ev="{{ ev | tojson | e }}" onclick="openFromData(this)"
          style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;">
       <div class="event-time" style="min-width:80px;">
         {% if ev.is_all_day %}All day{% else %}{{ ev.time }}{% if ev.end_time %} – {{ ev.end_time }}{% endif %}{% endif %}
@@ -232,7 +232,7 @@
         </a>
         {% endfor %}
         {% for ev in d.ha_events %}
-        <div onclick="openEventPopup({{ ev | tojson }})"
+        <div data-ev="{{ ev | tojson | e }}" onclick="openFromData(this)"
              style="display:block;background:#2a2318;color:#C9A870;border-left:2px solid #C9A870;
                     border-radius:4px;padding:4px 6px;font-size:11px;margin-bottom:4px;line-height:1.3;cursor:pointer;">
           {% if ev.time %}<span style="opacity:0.75;">{{ ev.time }}</span><br>{% endif %}
@@ -273,7 +273,7 @@
     </div>
     <div class="event-list">
       {% for ev in today_ha %}
-      <div onclick="openEventPopup({{ ev | tojson }})"
+      <div data-ev="{{ ev | tojson | e }}" onclick="openFromData(this)"
            style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;">
         <div class="event-time" style="min-width:80px;">
           {% if ev.is_all_day %}All day{% else %}{{ ev.time }}{% if ev.end_time %} – {{ ev.end_time }}{% endif %}{% endif %}
@@ -308,13 +308,16 @@
       {% for _ in range(first_weekday) %}<div></div>{% endfor %}
       {% for day_num in range(1, 32) %}
         {% set day_str = day_num | string %}
+        {% set day_full = today.strftime('%Y-%m-') + '%02d' | format(day_num) %}
         {% set is_today = day_num == today.day %}
         {% set has_event = day_str in month_event_days %}
-        <div style="padding:4px 2px;border-radius:4px;min-height:38px;font-size:12px;
+        <div {% if has_event %}onclick="openDayEvents('{{ day_full }}')"{% endif %}
+             style="padding:4px 2px;border-radius:4px;min-height:38px;font-size:12px;
                     background:{% if is_today %}#2a2318{% else %}transparent{% endif %};
                     border:{% if is_today %}1px solid #C9A870{% else %}1px solid transparent{% endif %};
                     color:{% if is_today %}#C9A870{% else %}var(--text){% endif %};
-                    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+                    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+                    {% if has_event %}cursor:pointer;{% endif %}">
           <span>{{ day_num }}</span>
           {% if has_event %}<span style="color:#C9A870;font-size:8px;line-height:1;">&#9679;</span>{% endif %}
         </div>
@@ -330,52 +333,102 @@
             align-items:center;justify-content:center;">
   <div style="background:var(--card-bg,#1c1917);border:1px solid #C9A870;border-radius:12px;
               padding:24px;width:min(90vw,360px);box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+
+    {# Header — shared by both views #}
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
-      <div>
+      <div id="ep-header">
         <div id="ep-summary" style="font-size:16px;font-weight:600;color:#C9A870;margin-bottom:4px;"></div>
         <div id="ep-time" style="font-size:12px;color:var(--text-muted);"></div>
       </div>
       <button onclick="closeEventPopup()"
               style="background:none;border:none;color:var(--text-muted);font-size:20px;cursor:pointer;line-height:1;padding:0 0 0 12px;">×</button>
     </div>
-    <div id="ep-desc" style="font-size:13px;color:var(--text-muted);margin-bottom:4px;white-space:pre-wrap;"></div>
-    <div id="ep-loc" style="font-size:12px;color:var(--text-muted);margin-bottom:20px;"></div>
 
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button onclick="doEventAction('done')"
-              style="background:#C9A870;color:#1c1917;border:none;border-radius:8px;
-                     padding:10px;font-size:14px;font-weight:600;cursor:pointer;">
-        Done ✓
-      </button>
-      <div style="display:flex;gap:8px;">
-        <button onclick="doEventAction('delay',30)"
-                style="flex:1;background:#2a2318;color:#C9A870;border:1px solid #C9A870;
-                       border-radius:8px;padding:8px;font-size:13px;cursor:pointer;">
-          +30m
+    {# Day list view — shown when multiple events on a day #}
+    <div id="ep-day-list" style="display:none;"></div>
+
+    {# Single event detail view #}
+    <div id="ep-detail">
+      <div id="ep-desc" style="font-size:13px;color:var(--text-muted);margin-bottom:4px;white-space:pre-wrap;"></div>
+      <div id="ep-loc" style="font-size:12px;color:var(--text-muted);margin-bottom:20px;"></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button onclick="doEventAction('done')"
+                style="background:#C9A870;color:#1c1917;border:none;border-radius:8px;
+                       padding:10px;font-size:14px;font-weight:600;cursor:pointer;">
+          Done ✓
         </button>
-        <button onclick="doEventAction('delay',60)"
-                style="flex:1;background:#2a2318;color:#C9A870;border:1px solid #C9A870;
+        <div style="display:flex;gap:8px;">
+          <button onclick="doEventAction('delay',30)"
+                  style="flex:1;background:#2a2318;color:#C9A870;border:1px solid #C9A870;
+                         border-radius:8px;padding:8px;font-size:13px;cursor:pointer;">
+            +30m
+          </button>
+          <button onclick="doEventAction('delay',60)"
+                  style="flex:1;background:#2a2318;color:#C9A870;border:1px solid #C9A870;
+                         border-radius:8px;padding:8px;font-size:13px;cursor:pointer;">
+            +1h
+          </button>
+          <button onclick="doEventAction('delay',120)"
+                  style="flex:1;background:#2a2318;color:#C9A870;border:1px solid #C9A870;
+                         border-radius:8px;padding:8px;font-size:13px;cursor:pointer;">
+            +2h
+          </button>
+        </div>
+        <button onclick="doEventAction('cancel')"
+                style="background:transparent;color:#ef4444;border:1px solid #ef4444;
                        border-radius:8px;padding:8px;font-size:13px;cursor:pointer;">
-          +1h
-        </button>
-        <button onclick="doEventAction('delay',120)"
-                style="flex:1;background:#2a2318;color:#C9A870;border:1px solid #C9A870;
-                       border-radius:8px;padding:8px;font-size:13px;cursor:pointer;">
-          +2h
+          Cancel event
         </button>
       </div>
-      <button onclick="doEventAction('cancel')"
-              style="background:transparent;color:#ef4444;border:1px solid #ef4444;
-                     border-radius:8px;padding:8px;font-size:13px;cursor:pointer;">
-        Cancel event
-      </button>
     </div>
+
     <div id="ep-feedback" style="display:none;margin-top:12px;text-align:center;font-size:13px;color:#C9A870;"></div>
   </div>
 </div>
 
 <script>
+// Month events indexed by YYYY-MM-DD for quick lookup
+const _monthEvents = {};
+{% for ev in ha_month_events %}
+(function(ev) {
+  if (!_monthEvents[ev.date]) _monthEvents[ev.date] = [];
+  _monthEvents[ev.date].push(ev);
+})({{ ev | tojson }});
+{% endfor %}
+
 let _currentEvent = null;
+
+function openFromData(el) {
+  try { openEventPopup(JSON.parse(el.dataset.ev)); } catch(e) { console.error('popup parse error', e); }
+}
+
+function openDayEvents(dateStr) {
+  const evs = _monthEvents[dateStr] || [];
+  if (!evs.length) return;
+  if (evs.length === 1) { openEventPopup(evs[0]); return; }
+  // Multiple events — show list
+  _currentEvent = null;
+  document.getElementById('ep-summary').textContent = dateStr;
+  document.getElementById('ep-time').textContent = evs.length + ' events';
+  document.getElementById('ep-feedback').style.display = 'none';
+  document.getElementById('ep-detail').style.display = 'none';
+  const list = document.getElementById('ep-day-list');
+  list.style.display = 'block';
+  list.innerHTML = evs.map(ev =>
+    `<div onclick='_selectDayEvent(${JSON.stringify(ev)})'
+          style="padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;">
+       <div style="font-weight:500;color:#C9A870;">${ev.summary || ''}</div>
+       <div style="font-size:12px;color:var(--text-muted);">${ev.is_all_day ? 'All day' : [ev.time, ev.end_time].filter(Boolean).join(' – ')}</div>
+     </div>`
+  ).join('');
+  document.getElementById('cal-event-overlay').style.display = 'flex';
+}
+
+function _selectDayEvent(ev) {
+  document.getElementById('ep-day-list').style.display = 'none';
+  document.getElementById('ep-detail').style.display = 'block';
+  openEventPopup(ev);
+}
 
 function openEventPopup(ev) {
   _currentEvent = ev;
@@ -383,11 +436,11 @@ function openEventPopup(ev) {
   const t = ev.is_all_day ? 'All day' : [ev.time, ev.end_time].filter(Boolean).join(' – ');
   document.getElementById('ep-time').textContent = t;
   document.getElementById('ep-desc').textContent = ev.description || '';
-  const locEl = document.getElementById('ep-loc');
-  locEl.textContent = ev.location ? '📍 ' + ev.location : '';
+  document.getElementById('ep-loc').textContent = ev.location ? '📍 ' + ev.location : '';
   document.getElementById('ep-feedback').style.display = 'none';
-  const overlay = document.getElementById('cal-event-overlay');
-  overlay.style.display = 'flex';
+  document.getElementById('ep-day-list').style.display = 'none';
+  document.getElementById('ep-detail').style.display = 'block';
+  document.getElementById('cal-event-overlay').style.display = 'flex';
 }
 
 function closeEventPopup() {
