@@ -65,11 +65,16 @@ def normalize_event(raw: dict) -> dict:
     # Strip internal Coach tags from description before displaying
     clean_desc = re.sub(r"\[[^\]]+\]\s*", "", description).strip()
 
+    uid = (raw.get("uid") or raw.get("id") or "").strip()
+
     return {
+        "uid":        uid,
         "summary":    summary,
         "date":       date,
         "time":       time,
         "end_time":   end_time,
+        "start_raw":  start_raw,
+        "end_raw":    end_raw,
         "is_all_day": is_all_day,
         "category":   category,
         "description": clean_desc,
