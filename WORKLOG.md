@@ -29,6 +29,7 @@ Plan: `plans/field-loop-spec.md`
 
 - [x] 2026-06-19 **v0.4.27** — confirmed scheduler tight loop fix: `asyncio.sleep(60)` between ticks + `_notified_events` guard prevent duplicate calendar API calls. Version bumped in config.json + Dockerfile.
 - [x] 2026-06-19 **v0.4.28** — fix: dashboard shows HA calendar events alongside internal slots. `ui.py` fetches `get_today_events()` (try/except, falls back to []). Dashboard card split into "From Calendar" (HA events, gold accent) + "Routines" (existing slots). Empty state: "No calendar events today." Version bumped in config.json + Dockerfile.
+- [x] 2026-06-21 **v0.4.29** — calendar widget: all three views (week/day/month) now show HA events. Week view: gold-accented event blocks per day column. Day view: "From Calendar" section below routines with time + summary + description. Month view: replaced stub with real 7-col grid; days with HA events show gold dot ●; today highlighted with gold border. `ui.py` now fetches `get_week_events()` + `get_month_events()`, normalizes month events, attaches day-filtered events to `week_data`, builds `month_event_days` set for Jinja2. Version bumped in config.json + Dockerfile.
 
 ### Known gaps — next session
 - [ ] ⚡ PRIORITY: Test events from Jun 3 still in calendar.coach — delete at session start

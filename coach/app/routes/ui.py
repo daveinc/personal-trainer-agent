@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.deps import get_db, get_current_user, redirect_to, tctx
 from app.models import Slot, CheckIn, HealthEntry, StandupEntry
 from app.routes.schedule import _get_week, _get_days, _today_or_next, CATEGORY_MAP
-from app.ha_calendar import get_today_events
+from app.ha_calendar import get_today_events, get_week_events, get_month_events, normalize_event
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -123,8 +123,26 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
 
     try:
         ha_events = await get_today_events()
+        ha_week_events = await get_week_events()
     except Exception:
         ha_events = []
+        ha_week_events = []
+
+    try:
+        ha_month_events_raw = await get_month_events()
+        ha_month_events = [normalize_event(e) for e in ha_month_events_raw]
+    except Exception:
+        ha_month_events = []
+
+    # Attach HA events to each day in week_data
+    for day_dict in week_data:
+        day_str = day_dict["date"].strftime("%Y-%m-%d")
+        day_dict["ha_events"] = [ev for ev in ha_week_events if ev.get("date") == day_str]
+
+    # Build set of day numbers (as strings, no leading zero) that have events this month
+    month_event_days = set(
+        ev["date"][8:10].lstrip("0") for ev in ha_month_events if ev.get("date")
+    )
 
     return templates.TemplateResponse(request, "dashboard.html", tctx(
         request, user=user, greeting=greeting,
@@ -137,6 +155,9 @@ async def dashboard(request: Request, db: AsyncSession = Depends(get_db)):
         mood_trend=mood_trend, sleep_average=sleep_average, active_streaks=active_streaks,
         standup_done=standup_done,
         ha_events=ha_events,
+        ha_week_events=ha_week_events,
+        ha_month_events=ha_month_events,
+        month_event_days=month_event_days,
     ))
 
 
